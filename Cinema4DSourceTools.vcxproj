@@ -138,11 +138,13 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="lib\tinyxml2.cpp" />
     <ClCompile Include="source\AboutDialog.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\VTFLoaderSaver.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="lib\tinyxml2.h" />
     <ClInclude Include="lib\VTFLib.h" />
     <ClInclude Include="res\c4d_symbols.h" />
     <ClInclude Include="source\AboutDialog.h" />

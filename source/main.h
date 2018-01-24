@@ -10,6 +10,7 @@
 #include "c4d_symbols.h"
 #include "Globals.h"
 #include <Windows.h>
+#include "..\lib\tinyxml2.h"
 
 //----------------------------------------------------------------------------------------
 /// Plugin registration functions
@@ -53,5 +54,15 @@ HMODULE LoadPluginDLL(const String *dllName);
 /// @return						BOOL true if successful
 //----------------------------------------------------------------------------------------
 BOOL UnloadPluginDLL(HMODULE DLLHANDLE);
+
+//----------------------------------------------------------------------------------------
+/// Checks if an update is available at CheckURL.
+///
+/// @param[in] CheckURL			The URL to check
+/// @param[out] DownloadURL		The URL to the latest version.
+///
+/// @return						BOOL true if update available.
+//----------------------------------------------------------------------------------------
+BOOL UpdateAvailable(const String &CheckURL, String &DownloadURL);
 
 #endif

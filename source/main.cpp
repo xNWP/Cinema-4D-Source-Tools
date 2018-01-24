@@ -19,8 +19,6 @@ Bool PluginStart(void)
 	VersionTag = (VersionTag == "0" ? "" : VersionTag);
 	GePrint("Loaded " + GeLoadString(IDS_PLUGIN_NAME) + " " + xstr(VERSION_MAJOR) + "." xstr(VERSION_MINOR) + VersionTag);
 
-	MessageDialog("Ayo this is a test boi");
-
 	return true;
 }
 
@@ -63,4 +61,9 @@ HMODULE LoadPluginDLL(const String *dllName)
 BOOL UnloadPluginDLL(HMODULE DLLHANDLE)
 {
 	return FreeLibrary(DLLHANDLE);
+}
+
+BOOL UpdateAvailable(const String &CheckURL, String &DownloadURL)
+{
+	return true;
 }

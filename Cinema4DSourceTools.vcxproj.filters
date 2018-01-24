@@ -30,6 +30,9 @@
     <ClCompile Include="source\AboutDialog.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="lib\tinyxml2.cpp">
+      <Filter>Libraries</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Globals.h">
@@ -49,6 +52,9 @@
     </ClInclude>
     <ClInclude Include="source\AboutDialog.h">
       <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\tinyxml2.h">
+      <Filter>Libraries</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
