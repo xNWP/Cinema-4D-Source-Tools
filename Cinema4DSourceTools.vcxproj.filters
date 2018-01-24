@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Sources">
+      <UniqueIdentifier>{21895B69-DE91-7035-0000-0000CA90681B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libraries">
+      <UniqueIdentifier>{ff019b7b-aa50-4f78-bde5-bcad740c588d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{ad0cbb42-9294-4580-b947-9f7f927a6217}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\strings_us">
+      <UniqueIdentifier>{99a6e531-5e3e-4e35-b0d7-8dc9e70e00fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\strings_us\dialogs">
+      <UniqueIdentifier>{f8152d7c-50ea-4a83-b2f4-9d04a46cd86b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\dialogs">
+      <UniqueIdentifier>{30486f04-8712-4c84-961d-d085aa969d0a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="source\main.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="source\VTFLoaderSaver.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="source\AboutDialog.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\Globals.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="source\main.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="res\c4d_symbols.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\VTFLib.h">
+      <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="source\VTFLoaderSaver.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="source\AboutDialog.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\strings_us\c4d_strings.str">
+      <Filter>Resources\strings_us</Filter>
+    </None>
+    <None Include="res\strings_us\dialogs\ABOUTDLG.str">
+      <Filter>Resources\strings_us\dialogs</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="res\dialogs\ABOUTDLG.res">
+      <Filter>Resources\dialogs</Filter>
+    </Resource>
+  </ItemGroup>
+</Project>

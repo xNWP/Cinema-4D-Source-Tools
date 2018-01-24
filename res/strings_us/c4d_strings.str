@@ -1,0 +1,7 @@
+STRINGTABLE
+{
+	IDS_PLUGIN_NAME	"Cinema 4D Source Tools";
+
+	// VTF Import/Export
+	IDS_VTF			"Valve Texture Format (VTF)";
+}
