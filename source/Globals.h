@@ -14,13 +14,15 @@
 #define VERSION_MINOR	15
 #define VERSION_TAG		-dev
 
-#define UPDATE_LINK		http://code.thatnwp.com/version/Cinema4DSourceTools.xml
-
 // About Dialog
 #define ABOUT_ID		1040531
 
 // VTF Import/Export
 #define VTF_IMPORT_ID	1040515
 #define VTF_EXPORT_ID	1040526
+
+// DLL Locale
+#define VTFLIB_DLL		lib\\VTFLib.dll
+#define LIBCURL_DLL		lib\\libcurl.dll
 
 #endif

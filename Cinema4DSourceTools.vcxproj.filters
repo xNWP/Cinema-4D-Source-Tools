@@ -19,6 +19,9 @@
     <Filter Include="Resources\dialogs">
       <UniqueIdentifier>{30486f04-8712-4c84-961d-d085aa969d0a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Libraries\libCurl">
+      <UniqueIdentifier>{255f54bd-add4-43ae-8c38-cf37f66f9b49}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp">
@@ -55,6 +58,30 @@
     </ClInclude>
     <ClInclude Include="lib\tinyxml2.h">
       <Filter>Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\curl\curl.h">
+      <Filter>Libraries\libCurl</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\curl\curlver.h">
+      <Filter>Libraries\libCurl</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\curl\easy.h">
+      <Filter>Libraries\libCurl</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\curl\mprintf.h">
+      <Filter>Libraries\libCurl</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\curl\multi.h">
+      <Filter>Libraries\libCurl</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\curl\stdcheaders.h">
+      <Filter>Libraries\libCurl</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\curl\system.h">
+      <Filter>Libraries\libCurl</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\curl\typecheck-gcc.h">
+      <Filter>Libraries\libCurl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

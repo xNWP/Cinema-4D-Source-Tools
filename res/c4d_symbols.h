@@ -7,6 +7,8 @@ enum
 
 	// Globals
 	IDS_PLUGIN_NAME,
+	IDS_UPDATE_AVAIL_0,
+	IDS_UPDATE_AVAIL_1,
 
 	// About Dialog
 	ABOUTDLG,
