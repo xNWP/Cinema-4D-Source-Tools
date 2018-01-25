@@ -1,6 +1,8 @@
 STRINGTABLE
 {
 	IDS_PLUGIN_NAME	"Cinema 4D Source Tools";
+	IDS_UPDATE_AVAIL_0	"An update is available for ";
+	IDS_UPDATE_AVAIL_1	", would you like to download it now? (you can disable auto-update checking in Plugins > ";
 
 	// VTF Import/Export
 	IDS_VTF			"Valve Texture Format (VTF)";

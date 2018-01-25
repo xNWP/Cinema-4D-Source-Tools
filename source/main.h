@@ -12,6 +12,7 @@
 #include <Windows.h>
 #include "tinyxml2.h"
 #include "curl\curl.h"
+#include <string>
 
 //----------------------------------------------------------------------------------------
 /// Plugin registration functions
