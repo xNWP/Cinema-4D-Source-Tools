@@ -23,7 +23,7 @@ namespace ST
 	IMAGERESULT VTFLoader::Load(const Filename &name, BaseBitmap *bm, Int32 frame)
 	{
 		// Load VTFLib.dll
-		HMODULE dll = LoadPluginDLL(&String("lib\\VTFLib.dll"));
+		HMODULE dll = LoadPluginDLL(&String(xstr(VTFLIB_DLL)));
 
 		// Get cPath
 		Char cPath[512];
@@ -116,7 +116,7 @@ namespace ST
 			return IMAGERESULT_PARAM_ERROR;
 
 		// Load VTFLib.dll
-		HMODULE dll = LoadPluginDLL(&String("lib\\VTFLib.dll"));
+		HMODULE dll = LoadPluginDLL(&String(xstr(VTFLIB_DLL)));
 
 		VTFLib::CVTFFile *file = new VTFLib::CVTFFile();
 		if (!file->Create(bm->GetBw(), bm->GetBh(), 1, 1, 1, savebits & SAVEBIT_ALPHA == SAVEBIT_ALPHA ? IMAGE_FORMAT_RGBA8888 : IMAGE_FORMAT_RGB888, true, false))

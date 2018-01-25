@@ -65,5 +65,11 @@ BOOL UnloadPluginDLL(HMODULE DLLHANDLE)
 
 BOOL UpdateAvailable(const String &CheckURL, String &DownloadURL)
 {
+	HMODULE dll = LoadPluginDLL(&String("lib\\libcurl.dll"));
+
+	CURLcode curlcode = curl_global_init(CURL_GLOBAL_WIN32);
+
+	UnloadPluginDLL(dll);
+
 	return true;
 }

@@ -72,16 +72,16 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>./source;./res;./res/description;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./source;./res;./res/description;./lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <IgnoreSpecificDefaultLibraries />
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>C:\xCode\__C4D\Cinema 4D Source Tools %28R18%29\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>VTFLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>VTFLib.lib;libcurl.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>
       </EntryPointSymbol>
-      <DelayLoadDLLs>VTFLib.dll</DelayLoadDLLs>
+      <DelayLoadDLLs>VTFLib.dll;libcurl.dll</DelayLoadDLLs>
     </Link>
     <PostBuildEvent>
       <Command>call "$(SolutionDir)push_to_c4d.bat"</Command>
@@ -93,15 +93,15 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>./source;./res;./res/description;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./source;./res;./res/description;./lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <IgnoreSpecificDefaultLibraries />
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>C:\xCode\__C4D\Cinema 4D Source Tools %28R18%29\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>VTFLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <DelayLoadDLLs>VTFLib.dll</DelayLoadDLLs>
+      <AdditionalLibraryDirectories>$(ProjectDir)lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>VTFLib.lib;libcurl.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <DelayLoadDLLs>VTFLib.dll;libcurl.dll</DelayLoadDLLs>
     </Link>
     <PostBuildEvent>
       <Command>call "$(SolutionDir)push_to_c4d.bat"</Command>
@@ -113,14 +113,14 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>./source;./res;./res/description;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./source;./res;./res/description;./lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <IgnoreSpecificDefaultLibraries />
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>C:\xCode\__C4D\Cinema 4D Source Tools %28R18%29\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>VTFLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <DelayLoadDLLs>VTFLib.dll</DelayLoadDLLs>
+      <AdditionalLibraryDirectories>$(ProjectDir)lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>VTFLib.lib;libcurl.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <DelayLoadDLLs>VTFLib.dll;libcurl.dll</DelayLoadDLLs>
     </Link>
     <PostBuildEvent>
       <Command>call "$(SolutionDir)push_to_c4d.bat"</Command>
@@ -144,6 +144,14 @@
     <ClCompile Include="source\VTFLoaderSaver.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="lib\curl\curl.h" />
+    <ClInclude Include="lib\curl\curlver.h" />
+    <ClInclude Include="lib\curl\easy.h" />
+    <ClInclude Include="lib\curl\mprintf.h" />
+    <ClInclude Include="lib\curl\multi.h" />
+    <ClInclude Include="lib\curl\stdcheaders.h" />
+    <ClInclude Include="lib\curl\system.h" />
+    <ClInclude Include="lib\curl\typecheck-gcc.h" />
     <ClInclude Include="lib\tinyxml2.h" />
     <ClInclude Include="lib\VTFLib.h" />
     <ClInclude Include="res\c4d_symbols.h" />
@@ -159,6 +167,8 @@
   <ItemGroup>
     <Resource Include="res\dialogs\ABOUTDLG.res">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Intel|x64'">true</ExcludedFromBuild>
     </Resource>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

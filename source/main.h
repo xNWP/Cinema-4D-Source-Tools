@@ -10,7 +10,8 @@
 #include "c4d_symbols.h"
 #include "Globals.h"
 #include <Windows.h>
-#include "..\lib\tinyxml2.h"
+#include "tinyxml2.h"
+#include "curl\curl.h"
 
 //----------------------------------------------------------------------------------------
 /// Plugin registration functions

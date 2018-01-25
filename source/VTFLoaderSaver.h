@@ -11,7 +11,7 @@
 #include "Globals.h"
 #include "main.h"
 
-#include "..\lib\VTFLib.h"
+#include "VTFLib.h"
 
 namespace ST
 {

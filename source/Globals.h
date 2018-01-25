@@ -23,4 +23,7 @@
 #define VTF_IMPORT_ID	1040515
 #define VTF_EXPORT_ID	1040526
 
+// DLL Locale
+#define VTFLIB_DLL		lib\\VTFLib.dll
+
 #endif
