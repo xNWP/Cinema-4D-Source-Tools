@@ -92,6 +92,24 @@ namespace ST
 		return bOk && aOk ? IMAGERESULT_OK : IMAGERESULT_FILEERROR;
 	}
 
+	Bool VTFLoader::GetInformation(const Filename &name, Int32 *frames, Float *fps)
+	{
+		HMODULE dll = LoadPluginDLL(&String(xstr(VTFLIB_DLL)));
+
+		VTFLib::CVTFFile *file = new VTFLib::CVTFFile();
+		if (!file->Load(name.GetString().GetCStringCopy(), true)) // load only file header
+			return false;
+
+		if (file->GetFrameCount() > 1)
+			*frames = file->GetFrameCount();
+		else
+			frames = new Int32(15);
+
+		UnloadPluginDLL(dll);
+
+		return true;
+	}
+
 	/* VTFSaver */
 
 	IMAGERESULT VTFSaver::Save(const Filename &name, BaseBitmap *bm, BaseContainer *data, SAVEBIT savebits)

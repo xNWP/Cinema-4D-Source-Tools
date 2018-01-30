@@ -28,12 +28,7 @@ Bool PluginStart(void)
 			+ GeLoadString(IDS_UPDATE_AVAIL_1)
 			+ GeLoadString(IDS_PLUGIN_NAME) + ")."))
 		{
-			// casting shenanigans
-			std::string sURL = DownloadURL.GetCStringCopy();
-			std::wstring wURL(sURL.begin(), sURL.end());
-			LPCWSTR url = wURL.c_str();
-
-			ShellExecute(NULL, L"open", url, NULL, NULL, SW_SHOWNORMAL);
+			OpenURL(DownloadURL);
 		}
 	}
 
@@ -152,4 +147,14 @@ BOOL UpdateAvailable(const String &CheckURL, String &DownloadURL)
 	}
 
 	return false;
+}
+
+void OpenURL(const String &url)
+{
+	// casting shenanigans
+	std::string sURL = url.GetCStringCopy();
+	std::wstring wURL(sURL.begin(), sURL.end());
+	LPCWSTR lURL = wURL.c_str();
+
+	ShellExecute(NULL, L"open", lURL, NULL, NULL, SW_SHOWNORMAL);
 }

@@ -67,4 +67,11 @@ BOOL UnloadPluginDLL(HMODULE DLLHANDLE);
 //----------------------------------------------------------------------------------------
 BOOL UpdateAvailable(const String &CheckURL, String &DownloadURL);
 
+//----------------------------------------------------------------------------------------
+/// Opens specified url in default browser.
+///
+/// @param[in] URL				The URL to open.
+//----------------------------------------------------------------------------------------
+void OpenURL(const String &url);
+
 #endif

@@ -24,6 +24,8 @@ namespace ST
 	public:
 		Bool Identify(const Filename &name, UChar *probe, Int32 size);
 		IMAGERESULT Load(const Filename &name, BaseBitmap *bm, Int32 frame);
+		Int32 GetSaver(void) { return VTF_EXPORT_ID; }
+		Bool GetInformation(const Filename &name, Int32 *frames, Float *fps);
 	};
 
 	//----------------------------------------------------------------------------------------
