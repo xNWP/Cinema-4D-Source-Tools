@@ -19,69 +19,67 @@
     <Filter Include="Resources\dialogs">
       <UniqueIdentifier>{30486f04-8712-4c84-961d-d085aa969d0a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Libraries\libCurl">
-      <UniqueIdentifier>{255f54bd-add4-43ae-8c38-cf37f66f9b49}</UniqueIdentifier>
+    <Filter Include="Includes">
+      <UniqueIdentifier>{076f275e-1979-47fc-961a-2365a05b3027}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libraries\curl">
+      <UniqueIdentifier>{bddc4a52-b1d7-4f92-9004-a82acbccf6d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libraries\tinyxml2">
+      <UniqueIdentifier>{d86999af-8e81-4c32-ab8d-25f89f6598e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libraries\VTFLib">
+      <UniqueIdentifier>{1aaf57dd-338b-4609-b560-5af310f9e0c1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\main.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="source\VTFLoaderSaver.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="source\AboutDialog.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="lib\tinyxml2.cpp">
-      <Filter>Libraries</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="source\Globals.h">
-      <Filter>Sources</Filter>
-    </ClInclude>
-    <ClInclude Include="source\main.h">
-      <Filter>Sources</Filter>
-    </ClInclude>
     <ClInclude Include="res\c4d_symbols.h">
       <Filter>Resources</Filter>
     </ClInclude>
-    <ClInclude Include="lib\VTFLib.h">
-      <Filter>Libraries</Filter>
+    <ClInclude Include="Include\AboutDialog.h">
+      <Filter>Includes</Filter>
     </ClInclude>
-    <ClInclude Include="source\VTFLoaderSaver.h">
-      <Filter>Sources</Filter>
+    <ClInclude Include="Include\Globals.h">
+      <Filter>Includes</Filter>
     </ClInclude>
-    <ClInclude Include="source\AboutDialog.h">
-      <Filter>Sources</Filter>
+    <ClInclude Include="Include\main.h">
+      <Filter>Includes</Filter>
     </ClInclude>
-    <ClInclude Include="lib\tinyxml2.h">
-      <Filter>Libraries</Filter>
+    <ClInclude Include="Include\UserConfig.h">
+      <Filter>Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\VTFLoaderSaver.h">
+      <Filter>Includes</Filter>
     </ClInclude>
     <ClInclude Include="lib\curl\curl.h">
-      <Filter>Libraries\libCurl</Filter>
+      <Filter>Libraries\curl</Filter>
     </ClInclude>
     <ClInclude Include="lib\curl\curlver.h">
-      <Filter>Libraries\libCurl</Filter>
+      <Filter>Libraries\curl</Filter>
     </ClInclude>
     <ClInclude Include="lib\curl\easy.h">
-      <Filter>Libraries\libCurl</Filter>
+      <Filter>Libraries\curl</Filter>
     </ClInclude>
     <ClInclude Include="lib\curl\mprintf.h">
-      <Filter>Libraries\libCurl</Filter>
+      <Filter>Libraries\curl</Filter>
     </ClInclude>
     <ClInclude Include="lib\curl\multi.h">
-      <Filter>Libraries\libCurl</Filter>
+      <Filter>Libraries\curl</Filter>
     </ClInclude>
     <ClInclude Include="lib\curl\stdcheaders.h">
-      <Filter>Libraries\libCurl</Filter>
+      <Filter>Libraries\curl</Filter>
     </ClInclude>
     <ClInclude Include="lib\curl\system.h">
-      <Filter>Libraries\libCurl</Filter>
+      <Filter>Libraries\curl</Filter>
     </ClInclude>
     <ClInclude Include="lib\curl\typecheck-gcc.h">
-      <Filter>Libraries\libCurl</Filter>
+      <Filter>Libraries\curl</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\tinyxml2\tinyxml2.h">
+      <Filter>Libraries\tinyxml2</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\VTFLib\VTFLib.h">
+      <Filter>Libraries\VTFLib</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -96,5 +94,22 @@
     <Resource Include="res\dialogs\ABOUTDLG.res">
       <Filter>Resources\dialogs</Filter>
     </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\AboutDialog.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\main.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\UserConfig.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\VTFLoaderSaver.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\tinyxml2\tinyxml2.cpp">
+      <Filter>Libraries\tinyxml2</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

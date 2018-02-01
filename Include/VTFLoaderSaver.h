@@ -6,12 +6,7 @@
 #ifndef ST_VTF_LOADER_SAVER_H
 #define ST_VTF_LOADER_SAVER_H
 
-#include "c4d.h"
-#include "c4d_symbols.h"
-#include "Globals.h"
 #include "main.h"
-
-#include "VTFLib.h"
 
 namespace ST
 {

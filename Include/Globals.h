@@ -11,8 +11,8 @@
 #define str(s) #s
 
 #define VERSION_MAJOR	0
-#define VERSION_MINOR	15
-#define VERSION_TAG		-dev
+#define VERSION_MINOR	21
+#define VERSION_TAG		"-dev"
 
 // About Dialog
 #define ABOUT_ID		1040531
@@ -22,7 +22,11 @@
 #define VTF_EXPORT_ID	1040526
 
 // DLL Locale
-#define VTFLIB_DLL		lib\\VTFLib.dll
-#define LIBCURL_DLL		lib\\libcurl.dll
+#define VTFLIB_DLL		"lib\\VTFLib.dll"
+#define LIBCURL_DLL		"lib\\libcurl.dll"
+
+// User Config
+#define USER_CONFIG_LOC	"userconfig.xml"
+#define PLUGIN_FOLDER	GeGetPluginPath().GetString().GetCStringCopy()
 
 #endif

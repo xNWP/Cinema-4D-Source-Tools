@@ -15,7 +15,7 @@ namespace ST
 	Bool AboutDialog::InitValues()
 	{
 		// Init Version
-		String PluginVers = "Version: " + String(xstr(VERSION_MAJOR)) + "." + String(xstr(VERSION_MINOR)) + String(xstr(VERSION_TAG));
+		String PluginVers = "Version: " + String(xstr(VERSION_MAJOR)) + "." + String(xstr(VERSION_MINOR)) + VERSION_TAG;
 		
 		if (!this->SetString(IDS_PLUGIN_VERSION, PluginVers, 0, FLAG_CENTER_HORIZ))
 			return false;

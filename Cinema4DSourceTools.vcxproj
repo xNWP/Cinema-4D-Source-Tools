@@ -67,12 +67,21 @@
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Intel|x64'">$(ProjectName)</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Intel|x64'">.cdl64</TargetExt>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Intel|x64'">
+    <OutDir>$(ProjectDir)Build\$(PlatformName)_$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(ProjectDir)Build\$(PlatformName)_$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(ProjectDir)Build\$(PlatformName)_$(Configuration)\</OutDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>./source;./res;./res/description;./lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./source;./res;./res/description;./lib;./Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <IgnoreSpecificDefaultLibraries />
@@ -84,7 +93,7 @@
       <DelayLoadDLLs>VTFLib.dll;libcurl.dll</DelayLoadDLLs>
     </Link>
     <PostBuildEvent>
-      <Command>call "$(SolutionDir)push_to_c4d.bat"</Command>
+      <Command>call "$(SolutionDir)push_to_c4d_debug.bat"</Command>
       <Message>Moves required files to C4D Directory</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -93,7 +102,7 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>./source;./res;./res/description;./lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./source;./res;./res/description;./lib;./Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -104,7 +113,7 @@
       <DelayLoadDLLs>VTFLib.dll;libcurl.dll</DelayLoadDLLs>
     </Link>
     <PostBuildEvent>
-      <Command>call "$(SolutionDir)push_to_c4d.bat"</Command>
+      <Command>call "$(SolutionDir)push_to_c4d_release.bat"</Command>
       <Message>Moves required files to C4D Directory</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -113,7 +122,7 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>./source;./res;./res/description;./lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./source;./res;./res/description;./lib;./Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <IgnoreSpecificDefaultLibraries />
@@ -123,7 +132,7 @@
       <DelayLoadDLLs>VTFLib.dll;libcurl.dll</DelayLoadDLLs>
     </Link>
     <PostBuildEvent>
-      <Command>call "$(SolutionDir)push_to_c4d.bat"</Command>
+      <Command>call "$(SolutionDir)push_to_c4d_debug.bat"</Command>
       <Message>Moves required files to C4D Directory</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -138,12 +147,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="lib\tinyxml2.cpp" />
-    <ClCompile Include="source\AboutDialog.cpp" />
-    <ClCompile Include="source\main.cpp" />
-    <ClCompile Include="source\VTFLoaderSaver.cpp" />
-  </ItemGroup>
-  <ItemGroup>
+    <ClInclude Include="Include\AboutDialog.h" />
+    <ClInclude Include="Include\Globals.h" />
+    <ClInclude Include="Include\main.h" />
+    <ClInclude Include="Include\UserConfig.h" />
+    <ClInclude Include="Include\VTFLoaderSaver.h" />
     <ClInclude Include="lib\curl\curl.h" />
     <ClInclude Include="lib\curl\curlver.h" />
     <ClInclude Include="lib\curl\easy.h" />
@@ -152,13 +160,9 @@
     <ClInclude Include="lib\curl\stdcheaders.h" />
     <ClInclude Include="lib\curl\system.h" />
     <ClInclude Include="lib\curl\typecheck-gcc.h" />
-    <ClInclude Include="lib\tinyxml2.h" />
-    <ClInclude Include="lib\VTFLib.h" />
+    <ClInclude Include="lib\tinyxml2\tinyxml2.h" />
+    <ClInclude Include="lib\VTFLib\VTFLib.h" />
     <ClInclude Include="res\c4d_symbols.h" />
-    <ClInclude Include="source\AboutDialog.h" />
-    <ClInclude Include="source\Globals.h" />
-    <ClInclude Include="source\main.h" />
-    <ClInclude Include="source\VTFLoaderSaver.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\strings_us\c4d_strings.str" />
@@ -170,6 +174,13 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Intel|x64'">true</ExcludedFromBuild>
     </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="lib\tinyxml2\tinyxml2.cpp" />
+    <ClCompile Include="Source\AboutDialog.cpp" />
+    <ClCompile Include="Source\main.cpp" />
+    <ClCompile Include="Source\UserConfig.cpp" />
+    <ClCompile Include="Source\VTFLoaderSaver.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

@@ -3,10 +3,9 @@
 // This work is licensed under the terms of the MIT license.
 // For a copy, see <https://opensource.org/licenses/MIT>.
 
-#ifndef ABOUT_DIALOG_H
-#define ABOUT_DIALOG_H
+#ifndef ST_ABOUT_DIALOG_H
+#define ST_ABOUT_DIALOG_H
 
-#include "c4d.h"
 #include "main.h"
 
 namespace ST

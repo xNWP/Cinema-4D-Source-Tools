@@ -15,22 +15,59 @@ Bool PluginStart(void)
 	if (!RegisterVTFSaver())
 		return false;
 
-	String VersionTag = xstr(VERSION_TAG);
-	VersionTag = (VersionTag == "0" ? "" : VersionTag);
-	GePrint("Loaded " + GeLoadString(IDS_PLUGIN_NAME) + " " + xstr(VERSION_MAJOR) + "." xstr(VERSION_MINOR) + VersionTag);
-
-	String DownloadURL;
-	if (UpdateAvailable("http://code.thatnwp.com/version/Cinema4DSourceToolsUpdate.xml", DownloadURL))
+	String StrLoc = PLUGIN_FOLDER;
+	StrLoc += "\\"; StrLoc += USER_CONFIG_LOC;
+	char *ChaLoc = StrLoc.GetCStringCopy();
+	tinyxml2::XMLDocument *M_DOC = new tinyxml2::XMLDocument();
+	tinyxml2::XMLError error = M_DOC->LoadFile(ChaLoc);
+	if (error == tinyxml2::XML_ERROR_FILE_NOT_FOUND)
 	{
-		if (QuestionDialog(
-			GeLoadString(IDS_UPDATE_AVAIL_0)
-			+ GeLoadString(IDS_PLUGIN_NAME)
-			+ GeLoadString(IDS_UPDATE_AVAIL_1)
+		GenerateDefaultConfigFile(*M_DOC);
+		// Acknowledge valid installation and ask if the user wants updates
+		if (QuestionDialog(GeLoadString(IDS_PLUGIN_NAME)
+			+ GeLoadString(IDS_NEW_INSTALL)
 			+ GeLoadString(IDS_PLUGIN_NAME) + ")."))
 		{
-			OpenURL(DownloadURL);
+			if (!SetUserConfig(M_DOC, CHECK_FOR_UPDATES, "true"))
+				return false;
+		}
+		else
+		{
+			if (!SetUserConfig(M_DOC, CHECK_FOR_UPDATES, "false"))
+				return false;
+		}
+
+		// save the file
+		M_DOC->SaveFile(ChaLoc);
+	}
+	else if (error != tinyxml2::XML_SUCCESS)
+	{
+		GePrint(GeLoadString(IDS_PLUGIN_NAME) + " -- critical error loading userconfig.xml");
+		return false;
+	}
+
+	String CheckUpdate;
+	if (!GetUserConfig(M_DOC, CHECK_FOR_UPDATES, CheckUpdate))
+		return false;
+
+	if (CheckUpdate == "true")
+	{
+		String DownloadURL;
+		if (UpdateAvailable("http://code.thatnwp.com/version/Cinema4DSourceToolsUpdate.xml", DownloadURL))
+		{
+			if (QuestionDialog(
+				GeLoadString(IDS_UPDATE_AVAIL_0)
+				+ GeLoadString(IDS_PLUGIN_NAME)
+				+ GeLoadString(IDS_UPDATE_AVAIL_1)
+				+ GeLoadString(IDS_PLUGIN_NAME) + ")."))
+			{
+				OpenURL(DownloadURL);
+			}
 		}
 	}
+
+	GePrint("Loaded " + GeLoadString(IDS_PLUGIN_NAME) + " " + xstr(VERSION_MAJOR) + "." xstr(VERSION_MINOR) + VERSION_TAG);
+
 
 	return true;
 }
@@ -106,7 +143,7 @@ static size_t WriteMemoryCallback
 
 BOOL UpdateAvailable(const String &CheckURL, String &DownloadURL)
 {
-	HMODULE dll = LoadPluginDLL(&String(xstr(LIBCURL_DLL)));
+	HMODULE dll = LoadPluginDLL(&String(LIBCURL_DLL));
 
 	// Get latest version info from site
 	BufferStruct output;
@@ -119,7 +156,11 @@ BOOL UpdateAvailable(const String &CheckURL, String &DownloadURL)
 	curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 	curl_easy_setopt(handle, CURLOPT_WRITEDATA, (void*)&output);
 	curl_easy_setopt(handle, CURLOPT_URL, CheckURL.GetCStringCopy());
-	curl_easy_perform(handle);
+	if (curl_easy_perform(handle) != CURLE_OK)
+	{
+		GePrint(GeLoadString(IDS_PLUGIN_NAME) + " -- critical error checking for updates, are you connected to the internet?");
+		return false;
+	}
 	curl_easy_cleanup(handle);
 
 	UnloadPluginDLL(dll);
@@ -157,4 +198,28 @@ void OpenURL(const String &url)
 	LPCWSTR lURL = wURL.c_str();
 
 	ShellExecute(NULL, L"open", lURL, NULL, NULL, SW_SHOWNORMAL);
+}
+
+Bool GetUserConfig(tinyxml2::XMLDocument *doc, const char *element, String &value)
+{
+	if (doc == nullptr) // config must be loaded
+		return false;
+
+	tinyxml2::XMLElement *e = doc->FirstChildElement(element);
+	
+	value = e->GetText();
+
+	return (&value == nullptr) ? false : true;
+}
+
+Bool SetUserConfig(tinyxml2::XMLDocument *doc, const char *element, const String &value)
+{
+	if (doc == nullptr) // config must be loaded
+		return false;
+
+	tinyxml2::XMLElement *e = doc->FirstChildElement(element);
+
+	e->SetText(value.GetCStringCopy());
+
+	return true;
 }
