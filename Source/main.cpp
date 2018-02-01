@@ -17,8 +17,9 @@ Bool PluginStart(void)
 
 	String StrLoc = PLUGIN_FOLDER;
 	StrLoc += "\\"; StrLoc += USER_CONFIG_LOC;
-	char *ChaLoc = StrLoc.GetCStringCopy();
-	tinyxml2::XMLDocument *M_DOC = new tinyxml2::XMLDocument();
+	Char *ChaLoc = NewMem(Char, StrLoc.GetCStringLen() + 1);
+	StrLoc.GetCString(ChaLoc, StrLoc.GetCStringLen() + 1);
+	tinyxml2::XMLDocument *M_DOC = NewObj(tinyxml2::XMLDocument);
 	tinyxml2::XMLError error = M_DOC->LoadFile(ChaLoc);
 	if (error == tinyxml2::XML_ERROR_FILE_NOT_FOUND)
 	{
@@ -68,6 +69,8 @@ Bool PluginStart(void)
 
 	GePrint("Loaded " + GeLoadString(IDS_PLUGIN_NAME) + " " + xstr(VERSION_MAJOR) + "." xstr(VERSION_MINOR) + VERSION_TAG);
 
+	DeleteObj(M_DOC);
+	DeleteMem(ChaLoc);
 
 	return true;
 }
@@ -88,14 +91,14 @@ Bool PluginMessage(Int32 id, void *data)
 	return true;
 }
 
-HMODULE LoadPluginDLL(const String *dllName)
+HMODULE LoadPluginDLL(const Char *dllName)
 {
 	// A big thank-you to karanik on the plugincafe forums,
 	// this code is mostly based on his.
 
 	String path = GeGetPluginPath().GetString();
 	path += String("\\");
-	path += String(*dllName);
+	path += dllName;
 
 	maxon::BaseArray<Utf16Char> arr;
 	if (!path.GetUtf16(arr))
@@ -143,7 +146,7 @@ static size_t WriteMemoryCallback
 
 BOOL UpdateAvailable(const String &CheckURL, String &DownloadURL)
 {
-	HMODULE dll = LoadPluginDLL(&String(LIBCURL_DLL));
+	HMODULE dll = LoadPluginDLL(LIBCURL_DLL);
 
 	// Get latest version info from site
 	BufferStruct output;
@@ -166,9 +169,9 @@ BOOL UpdateAvailable(const String &CheckURL, String &DownloadURL)
 	UnloadPluginDLL(dll);
 
 	// parse that info with tinyxml2
-	tinyxml2::XMLDocument data;
-	data.Parse(output.buffer, output.size);
-	tinyxml2::XMLElement *update = data.FirstChildElement("update");
+	tinyxml2::XMLDocument *data = NewObj(tinyxml2::XMLDocument);
+	data->Parse(output.buffer, output.size);
+	tinyxml2::XMLElement *update = data->FirstChildElement("update");
 	tinyxml2::XMLElement *major = update->FirstChildElement("version")->FirstChildElement("major");
 	tinyxml2::XMLElement *minor = update->FirstChildElement("version")->FirstChildElement("minor");
 	tinyxml2::XMLElement *download = update->FirstChildElement("link");
@@ -186,6 +189,8 @@ BOOL UpdateAvailable(const String &CheckURL, String &DownloadURL)
 			return true;
 		}
 	}
+
+	DeleteObj(data);
 
 	return false;
 }

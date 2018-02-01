@@ -35,24 +35,84 @@ namespace ST
 		}
 		
 		// Init banner
-		AboutDialogBanner *banner = new AboutDialogBanner();
+		AboutDialogBanner *banner = NewObj(AboutDialogBanner);
 		if (!this->AttachUserArea(*banner, IDC_ABOUT_DIALOG_BANNER, USERAREA_0))
 			return false;
 		banner->LayoutChanged();
 		banner->Redraw();
 
 		// Init donation buttons
-		PayPalDonate *paypal = new PayPalDonate();
+		PayPalDonate *paypal = NewObj(PayPalDonate);
 		if (!this->AttachUserArea(*paypal, IDC_PAYPAL, USERAREA_0))
 			return false;
 		paypal->LayoutChanged();
 		paypal->Redraw();
 
-		SteamDonate *steam = new SteamDonate();
+		SteamDonate *steam = NewObj(SteamDonate);
 		if (!this->AttachUserArea(*steam, IDC_STEAM, USERAREA_0))
 			return false;
 		steam->LayoutChanged();
 		steam->Redraw();
+
+		// Set initial tab to about page
+		this->SetInt32(IDT_TAB_GROUP, IDT_ABOUT);
+
+		// Set settings according to user file.
+		tinyxml2::XMLDocument *M_DOC = NewObj(tinyxml2::XMLDocument);
+		String StrLoc = PLUGIN_FOLDER;
+		StrLoc += "\\"; StrLoc += USER_CONFIG_LOC;
+		char *ChaLoc = StrLoc.GetCStringCopy();
+		tinyxml2::XMLError error = M_DOC->LoadFile(ChaLoc);
+
+		if (error != tinyxml2::XML_SUCCESS)
+			MessageDialog(GeLoadString(IDS_CRITICAL_ERROR));
+
+		String probe;
+
+		// Auto-Update
+		if (!GetUserConfig(M_DOC, CHECK_FOR_UPDATES, probe))
+			MessageDialog(GeLoadString(IDS_CRITICAL_ERROR));
+		if (probe == "true")
+			this->SetBool(IDC_AUTO_UPDATE, true);
+		else
+			this->SetBool(IDC_AUTO_UPDATE, false);
+
+		DeleteObj(M_DOC);
+		DeleteMem(ChaLoc);
+
+		return true;
+	}
+
+	Bool AboutDialog::Command(Int32 id, const BaseContainer &msg)
+	{
+		// Save Settings
+		if (id == IDC_SAVE_SETTINGS)
+		{
+			tinyxml2::XMLDocument *M_DOC = NewObj(tinyxml2::XMLDocument);
+			String StrLoc = PLUGIN_FOLDER;
+			StrLoc += "\\"; StrLoc += USER_CONFIG_LOC;
+			char *ChaLoc = StrLoc.GetCStringCopy();
+			tinyxml2::XMLError error = M_DOC->LoadFile(ChaLoc);
+
+			if (error != tinyxml2::XML_SUCCESS)
+				MessageDialog(GeLoadString(IDS_CRITICAL_ERROR));
+
+			Bool bProbe;
+
+			// Auto-Update
+			this->GetBool(IDC_AUTO_UPDATE, bProbe);
+			if (bProbe)
+				SetUserConfig(M_DOC, CHECK_FOR_UPDATES, "true");
+			else
+				SetUserConfig(M_DOC, CHECK_FOR_UPDATES, "false");
+
+			M_DOC->SaveFile(ChaLoc);
+			DeleteObj(M_DOC);
+			DeleteMem(ChaLoc);
+			MessageDialog(GeLoadString(IDS_SETTINGS_SAVED));
+
+			return true;
+		}
 
 		return true;
 	}

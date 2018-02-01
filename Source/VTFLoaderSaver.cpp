@@ -23,13 +23,13 @@ namespace ST
 	IMAGERESULT VTFLoader::Load(const Filename &name, BaseBitmap *bm, Int32 frame)
 	{
 		// Load VTFLib.dll
-		HMODULE dll = LoadPluginDLL(&String(VTFLIB_DLL));
+		HMODULE dll = LoadPluginDLL(VTFLIB_DLL);
 
 		// Get cPath
-		Char cPath[512];
+		Char *cPath = NewMem(Char, 512);
 		name.GetString().GetCString(cPath, name.GetString().GetCStringLen() + 1, STRINGENCODING_UTF8);
 
-		VTFLib::CVTFFile *file = new VTFLib::CVTFFile();
+		VTFLib::CVTFFile *file = NewObj(VTFLib::CVTFFile);
 
 		if (!file->Load(cPath)) // Load file
 			return IMAGERESULT_FILEERROR;
@@ -61,7 +61,7 @@ namespace ST
 		UInt64 sizeSrc = file->ComputeImageSize(bw, bh, bdep, srcmode);
 		UInt64 sizeRGBA = file->ComputeImageSize(bw, bh, bdep, IMAGE_FORMAT_RGBA8888);
 
-		vlByte *RGBAData = new vlByte[sizeRGBA];
+		vlByte *RGBAData = NewMem(vlByte, sizeRGBA);
 		vlByte *srcData = file->GetData(frame, 0, 0, 0);
 
 		file->Convert(srcData, RGBAData, file->GetWidth(), file->GetHeight(), file->GetFormat(), IMAGE_FORMAT_RGBA8888);
@@ -86,7 +86,9 @@ namespace ST
 			}
 		}
 
-		delete file;
+		DeleteObj(file);
+		DeleteMem(RGBAData);
+		DeleteMem(cPath);
 		UnloadPluginDLL(dll);
 
 		return bOk && aOk ? IMAGERESULT_OK : IMAGERESULT_FILEERROR;
@@ -94,17 +96,16 @@ namespace ST
 
 	Bool VTFLoader::GetInformation(const Filename &name, Int32 *frames, Float *fps)
 	{
-		HMODULE dll = LoadPluginDLL(&String(VTFLIB_DLL));
+		HMODULE dll = LoadPluginDLL(VTFLIB_DLL);
 
-		VTFLib::CVTFFile *file = new VTFLib::CVTFFile();
+		VTFLib::CVTFFile *file = NewObj(VTFLib::CVTFFile);
 		if (!file->Load(name.GetString().GetCStringCopy(), true)) // load only file header
 			return false;
 
 		if (file->GetFrameCount() > 1)
 			*frames = file->GetFrameCount();
-		else
-			frames = new Int32(15);
 
+		DeleteObj(file);
 		UnloadPluginDLL(dll);
 
 		return true;
@@ -134,15 +135,15 @@ namespace ST
 			return IMAGERESULT_PARAM_ERROR;
 
 		// Load VTFLib.dll
-		HMODULE dll = LoadPluginDLL(&String(VTFLIB_DLL));
+		HMODULE dll = LoadPluginDLL(VTFLIB_DLL);
 
-		VTFLib::CVTFFile *file = new VTFLib::CVTFFile();
+		VTFLib::CVTFFile *file = NewObj(VTFLib::CVTFFile);
 		if (!file->Create(bm->GetBw(), bm->GetBh(), 1, 1, 1, savebits & SAVEBIT_ALPHA == SAVEBIT_ALPHA ? IMAGE_FORMAT_RGBA8888 : IMAGE_FORMAT_RGB888, true, false))
 			return IMAGERESULT_FILEERROR;
 
 		// Load data into an array
 		Int64 dataSize = bm->GetBw() * bm->GetBh() * (savebits & SAVEBIT_ALPHA == SAVEBIT_ALPHA ? 4 : 3);
-		vlByte *srcData = new vlByte[dataSize];
+		vlByte *srcData = NewMem(vlByte, dataSize);
 
 		for (Int64 sY = 0; sY < bm->GetBh(); sY++) // for each row
 		{
@@ -167,6 +168,8 @@ namespace ST
 		file->SetData(0, 0, 0, 0, srcData);
 		Bool sOk = file->Save(name.GetString().GetCStringCopy());
 
+		DeleteObj(file);
+		DeleteMem(srcData);
 		UnloadPluginDLL(dll);
 
 		return sOk ? IMAGERESULT_OK : IMAGERESULT_FILEERROR;

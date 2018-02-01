@@ -48,7 +48,7 @@ Bool RegisterAboutDialog();
 ///
 /// @return				HMODULE handle to dll
 //----------------------------------------------------------------------------------------
-HMODULE LoadPluginDLL(const String *dllName);
+HMODULE LoadPluginDLL(const Char *dllName);
 
 //----------------------------------------------------------------------------------------
 /// Decrements the reference count of the specified dll by 1, unloads if reference count == 0

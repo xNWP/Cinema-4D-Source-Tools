@@ -1,6 +1,8 @@
 DIALOGSTRINGS ABOUTDLG
 {
 	DIALOG_TITLE		"Cinema 4D Source Tools"; // DNT
+	S_ABOUT_TAB			"About";
+	S_SETTINGS_TAB		"Settings";
 
 	S_PLUGIN_NAME		"Cinema 4D Source Tools"; // DNT
 	S_PLUGIN_VERSION	"<             VERSION             >"; // DNT
@@ -13,4 +15,8 @@ DIALOGSTRINGS ABOUTDLG
 
 	TRANSLATION_AUTHOR	""; // Translation by <your name here>.
 	TRAN_LINK			""; // A link to your site/twitter/etc.
+
+	S_GENERAL			"General";
+	S_AUTO_UPDATE		"Automatically Check For Updates";
+	S_SAVE_SETTINGS		"Save Settings";
 }

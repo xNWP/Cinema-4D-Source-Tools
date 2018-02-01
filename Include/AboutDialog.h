@@ -18,6 +18,7 @@ namespace ST
 	public:
 		Bool CreateLayout();
 		Bool InitValues();
+		Bool Command(Int32 id, const BaseContainer &msg);
 
 	private:
 		//----------------------------------------------------------------------------------------

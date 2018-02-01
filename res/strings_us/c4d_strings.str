@@ -1,10 +1,14 @@
 STRINGTABLE
 {
-	IDS_PLUGIN_NAME	"Cinema 4D Source Tools"; // DNT
+	IDS_PLUGIN_NAME		"Cinema 4D Source Tools"; // DNT
 	IDS_UPDATE_AVAIL_0	"An update is available for ";
 	IDS_UPDATE_AVAIL_1	", would you like to download it now? (you can disable auto-update checking in Plugins > ";
 	IDS_NEW_INSTALL		" was successfully installed! Would you like to automatically check for updates? (you can disable auto-update checking in Plugins > ";
+	IDS_CRITICAL_ERROR	"A critical error occured.";
+
+	// About Dialog
+	IDS_SETTINGS_SAVED	"Settings successfully saved!";
 
 	// VTF Import/Export
-	IDS_VTF			"Valve Texture Format (VTF)"; // DNT
+	IDS_VTF				"Valve Texture Format (VTF)"; // DNT
 }
