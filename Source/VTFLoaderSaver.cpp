@@ -14,7 +14,7 @@ namespace ST
 		if (!probe || size < 4)
 			return false;
 		
-		UInt32* p = (UInt32*)probe, v1 = p[0];
+		UInt32 *p = (UInt32*)probe, v1 = p[0];
 		lMotor(&v1); // Convert to BE.
 	
 		return v1 == 0x56544600; // 0x56544600 => VTF\0
@@ -55,11 +55,10 @@ namespace ST
 			alpha = true;
 
 		// Create Bitmap
-		if (bm->Init(bw, bh, alpha ? 32 : 24) != IMAGERESULT_OK)
+		if (bm->Init(Int32(bw), Int32(bh), Int32(alpha) ? Int32(32) : Int32(24)) != IMAGERESULT_OK)
 			return IMAGERESULT_OUTOFMEMORY;
 		
-		UInt64 sizeSrc = file->ComputeImageSize(bw, bh, bdep, srcmode);
-		UInt64 sizeRGBA = file->ComputeImageSize(bw, bh, bdep, IMAGE_FORMAT_RGBA8888);
+		UInt64 sizeRGBA = file->ComputeImageSize(vlUInt(bw), vlUInt(bh), vlUInt(bdep), IMAGE_FORMAT_RGBA8888);
 
 		vlByte *RGBAData = NewMem(vlByte, sizeRGBA);
 		vlByte *srcData = file->GetData(frame, 0, 0, 0);
@@ -99,13 +98,16 @@ namespace ST
 		HMODULE dll = LoadPluginDLL(VTFLIB_DLL);
 
 		VTFLib::CVTFFile *file = NewObj(VTFLib::CVTFFile);
-		if (!file->Load(name.GetString().GetCStringCopy(), true)) // load only file header
+		Char *charName = NewMem(Char, name.GetString().GetCStringLen() + 1);
+		name.GetString().GetCString(charName, name.GetString().GetCStringLen() + 1);
+		if (!file->Load(charName, true)) // load only file header
 			return false;
 
 		if (file->GetFrameCount() > 1)
 			*frames = file->GetFrameCount();
 
 		DeleteObj(file);
+		DeleteMem(charName);
 		UnloadPluginDLL(dll);
 
 		return true;
@@ -138,11 +140,11 @@ namespace ST
 		HMODULE dll = LoadPluginDLL(VTFLIB_DLL);
 
 		VTFLib::CVTFFile *file = NewObj(VTFLib::CVTFFile);
-		if (!file->Create(bm->GetBw(), bm->GetBh(), 1, 1, 1, savebits & SAVEBIT_ALPHA == SAVEBIT_ALPHA ? IMAGE_FORMAT_RGBA8888 : IMAGE_FORMAT_RGB888, true, false))
+		if (!file->Create(bm->GetBw(), bm->GetBh(), 1, 1, 1, (savebits & SAVEBIT_ALPHA) == SAVEBIT_ALPHA ? IMAGE_FORMAT_RGBA8888 : IMAGE_FORMAT_RGB888, true, false))
 			return IMAGERESULT_FILEERROR;
 
 		// Load data into an array
-		Int64 dataSize = bm->GetBw() * bm->GetBh() * (savebits & SAVEBIT_ALPHA == SAVEBIT_ALPHA ? 4 : 3);
+		Int64 dataSize = bm->GetBw() * bm->GetBh() * ((savebits & SAVEBIT_ALPHA) == SAVEBIT_ALPHA ? 4 : 3);
 		vlByte *srcData = NewMem(vlByte, dataSize);
 
 		for (Int64 sY = 0; sY < bm->GetBh(); sY++) // for each row
@@ -150,15 +152,15 @@ namespace ST
 			for (Int64 sX = 0; sX < bm->GetBw(); sX++) // for each col
 			{
 				UInt16 r, g, b;
-				bm->GetPixel(sX, sY, &r, &g, &b);
-				Int16 bytes = savebits & SAVEBIT_ALPHA == SAVEBIT_ALPHA ? 4 : 3;
+				bm->GetPixel(Int32(sX), Int32(sY), &r, &g, &b);
+				Int16 bytes = (savebits & SAVEBIT_ALPHA) == SAVEBIT_ALPHA ? 4 : 3;
 				srcData[sY * bm->GetBw() * bytes + sX * bytes] = (vlByte)r;
 				srcData[sY * bm->GetBw() * bytes + sX * bytes + 1] = (vlByte)g;
 				srcData[sY * bm->GetBw() * bytes + sX * bytes + 2] = (vlByte)b;
-				if (savebits & SAVEBIT_ALPHA == SAVEBIT_ALPHA)
+				if ((savebits & SAVEBIT_ALPHA) == SAVEBIT_ALPHA)
 				{
 					UInt16 a = 0;
-					bm->GetAlphaPixel(bm->GetInternalChannel(), sX, sY, &a);
+					bm->GetAlphaPixel(bm->GetInternalChannel(), Int32(sX), Int32(sY), &a);
 					srcData[sY * bm->GetBw() * bytes + sX * bytes + 3] = (vlByte)a;
 				}
 			}
@@ -166,10 +168,13 @@ namespace ST
 
 		// Commit Data
 		file->SetData(0, 0, 0, 0, srcData);
-		Bool sOk = file->Save(name.GetString().GetCStringCopy());
+		Char *charName = NewMem(Char, name.GetString().GetCStringLen() + 1);
+		name.GetString().GetCString(charName, name.GetString().GetCStringLen() + 1);
+		Bool sOk = file->Save(charName);
 
 		DeleteObj(file);
 		DeleteMem(srcData);
+		DeleteMem(charName);
 		UnloadPluginDLL(dll);
 
 		return sOk ? IMAGERESULT_OK : IMAGERESULT_FILEERROR;

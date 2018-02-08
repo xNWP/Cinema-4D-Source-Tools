@@ -65,9 +65,9 @@ BOOL UnloadPluginDLL(HMODULE DLLHANDLE);
 /// @param[in] CheckURL			The URL to check
 /// @param[out] DownloadURL		The URL to the latest version.
 ///
-/// @return						BOOL true if update available.
+/// @return						Bool true if update available.
 //----------------------------------------------------------------------------------------
-BOOL UpdateAvailable(const String &CheckURL, String &DownloadURL);
+Bool UpdateAvailable(const String &CheckURL, String &DownloadURL);
 
 //----------------------------------------------------------------------------------------
 /// Opens specified url in default browser.

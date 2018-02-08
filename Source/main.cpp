@@ -7,6 +7,7 @@
 
 Bool PluginStart(void)
 {
+
 	// Register Components
 	if (!RegisterAboutDialog())
 		return false;
@@ -15,12 +16,14 @@ Bool PluginStart(void)
 	if (!RegisterVTFSaver())
 		return false;
 
-	String StrLoc = PLUGIN_FOLDER;
-	StrLoc += "\\"; StrLoc += USER_CONFIG_LOC;
+	String StrLoc = GeGetPluginPath().GetString();
+	StrLoc += "\\";
+	StrLoc += USER_CONFIG_LOC;
 	Char *ChaLoc = NewMem(Char, StrLoc.GetCStringLen() + 1);
 	StrLoc.GetCString(ChaLoc, StrLoc.GetCStringLen() + 1);
 	tinyxml2::XMLDocument *M_DOC = NewObj(tinyxml2::XMLDocument);
 	tinyxml2::XMLError error = M_DOC->LoadFile(ChaLoc);
+
 	if (error == tinyxml2::XML_ERROR_FILE_NOT_FOUND)
 	{
 		GenerateDefaultConfigFile(*M_DOC);
@@ -68,7 +71,7 @@ Bool PluginStart(void)
 	}
 
 	GePrint("Loaded " + GeLoadString(IDS_PLUGIN_NAME) + " " + xstr(VERSION_MAJOR) + "." xstr(VERSION_MINOR) + VERSION_TAG);
-
+	
 	DeleteObj(M_DOC);
 	DeleteMem(ChaLoc);
 
@@ -144,7 +147,7 @@ static size_t WriteMemoryCallback
 	return realsize;
 }
 
-BOOL UpdateAvailable(const String &CheckURL, String &DownloadURL)
+Bool UpdateAvailable(const String &CheckURL, String &DownloadURL)
 {
 	HMODULE dll = LoadPluginDLL(LIBCURL_DLL);
 
@@ -156,9 +159,12 @@ BOOL UpdateAvailable(const String &CheckURL, String &DownloadURL)
 	curl_global_init(CURL_GLOBAL_WIN32);
 	CURL *handle = curl_easy_init();
 	
+	Char *cCheckURL = NewMem(Char, CheckURL.GetCStringLen() + 1);
+	CheckURL.GetCString(cCheckURL, CheckURL.GetCStringLen() + 1);
+
 	curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 	curl_easy_setopt(handle, CURLOPT_WRITEDATA, (void*)&output);
-	curl_easy_setopt(handle, CURLOPT_URL, CheckURL.GetCStringCopy());
+	curl_easy_setopt(handle, CURLOPT_URL, cCheckURL);
 	if (curl_easy_perform(handle) != CURLE_OK)
 	{
 		GePrint(GeLoadString(IDS_PLUGIN_NAME) + " -- critical error checking for updates, are you connected to the internet?");
@@ -191,6 +197,7 @@ BOOL UpdateAvailable(const String &CheckURL, String &DownloadURL)
 	}
 
 	DeleteObj(data);
+	DeleteMem(cCheckURL);
 
 	return false;
 }
@@ -198,11 +205,15 @@ BOOL UpdateAvailable(const String &CheckURL, String &DownloadURL)
 void OpenURL(const String &url)
 {
 	// casting shenanigans
-	std::string sURL = url.GetCStringCopy();
+	Char* charURL = NewMem(Char, url.GetCStringLen() + 1);
+	url.GetCString(charURL, url.GetCStringLen() + 1);
+	std::string sURL = charURL;
 	std::wstring wURL(sURL.begin(), sURL.end());
 	LPCWSTR lURL = wURL.c_str();
 
 	ShellExecute(NULL, L"open", lURL, NULL, NULL, SW_SHOWNORMAL);
+
+	DeleteMem(charURL);
 }
 
 Bool GetUserConfig(tinyxml2::XMLDocument *doc, const char *element, String &value)
@@ -224,7 +235,10 @@ Bool SetUserConfig(tinyxml2::XMLDocument *doc, const char *element, const String
 
 	tinyxml2::XMLElement *e = doc->FirstChildElement(element);
 
-	e->SetText(value.GetCStringCopy());
+	Char *val = NewMem(Char, value.GetCStringLen() + 1);
+	value.GetCString(val, value.GetCStringLen() + 1);
+	e->SetText(val);
+	DeleteMem(val);
 
 	return true;
 }

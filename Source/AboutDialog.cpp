@@ -35,20 +35,20 @@ namespace ST
 		}
 		
 		// Init banner
-		AboutDialogBanner *banner = NewObj(AboutDialogBanner);
+		banner = NewObj(AboutDialogBanner);
 		if (!this->AttachUserArea(*banner, IDC_ABOUT_DIALOG_BANNER, USERAREA_0))
 			return false;
 		banner->LayoutChanged();
 		banner->Redraw();
 
 		// Init donation buttons
-		PayPalDonate *paypal = NewObj(PayPalDonate);
+		paypal = NewObj(PayPalDonate);
 		if (!this->AttachUserArea(*paypal, IDC_PAYPAL, USERAREA_0))
 			return false;
 		paypal->LayoutChanged();
 		paypal->Redraw();
 
-		SteamDonate *steam = NewObj(SteamDonate);
+		steam = NewObj(SteamDonate);
 		if (!this->AttachUserArea(*steam, IDC_STEAM, USERAREA_0))
 			return false;
 		steam->LayoutChanged();
@@ -59,7 +59,7 @@ namespace ST
 
 		// Set settings according to user file.
 		tinyxml2::XMLDocument *M_DOC = NewObj(tinyxml2::XMLDocument);
-		String StrLoc = PLUGIN_FOLDER;
+		String StrLoc = GeGetPluginPath().GetString();
 		StrLoc += "\\"; StrLoc += USER_CONFIG_LOC;
 		char *ChaLoc = StrLoc.GetCStringCopy();
 		tinyxml2::XMLError error = M_DOC->LoadFile(ChaLoc);
@@ -89,7 +89,7 @@ namespace ST
 		if (id == IDC_SAVE_SETTINGS)
 		{
 			tinyxml2::XMLDocument *M_DOC = NewObj(tinyxml2::XMLDocument);
-			String StrLoc = PLUGIN_FOLDER;
+			String StrLoc = GeGetPluginPath().GetString();
 			StrLoc += "\\"; StrLoc += USER_CONFIG_LOC;
 			char *ChaLoc = StrLoc.GetCStringCopy();
 			tinyxml2::XMLError error = M_DOC->LoadFile(ChaLoc);
@@ -117,6 +117,18 @@ namespace ST
 		return true;
 	}
 
+	void AboutDialog::DestroyWindow()
+	{
+		DeleteObj(banner);
+		DeleteObj(paypal);
+		DeleteObj(steam);
+	}
+
+	AboutDialog::AboutDialogBanner::~AboutDialogBanner()
+	{
+		BaseBitmap::Free(bmp);
+	}
+
 	Bool AboutDialog::AboutDialogBanner::GetMinSize(Int32 &w, Int32 &h)
 	{
 		w = 240; h = 60;
@@ -125,11 +137,16 @@ namespace ST
 
 	void AboutDialog::AboutDialogBanner::DrawMsg(Int32 x1, Int32 y1, Int32 x2, Int32 y2, const BaseContainer &msg)
 	{
-		BaseBitmap *bmp = BaseBitmap::Alloc();
+		bmp = BaseBitmap::Alloc();
 		Filename imagePath(GeGetPluginPath() + "\\res" + "\\AboutBanner.png");
 		bmp->Init(imagePath);
 
 		DrawBitmap(bmp, 0, 0, bmp->GetBw(), bmp->GetBh(), 0, 0, bmp->GetBw(), bmp->GetBh(), BMP_ALLOWALPHA);
+	}
+
+	AboutDialog::PayPalDonate::~PayPalDonate()
+	{
+		BaseBitmap::Free(bmp);
 	}
 
 	Bool AboutDialog::PayPalDonate::GetMinSize(Int32 &w, Int32 &h)
@@ -140,7 +157,7 @@ namespace ST
 
 	void AboutDialog::PayPalDonate::DrawMsg(Int32 x1, Int32 y1, Int32 x2, Int32 y2, const BaseContainer &msg)
 	{
-		BaseBitmap *bmp = BaseBitmap::Alloc();
+		bmp = BaseBitmap::Alloc();
 		Filename imagePath(GeGetPluginPath() + "\\res" + "\\paypal.png");
 		bmp->Init(imagePath);
 
@@ -159,6 +176,11 @@ namespace ST
 		return true;
 	}
 
+	AboutDialog::SteamDonate::~SteamDonate()
+	{
+		BaseBitmap::Free(bmp);
+	}
+
 	Bool AboutDialog::SteamDonate::GetMinSize(Int32 &w, Int32 &h)
 	{
 		w = 100; h = 40;
@@ -167,7 +189,7 @@ namespace ST
 
 	void AboutDialog::SteamDonate::DrawMsg(Int32 x1, Int32 y1, Int32 x2, Int32 y2, const BaseContainer &msg)
 	{
-		BaseBitmap *bmp = BaseBitmap::Alloc();
+		bmp = BaseBitmap::Alloc();
 		Filename imagePath(GeGetPluginPath() + "\\res" + "\\steam.png");
 		bmp->Init(imagePath);
 
@@ -188,8 +210,12 @@ namespace ST
 
 	Bool AboutDialogCommand::Execute(BaseDocument *doc)
 	{
-		AboutDialog *adlg = NewObjClear(AboutDialog);
-		return adlg->Open(DLG_TYPE_MODAL, ABOUT_ID);
+		adlg = NewObjClear(AboutDialog);
+		if (!adlg->Open(DLG_TYPE_MODAL, ABOUT_ID))
+			return false;
+
+		DeleteObj(adlg);
+		return true;
 	}
 }
 

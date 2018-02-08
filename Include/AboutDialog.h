@@ -19,16 +19,28 @@ namespace ST
 		Bool CreateLayout();
 		Bool InitValues();
 		Bool Command(Int32 id, const BaseContainer &msg);
+		void DestroyWindow();
 
 	private:
+		class AboutDialogBanner;
+		AboutDialogBanner *banner;
+		class PayPalDonate;
+		PayPalDonate *paypal;
+		class SteamDonate;
+		SteamDonate *steam;
+
 		//----------------------------------------------------------------------------------------
 		/// Banner definition for AboutDialog
 		//----------------------------------------------------------------------------------------
 		class AboutDialogBanner : public GeUserArea
 		{
 		public:
+			~AboutDialogBanner();
 			Bool GetMinSize(Int32 &w, Int32 &h);
 			void DrawMsg(Int32 x1, Int32 y1, Int32 x2, Int32 y2, const BaseContainer &msg);
+
+		private:
+			BaseBitmap *bmp;
 		};
 
 		//----------------------------------------------------------------------------------------
@@ -37,9 +49,13 @@ namespace ST
 		class PayPalDonate : public GeUserArea
 		{
 		public:
+			~PayPalDonate();
 			Bool GetMinSize(Int32 &w, Int32 &h);
 			void DrawMsg(Int32 x1, Int32 y1, Int32 x2, Int32 y2, const BaseContainer &msg);
 			Bool InputEvent(const BaseContainer &msg);
+
+		private:
+			BaseBitmap *bmp;
 		};
 
 		//----------------------------------------------------------------------------------------
@@ -48,9 +64,13 @@ namespace ST
 		class SteamDonate : public GeUserArea
 		{
 		public:
+			~SteamDonate();
 			Bool GetMinSize(Int32 &w, Int32 &h);
 			void DrawMsg(Int32 x1, Int32 y1, Int32 x2, Int32 y2, const BaseContainer &msg);
 			Bool InputEvent(const BaseContainer &msg);
+
+		private:
+			BaseBitmap *bmp;
 		};
 	};
 
@@ -61,6 +81,9 @@ namespace ST
 	{
 	public:
 		Bool Execute(BaseDocument *doc);
+
+	private:
+		AboutDialog *adlg;
 	};
 }
 

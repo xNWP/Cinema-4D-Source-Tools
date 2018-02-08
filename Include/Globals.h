@@ -11,7 +11,7 @@
 #define str(s) #s
 
 #define VERSION_MAJOR	0
-#define VERSION_MINOR	22
+#define VERSION_MINOR	25
 #define VERSION_TAG		"-alpha"
 
 // About Dialog
@@ -27,6 +27,5 @@
 
 // User Config
 #define USER_CONFIG_LOC	"userconfig.xml"
-#define PLUGIN_FOLDER	GeGetPluginPath().GetString().GetCStringCopy()
 
 #endif
