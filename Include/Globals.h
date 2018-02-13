@@ -6,13 +6,20 @@
 #ifndef ST_GLOBALS_H
 #define ST_GLOBALS_H
 
+// Libraries //
+#include "c4d.h"
+#include <string>
+#include <Windows.h>
+
+// Macros //
+
 // stringification macro
 #define xstr(s) str(s)
 #define str(s) #s
 
 #define VERSION_MAJOR	0
-#define VERSION_MINOR	25
-#define VERSION_TAG		"-alpha"
+#define VERSION_MINOR	26
+#define VERSION_TAG		"-dev"
 
 // About Dialog
 #define ABOUT_ID		1040531
@@ -27,5 +34,34 @@
 
 // User Config
 #define USER_CONFIG_LOC	"userconfig.xml"
+
+// Methods //
+namespace ST
+{
+	//----------------------------------------------------------------------------------------
+	/// Opens specified url in default browser.
+	///
+	/// @param[in] URL				The URL to open.
+	//----------------------------------------------------------------------------------------
+	void OpenURL(const String &url);
+
+	//----------------------------------------------------------------------------------------
+	/// Loads the specified dll into memory. Use UnloadPluginDLL to unload.
+	///
+	/// @param[in] dllName		Path to dll (including extension) relative to the current plugins directory.
+	///
+	/// @return				HMODULE handle to dll
+	//----------------------------------------------------------------------------------------
+	HMODULE LoadPluginDLL(const Char *dllName);
+
+	//----------------------------------------------------------------------------------------
+	/// Decrements the reference count of the specified dll by 1, unloads if reference count == 0
+	///
+	/// @param[in] DLLHANDLE		HMODULE handle to the dll
+	///
+	/// @return						BOOL true if successful
+	//----------------------------------------------------------------------------------------
+	BOOL UnloadPluginDLL(HMODULE DLLHANDLE);
+}
 
 #endif

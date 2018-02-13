@@ -111,5 +111,8 @@
     <ClCompile Include="lib\tinyxml2\tinyxml2.cpp">
       <Filter>Libraries\tinyxml2</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Globals.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

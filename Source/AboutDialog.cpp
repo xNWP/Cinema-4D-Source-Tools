@@ -70,7 +70,7 @@ namespace ST
 		String probe;
 
 		// Auto-Update
-		if (!GetUserConfig(M_DOC, CHECK_FOR_UPDATES, probe))
+		if (!ST::GetUserConfig(M_DOC, CHECK_FOR_UPDATES, probe))
 			MessageDialog(GeLoadString(IDS_CRITICAL_ERROR));
 		if (probe == "true")
 			this->SetBool(IDC_AUTO_UPDATE, true);

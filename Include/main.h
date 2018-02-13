@@ -6,58 +6,24 @@
 #ifndef ST_MAIN_H
 #define ST_MAIN_H
 
+// Cinema 4D
 #include "c4d.h"
 #include "c4d_symbols.h"
-#include "curl\curl.h"
+
+// Macros
 #include "Globals.h"
+
+// Libraries
+#include "curl\curl.h"
 #include <string>
 #include "tinyxml2/tinyxml2.h"
+
+// Modules
+#include "AboutDialog.h"
 #include "UserConfig.h"
-#include "VTFLib/VTFLib.h"
-#include <Windows.h>
+#include "VTFLoaderSaver.h"
 
-//----------------------------------------------------------------------------------------
-/// Plugin registration functions
-//----------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------
-/// Registers the VTF Loader Plugin
-///
-/// @return						BOOL true if successful.
-//----------------------------------------------------------------------------------------
-Bool RegisterVTFLoader();
-
-//----------------------------------------------------------------------------------------
-/// Registers the VTF Saver Plugin
-///
-/// @return						BOOL true if successful.
-//----------------------------------------------------------------------------------------
-Bool RegisterVTFSaver();
-
-//----------------------------------------------------------------------------------------
-/// Registers the About Dialog
-///
-/// @return						BOOL true if successful.
-//----------------------------------------------------------------------------------------
-Bool RegisterAboutDialog();
-
-//----------------------------------------------------------------------------------------
-/// Loads the specified dll into memory. Use UnloadPluginDLL to unload.
-///
-/// @param[in] dllName		Path to dll (including extension) relative to the current plugins directory.
-///
-/// @return				HMODULE handle to dll
-//----------------------------------------------------------------------------------------
-HMODULE LoadPluginDLL(const Char *dllName);
-
-//----------------------------------------------------------------------------------------
-/// Decrements the reference count of the specified dll by 1, unloads if reference count == 0
-///
-/// @param[in] DLLHANDLE		HMODULE handle to the dll
-///
-/// @return						BOOL true if successful
-//----------------------------------------------------------------------------------------
-BOOL UnloadPluginDLL(HMODULE DLLHANDLE);
+// Methods
 
 //----------------------------------------------------------------------------------------
 /// Checks if an update is available at CheckURL.
@@ -68,34 +34,5 @@ BOOL UnloadPluginDLL(HMODULE DLLHANDLE);
 /// @return						Bool true if update available.
 //----------------------------------------------------------------------------------------
 Bool UpdateAvailable(const String &CheckURL, String &DownloadURL);
-
-//----------------------------------------------------------------------------------------
-/// Opens specified url in default browser.
-///
-/// @param[in] URL				The URL to open.
-//----------------------------------------------------------------------------------------
-void OpenURL(const String &url);
-
-//----------------------------------------------------------------------------------------
-/// Get's the element from the user config file.
-///
-/// @param[in] doc				The XML document.
-/// @param[in] element			The element to get.
-/// @param[out] value			The value contained in the element.
-///
-/// @return						Bool true if successful.
-//----------------------------------------------------------------------------------------
-Bool GetUserConfig(tinyxml2::XMLDocument *doc, const char *element, String &value);
-
-//----------------------------------------------------------------------------------------
-/// Sets the element (type USER_CONFIG) in the user config file to the specified value
-///
-/// @param[in] doc				The XML document.
-/// @param[in] element			The element to set.
-/// @param[in] value			The value to set the element.
-///
-/// @return						Bool true if successful.
-//----------------------------------------------------------------------------------------
-Bool SetUserConfig(tinyxml2::XMLDocument *doc, const char *element, const String &value);
 
 #endif

@@ -82,6 +82,7 @@
     </Midl>
     <ClCompile>
       <AdditionalIncludeDirectories>./source;./res;./res/description;./lib;./Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <BrowseInformation>true</BrowseInformation>
     </ClCompile>
     <Link>
       <IgnoreSpecificDefaultLibraries />
@@ -96,6 +97,9 @@
       <Command>call "$(SolutionDir)push_to_c4d_debug.bat"</Command>
       <Message>Moves required files to C4D Directory</Message>
     </PostBuildEvent>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Midl>
@@ -178,6 +182,7 @@
   <ItemGroup>
     <ClCompile Include="lib\tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="Source\AboutDialog.cpp" />
+    <ClCompile Include="Source\Globals.cpp" />
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\UserConfig.cpp" />
     <ClCompile Include="Source\VTFLoaderSaver.cpp" />

@@ -7,7 +7,6 @@
 
 Bool PluginStart(void)
 {
-
 	// Register Components
 	if (!RegisterAboutDialog())
 		return false;
@@ -26,18 +25,18 @@ Bool PluginStart(void)
 
 	if (error == tinyxml2::XML_ERROR_FILE_NOT_FOUND)
 	{
-		GenerateDefaultConfigFile(*M_DOC);
+		ST::GenerateDefaultConfigFile(*M_DOC);
 		// Acknowledge valid installation and ask if the user wants updates
 		if (QuestionDialog(GeLoadString(IDS_PLUGIN_NAME)
 			+ GeLoadString(IDS_NEW_INSTALL)
 			+ GeLoadString(IDS_PLUGIN_NAME) + ")."))
 		{
-			if (!SetUserConfig(M_DOC, CHECK_FOR_UPDATES, "true"))
+			if (!ST::SetUserConfig(M_DOC, CHECK_FOR_UPDATES, "true"))
 				return false;
 		}
 		else
 		{
-			if (!SetUserConfig(M_DOC, CHECK_FOR_UPDATES, "false"))
+			if (!ST::SetUserConfig(M_DOC, CHECK_FOR_UPDATES, "false"))
 				return false;
 		}
 
@@ -51,7 +50,7 @@ Bool PluginStart(void)
 	}
 
 	String CheckUpdate;
-	if (!GetUserConfig(M_DOC, CHECK_FOR_UPDATES, CheckUpdate))
+	if (!ST::GetUserConfig(M_DOC, CHECK_FOR_UPDATES, CheckUpdate))
 		return false;
 
 	if (CheckUpdate == "true")
@@ -65,7 +64,7 @@ Bool PluginStart(void)
 				+ GeLoadString(IDS_UPDATE_AVAIL_1)
 				+ GeLoadString(IDS_PLUGIN_NAME) + ")."))
 			{
-				OpenURL(DownloadURL);
+				ST::OpenURL(DownloadURL);
 			}
 		}
 	}
@@ -92,31 +91,6 @@ Bool PluginMessage(Int32 id, void *data)
 	}
 
 	return true;
-}
-
-HMODULE LoadPluginDLL(const Char *dllName)
-{
-	// A big thank-you to karanik on the plugincafe forums,
-	// this code is mostly based on his.
-
-	String path = GeGetPluginPath().GetString();
-	path += String("\\");
-	path += dllName;
-
-	maxon::BaseArray<Utf16Char> arr;
-	if (!path.GetUtf16(arr))
-		return 0;
-
-	// Append null at end
-	arr.Append(Utf16Char(0));
-
-	HMODULE mod = LoadLibrary((LPCWSTR)(arr.GetFirst()));
-	return mod;
-}
-
-BOOL UnloadPluginDLL(HMODULE DLLHANDLE)
-{
-	return FreeLibrary(DLLHANDLE);
 }
 
 // Define our struct for accepting LCs output
@@ -149,7 +123,7 @@ static size_t WriteMemoryCallback
 
 Bool UpdateAvailable(const String &CheckURL, String &DownloadURL)
 {
-	HMODULE dll = LoadPluginDLL(LIBCURL_DLL);
+	HMODULE dll = ST::LoadPluginDLL(LIBCURL_DLL);
 
 	// Get latest version info from site
 	BufferStruct output;
@@ -172,7 +146,7 @@ Bool UpdateAvailable(const String &CheckURL, String &DownloadURL)
 	}
 	curl_easy_cleanup(handle);
 
-	UnloadPluginDLL(dll);
+	ST::UnloadPluginDLL(dll);
 
 	// parse that info with tinyxml2
 	tinyxml2::XMLDocument *data = NewObj(tinyxml2::XMLDocument);
@@ -200,45 +174,4 @@ Bool UpdateAvailable(const String &CheckURL, String &DownloadURL)
 	DeleteMem(cCheckURL);
 
 	return false;
-}
-
-void OpenURL(const String &url)
-{
-	// casting shenanigans
-	Char* charURL = NewMem(Char, url.GetCStringLen() + 1);
-	url.GetCString(charURL, url.GetCStringLen() + 1);
-	std::string sURL = charURL;
-	std::wstring wURL(sURL.begin(), sURL.end());
-	LPCWSTR lURL = wURL.c_str();
-
-	ShellExecute(NULL, L"open", lURL, NULL, NULL, SW_SHOWNORMAL);
-
-	DeleteMem(charURL);
-}
-
-Bool GetUserConfig(tinyxml2::XMLDocument *doc, const char *element, String &value)
-{
-	if (doc == nullptr) // config must be loaded
-		return false;
-
-	tinyxml2::XMLElement *e = doc->FirstChildElement(element);
-	
-	value = e->GetText();
-
-	return (&value == nullptr) ? false : true;
-}
-
-Bool SetUserConfig(tinyxml2::XMLDocument *doc, const char *element, const String &value)
-{
-	if (doc == nullptr) // config must be loaded
-		return false;
-
-	tinyxml2::XMLElement *e = doc->FirstChildElement(element);
-
-	Char *val = NewMem(Char, value.GetCStringLen() + 1);
-	value.GetCString(val, value.GetCStringLen() + 1);
-	e->SetText(val);
-	DeleteMem(val);
-
-	return true;
 }

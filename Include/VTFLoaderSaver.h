@@ -6,7 +6,11 @@
 #ifndef ST_VTF_LOADER_SAVER_H
 #define ST_VTF_LOADER_SAVER_H
 
-#include "main.h"
+#include "c4d.h"
+#include "c4d_symbols.h"
+#include "Globals.h"
+#include "tinyxml2/tinyxml2.h"
+#include "VTFLib/VTFLib.h"
 
 namespace ST
 {
@@ -34,5 +38,19 @@ namespace ST
 		Int32 GetMaxAlphas(BaseContainer *data) { return 1; }
 	};
 }
+
+//----------------------------------------------------------------------------------------
+/// Registers the VTF Loader Plugin
+///
+/// @return						BOOL true if successful.
+//----------------------------------------------------------------------------------------
+Bool RegisterVTFLoader();
+
+//----------------------------------------------------------------------------------------
+/// Registers the VTF Saver Plugin
+///
+/// @return						BOOL true if successful.
+//----------------------------------------------------------------------------------------
+Bool RegisterVTFSaver();
 
 #endif

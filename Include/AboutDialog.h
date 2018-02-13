@@ -6,7 +6,11 @@
 #ifndef ST_ABOUT_DIALOG_H
 #define ST_ABOUT_DIALOG_H
 
-#include "main.h"
+#include "c4d.h"
+#include "c4d_symbols.h"
+#include "Globals.h"
+#include "tinyxml2/tinyxml2.h"
+#include "UserConfig.h"
 
 namespace ST
 {
@@ -86,5 +90,12 @@ namespace ST
 		AboutDialog *adlg;
 	};
 }
+
+//----------------------------------------------------------------------------------------
+/// Registers the About Dialog
+///
+/// @return						BOOL true if successful.
+//----------------------------------------------------------------------------------------
+Bool RegisterAboutDialog();
 
 #endif
