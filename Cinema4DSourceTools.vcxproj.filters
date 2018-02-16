@@ -31,6 +31,12 @@
     <Filter Include="Libraries\VTFLib">
       <UniqueIdentifier>{1aaf57dd-338b-4609-b560-5af310f9e0c1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resources\description">
+      <UniqueIdentifier>{62c9bcd4-1218-4609-a048-03f9d6ba3f34}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\strings_us\description">
+      <UniqueIdentifier>{b56d12e7-01c7-4231-967e-5f02983b6c92}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="res\c4d_symbols.h">
@@ -81,6 +87,21 @@
     <ClInclude Include="lib\VTFLib\VTFLib.h">
       <Filter>Libraries\VTFLib</Filter>
     </ClInclude>
+    <ClInclude Include="res\description\fsmdloader.h">
+      <Filter>Resources\description</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\SMDLoader.h">
+      <Filter>Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\stParseTools.h">
+      <Filter>Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\stMath.h">
+      <Filter>Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\stMem.h">
+      <Filter>Includes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\strings_us\c4d_strings.str">
@@ -89,10 +110,16 @@
     <None Include="res\strings_us\dialogs\ABOUTDLG.str">
       <Filter>Resources\strings_us\dialogs</Filter>
     </None>
+    <None Include="res\strings_us\description\fsmdloader.str">
+      <Filter>Resources\strings_us\description</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="res\dialogs\ABOUTDLG.res">
       <Filter>Resources\dialogs</Filter>
+    </Resource>
+    <Resource Include="res\description\fsmdloader.res">
+      <Filter>Resources\description</Filter>
     </Resource>
   </ItemGroup>
   <ItemGroup>
@@ -112,6 +139,15 @@
       <Filter>Libraries\tinyxml2</Filter>
     </ClCompile>
     <ClCompile Include="Source\Globals.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\SMDLoader.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\stParseTools.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\stMath.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
   </ItemGroup>

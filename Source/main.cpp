@@ -10,6 +10,8 @@ Bool PluginStart(void)
 	// Register Components
 	if (!RegisterAboutDialog())
 		return false;
+	if (!RegisterSMDLoader())
+		return false;
 	if (!RegisterVTFLoader())
 		return false;
 	if (!RegisterVTFSaver())

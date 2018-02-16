@@ -154,6 +154,10 @@
     <ClInclude Include="Include\AboutDialog.h" />
     <ClInclude Include="Include\Globals.h" />
     <ClInclude Include="Include\main.h" />
+    <ClInclude Include="Include\SMDLoader.h" />
+    <ClInclude Include="Include\stMath.h" />
+    <ClInclude Include="Include\stMem.h" />
+    <ClInclude Include="Include\stParseTools.h" />
     <ClInclude Include="Include\UserConfig.h" />
     <ClInclude Include="Include\VTFLoaderSaver.h" />
     <ClInclude Include="lib\curl\curl.h" />
@@ -167,12 +171,19 @@
     <ClInclude Include="lib\tinyxml2\tinyxml2.h" />
     <ClInclude Include="lib\VTFLib\VTFLib.h" />
     <ClInclude Include="res\c4d_symbols.h" />
+    <ClInclude Include="res\description\fsmdloader.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\strings_us\c4d_strings.str" />
+    <None Include="res\strings_us\description\fsmdloader.str" />
     <None Include="res\strings_us\dialogs\ABOUTDLG.str" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="res\description\fsmdloader.res">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Intel|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </Resource>
     <Resource Include="res\dialogs\ABOUTDLG.res">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -184,6 +195,9 @@
     <ClCompile Include="Source\AboutDialog.cpp" />
     <ClCompile Include="Source\Globals.cpp" />
     <ClCompile Include="Source\main.cpp" />
+    <ClCompile Include="Source\SMDLoader.cpp" />
+    <ClCompile Include="Source\stMath.cpp" />
+    <ClCompile Include="Source\stParseTools.cpp" />
     <ClCompile Include="Source\UserConfig.cpp" />
     <ClCompile Include="Source\VTFLoaderSaver.cpp" />
   </ItemGroup>

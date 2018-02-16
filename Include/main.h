@@ -20,6 +20,7 @@
 
 // Modules
 #include "AboutDialog.h"
+#include "SMDLoader.h"
 #include "UserConfig.h"
 #include "VTFLoaderSaver.h"
 

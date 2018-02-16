@@ -31,6 +31,9 @@ enum
 	// VTF Import/Export
 	IDS_VTF,
 
+	// SMD Import
+	IDS_SMD,
+
 	// End of symbol definition
 	_DUMMY_ELEMENT_
 };

@@ -11,4 +11,7 @@ STRINGTABLE
 
 	// VTF Import/Export
 	IDS_VTF				"Valve Texture Format (VTF)"; // DNT
+
+	// SMD Import
+	IDS_SMD				"Source Studio Model Data (SMD)"; // DNT
 }

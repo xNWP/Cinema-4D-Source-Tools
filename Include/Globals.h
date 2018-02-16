@@ -28,6 +28,9 @@
 #define VTF_IMPORT_ID	1040515
 #define VTF_EXPORT_ID	1040526
 
+// SMD Import
+#define SMD_IMPORT_ID	1000001
+
 // DLL Locale
 #define VTFLIB_DLL		"lib\\VTFLib.dll"
 #define LIBCURL_DLL		"lib\\libcurl.dll"
