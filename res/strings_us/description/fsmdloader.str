@@ -1,5 +1,11 @@
 STRINGTABLE Fsmdloader
 {
 	Fsmdloader	"Source Studio Model Data (SMD)";
-	SCALE		"Scale";
+
+	S_SCALEORIENTATION	"Scale/Orientation";
+	SMD_LOADER_SCALE	"Scale";
+
+	S_IMPORTOPTIONS		"Import";
+	SMD_IMPORT_ANIMATION	"Animation";
+	SMD_IMPORT_MESH		"Mesh";
 }

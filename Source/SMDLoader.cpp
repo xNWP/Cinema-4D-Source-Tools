@@ -7,11 +7,15 @@
 
 namespace ST
 {
-	SMDLoader::~SMDLoader()
+	Bool SMDLoader::Init(GeListNode* node)
 	{
-		DeletePtrVector(m_skeleton);
+		BaseContainer *data = ((BaseList2D*)node)->GetDataInstance();
+		data->SetData(SMD_LOADER_SCALE, GeData(Float32(1.0)));
+		data->SetData(SMD_IMPORT_ANIMATION, GeData(Bool(true)));
+		data->SetData(SMD_IMPORT_MESH, GeData(Bool(true)));
+		
+		return true;
 	}
-
 	Bool SMDLoader::Identify(BaseSceneLoader* node, const Filename& name, UChar* probe, Int32 size)
 	{
 		// unfortunately SMD is an ascii format so we will just assume
@@ -23,6 +27,12 @@ namespace ST
 	{
 		AutoAlloc<BaseFile> file;
 		file->Open(name);
+		if (!file)
+			return file->GetError();
+
+		// get options
+		Float smdScale = node->GetData().GetFloat(SMD_LOADER_SCALE, 1.0);
+		Bool animate = node->GetData().GetBool(SMD_IMPORT_ANIMATION, 1);
 		
 		// read data into byte array and seperate it into lines.
 		Char *fileData = NewMem(Char, file->GetLength());
@@ -30,7 +40,9 @@ namespace ST
 		std::vector<String> *fileLineData = ST::Parse::ParseLines(fileData);
 		DeleteMem(fileData);
 
-		BaseObject *topNull;
+		BaseObject *topNull = BaseObject::Alloc(Onull);
+		topNull->SetName(name.GetFileString());
+		doc->InsertObject(topNull, nullptr, nullptr);
 
 		for (Int32 i = 0; i < fileLineData->size(); i++)
 		{
@@ -45,10 +57,7 @@ namespace ST
 			}
 			if (line == "skeleton")
 			{
-				topNull = BaseObject::Alloc(Onull);
-				topNull->SetName(name.GetFileString());
-				doc->InsertObject(topNull, nullptr, nullptr);
-				if (!ParseSkeleton(fileLineData, doc, topNull, i))
+				if (!ParseSkeleton(fileLineData, doc, filterflags, topNull, smdScale, animate, i))
 				{
 					*error = GeLoadString(IDS_CRITICAL_ERROR);
 					return FILEERROR_READ;
@@ -58,6 +67,7 @@ namespace ST
 
 		file->Close();
 		DeleteObj(fileLineData);
+		DeletePtrVector(m_skeleton);
 
 		return FILEERROR_NONE;
 	}
@@ -99,10 +109,10 @@ namespace ST
 			name = substrs[1].SubStr(1, substrs[1].GetLength() - 2);
 			parentid = substrs[2].ParseToInt32();
 
-			SourceSkeletonBone *bone = NewObj(SourceSkeletonBone, id, parentid);
+			ST::SourceSkeletonBone *bone = NewObj(ST::SourceSkeletonBone, id, parentid);
 			bone->SetName(name);
 			if (m_skeleton == nullptr)
-				m_skeleton = NewObj(std::vector<SourceSkeletonBone*>);
+				m_skeleton = NewObj(std::vector<ST::SourceSkeletonBone*>);
 			m_skeleton->push_back(bone);
 
 			it++;
@@ -111,9 +121,15 @@ namespace ST
 		return (it == data->size()) ? false : true;
 	}
 
-	Bool SMDLoader::ParseSkeleton(const std::vector<String> *data, BaseDocument *doc, BaseObject *parent, Int32 &it)
+	Bool SMDLoader::ParseSkeleton(const std::vector<String> *data, BaseDocument *doc, SCENEFILTER flags, BaseObject *parent, const Float &scale, const Bool &animate, Int32 &it)
 	{
-		it++; it++; // two to skip time, need to implement animation yet.
+		it++;
+
+		Int32 frame = -1;
+		CTrack *xPtrack=NULL, *yPtrack=NULL, *zPtrack=NULL;
+		CTrack *xRtrack=NULL, *yRtrack=NULL, *zRtrack=NULL;
+		CCurve *xPos=NULL, *yPos=NULL, *zPos=NULL;
+		CCurve *xRot=NULL, *yRot=NULL, *zRot=NULL;
 
 		while ((*data)[it] != "end" && it < data->size())
 		{
@@ -140,32 +156,107 @@ namespace ST
 					start = -1;
 				}
 			}
-			if (substrs.size() < 7)
-				return false;
+
+			if (substrs[0] == "time")
+			{
+				frame = substrs[1].ParseToInt32();
+				it++;
+				continue;
+			}
 
 			Int32 id = substrs[0].ParseToInt32();
 			Vector pos(substrs[1].ParseToFloat(), substrs[2].ParseToFloat(), substrs[3].ParseToFloat());
+			pos *= scale;
 			Vector rot(substrs[4].ParseToFloat(), substrs[5].ParseToFloat(), substrs[6].ParseToFloat());
 
 			// Insert the bone
 			StopAllThreads();
 
-			Int32 parentid = (*m_skeleton)[id]->GetParentId();
-			if (parentid == -1)
+			if (frame == 0)
 			{
-				doc->InsertObject((*m_skeleton)[id]->GetBone(), parent, nullptr);
+				Int32 parentid = (*m_skeleton)[id]->GetParentId();
+				if (parentid == -1)
+				{
+					doc->InsertObject((*m_skeleton)[id]->GetBone(), parent, nullptr);
+				}
+				else
+				{
+					doc->InsertObject((*m_skeleton)[id]->GetBone(), (*m_skeleton)[parentid]->GetBone(), nullptr);
+				}
+
+				xPtrack = CTrack::Alloc((*m_skeleton)[id]->GetBone(),
+					DescID(DescLevel(ID_BASEOBJECT_ABS_POSITION, DTYPE_VECTOR, 0),
+					DescLevel(VECTOR_X, DTYPE_REAL, 0)));
+				yPtrack = CTrack::Alloc((*m_skeleton)[id]->GetBone(),
+					DescID(DescLevel(ID_BASEOBJECT_ABS_POSITION, DTYPE_VECTOR, 0),
+					DescLevel(VECTOR_Y, DTYPE_REAL, 0)));
+				zPtrack = CTrack::Alloc((*m_skeleton)[id]->GetBone(),
+					DescID(DescLevel(ID_BASEOBJECT_ABS_POSITION, DTYPE_VECTOR, 0),
+					DescLevel(VECTOR_Z, DTYPE_REAL, 0)));
+				xRtrack = CTrack::Alloc((*m_skeleton)[id]->GetBone(),
+					DescID(DescLevel(ID_BASEOBJECT_ABS_ROTATION, DTYPE_VECTOR, 0),
+					DescLevel(VECTOR_X, DTYPE_REAL, 0)));
+				yRtrack = CTrack::Alloc((*m_skeleton)[id]->GetBone(),
+					DescID(DescLevel(ID_BASEOBJECT_ABS_ROTATION, DTYPE_VECTOR, 0),
+					DescLevel(VECTOR_Y, DTYPE_REAL, 0)));
+				zRtrack = CTrack::Alloc((*m_skeleton)[id]->GetBone(),
+					DescID(DescLevel(ID_BASEOBJECT_ABS_ROTATION, DTYPE_VECTOR, 0),
+					DescLevel(VECTOR_Z, DTYPE_REAL, 0)));
+				(*m_skeleton)[id]->GetBone()->InsertTrackSorted(xPtrack);
+				(*m_skeleton)[id]->GetBone()->InsertTrackSorted(yPtrack);
+				(*m_skeleton)[id]->GetBone()->InsertTrackSorted(zPtrack);
+				(*m_skeleton)[id]->GetBone()->InsertTrackSorted(xRtrack);
+				(*m_skeleton)[id]->GetBone()->InsertTrackSorted(yRtrack);
+				(*m_skeleton)[id]->GetBone()->InsertTrackSorted(zRtrack);
+				(*m_skeleton)[id]->SetXPTrack(xPtrack);
+				(*m_skeleton)[id]->SetYPTrack(yPtrack);
+				(*m_skeleton)[id]->SetZPTrack(zPtrack);
+				(*m_skeleton)[id]->SetXRTrack(xRtrack);
+				(*m_skeleton)[id]->SetYRTrack(yRtrack);
+				(*m_skeleton)[id]->SetZRTrack(zRtrack);
 			}
-			else
-			{
-				doc->InsertObject((*m_skeleton)[id]->GetBone(), (*m_skeleton)[parentid]->GetBone(), nullptr);
-			}
+
+			xPos = (*m_skeleton)[id]->GetXPTrack()->GetCurve();
+			yPos = (*m_skeleton)[id]->GetYPTrack()->GetCurve();
+			zPos = (*m_skeleton)[id]->GetZPTrack()->GetCurve();
+			xRot = (*m_skeleton)[id]->GetXRTrack()->GetCurve();
+			yRot = (*m_skeleton)[id]->GetYRTrack()->GetCurve();
+			zRot = (*m_skeleton)[id]->GetZRTrack()->GetCurve();
+
+			Int32 fps = doc->GetFps();
 
 			Matrix mat = HPBToMatrix(rot, ROTATIONORDER_XYZLOCAL);
 			mat = ~mat; // invert the matrix to make euler angles local
 			mat.off = pos;
-			(*m_skeleton)[id]->SetLocalMatrix(mat);
+			Vector finalRot = MatrixToHPB(mat, ROTATIONORDER_HPB);
+
+			CKey *xPKey = xPos->AddKey(BaseTime(frame, fps));
+			xPKey->SetValue(xPos, mat.off.x);
+			CKey *yPKey = yPos->AddKey(BaseTime(frame, fps));
+			yPKey->SetValue(yPos, mat.off.y);
+			CKey *zPKey = zPos->AddKey(BaseTime(frame, fps));
+			zPKey->SetValue(zPos, mat.off.z);
+			CKey *xRKey = xRot->AddKey(BaseTime(frame, fps));
+			xRKey->SetValue(xRot, finalRot.x);
+			CKey *yRKey = yRot->AddKey(BaseTime(frame, fps));
+			yRKey->SetValue(yRot, finalRot.y);
+			CKey *zRKey = zRot->AddKey(BaseTime(frame, fps));
+			zRKey->SetValue(zRot, finalRot.z);
+
+			EventAdd();
 
 			it++;
+
+			if (!animate && id == m_skeleton->size() - 1)
+				break;
+		}
+
+		// if we're not merging and we have animation, set the start & end accordingly
+		if (((flags & SCENEFILTER_MERGESCENE) != SCENEFILTER_MERGESCENE)
+			&& animate && frame > 0)
+		{
+			doc->SetMaxTime(BaseTime(frame + 1, doc->GetFps()));
+			doc->SetLoopMaxTime(BaseTime(frame + 1, doc->GetFps()));
 		}
 
 		return (it == data->size()) ? false : true;
@@ -174,5 +265,5 @@ namespace ST
 
 Bool RegisterSMDLoader()
 {
-	return RegisterSceneLoaderPlugin(SMD_IMPORT_ID, GeLoadString(IDS_SMD), 0, ST::SMDLoader::Alloc, 0, nullptr);
+	return RegisterSceneLoaderPlugin(SMD_IMPORT_ID, GeLoadString(IDS_SMD), 0, ST::SMDLoader::Alloc, "fsmdloader", nullptr);
 }

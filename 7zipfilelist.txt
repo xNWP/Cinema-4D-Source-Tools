@@ -1,4 +1,0 @@
-*.cdl64
-*.txt
-res
-lib
