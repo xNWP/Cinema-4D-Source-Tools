@@ -63,6 +63,12 @@ namespace ST
 					return FILEERROR_READ;
 				}
 			}
+			/*if (line == "triangles")
+			{
+				i++;
+				Int32 error = 0;
+				StudiomdlDataTriangle a(fileLineData, i, error);
+			}*/
 		}
 
 		file->Close();

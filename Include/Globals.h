@@ -19,7 +19,7 @@
 
 #define VERSION_MAJOR	0
 #define VERSION_MINOR	28
-#define VERSION_TAG		"-dev"
+#define VERSION_TAG		"-alpha"
 
 // About Dialog
 #define ABOUT_ID		1040531
@@ -29,7 +29,7 @@
 #define VTF_EXPORT_ID	1040526
 
 // SMD Import
-#define SMD_IMPORT_ID	1000001
+#define SMD_IMPORT_ID	1040673
 
 // DLL Locale
 #define VTFLIB_DLL		"lib\\VTFLib.dll"

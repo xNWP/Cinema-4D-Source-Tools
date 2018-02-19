@@ -121,55 +121,94 @@ namespace ST
 	//----------------------------------------------------------------------------------------
 	/// Contains all the needed data to draw a triangle from SMD data.
 	//----------------------------------------------------------------------------------------
-	//class StudiomdlDataTriangle
-	//{
-	//public:
-	//	//----------------------------------------------------------------------------------------
-	//	/// Fills the object with all needed info from a standard format SMD file (seperated by lines).
-	//	///
-	//	/// @param[in] data				The line data from the SMD file.
-	//	/// @param[in,out] it			Should point to the beginning <material> tag of the triangle, will return the line location after the last vertex.
-	//	//----------------------------------------------------------------------------------------
-	//	StudiomdlDataTriangle(const std::vector<String> &data, Int32 &it)
-	//	{
+	class StudiomdlDataTriangle
+	{
+	public:
+		//----------------------------------------------------------------------------------------
+		/// Fills the object with all needed info from a standard format SMD file (seperated by lines).
+		///
+		/// @param[in] data				The line data from the SMD file.
+		/// @param[in,out] it			Should point to the beginning <material> tag of the triangle, will return the line location after the last vertex.
+		/// @param[out] error			Returns 0 if no error creating, negative otherwise.
+		//----------------------------------------------------------------------------------------
+		StudiomdlDataTriangle(const std::vector<String> *data, Int32 &it, Int32 &error)
+		{
+			m_material = (*data)[it];
+			it++;
 
+			// Read the data into a substring
+			while (it < (it + 3))
+			{
+				std::vector<String> substrs;
+				Int32 start = -1;
+				for (Int32 i = 0; i <= (*data)[it].GetLength(); i++)
+				{
+					if ((*data)[it][i] == ' ' && start == -1)
+					{
+						continue;
+					}
+					else if (i == (*data)[it].GetLength())
+					{
+						substrs.push_back((*data)[it].SubStr(start, i - start));
+					}
+					else if (start == -1)
+					{
+						start = i;
+					}
+					else if ((*data)[it][i] == ' ' && start != -1)
+					{
+						substrs.push_back((*data)[it].SubStr(start, i - start));
+						start = -1;
+					}
+				}
 
-	//		// Read the data into a substring
-	//		std::vector<String> substrs;
+				if (substrs.size() < 10)
+				{
+					error = -1; // bad vertex
+					break;
+				}
 
-	//		while (it < it + 3)
-	//		{
-	//			Int32 start = -1;
-	//			for (Int32 i = 0; i <= data[it].GetLength(); i++)
-	//			{
-	//				if (data[it][i] == ' ' && start == -1)
-	//				{
-	//					continue;
-	//				}
-	//				else if (i == data[it].GetLength())
-	//				{
-	//					substrs.push_back(data[it].SubStr(start, i - start));
-	//				}
-	//				else if (start == -1)
-	//				{
-	//					start = i;
-	//				}
-	//				else if (data[it][i] == ' ' && start != -1)
-	//				{
-	//					substrs.push_back(data[it].SubStr(start, i - start));
-	//					start = -1;
-	//				}
-	//			}
+				Int32 ParentBone = substrs[0].ParseToInt32();
+				m_points.push_back(Vector(substrs[1].ParseToFloat(), substrs[2].ParseToFloat(), substrs[3].ParseToFloat()));
+				// skip normal [4-6]
+				m_uv_raw.push_back(Vector(substrs[7].ParseToFloat(), substrs[8].ParseToFloat(), 1));
+				
+				std::map<Int32, Float> tempWeights;
+				for (Int32 j = 10; j < substrs.size(); j += 2)
+					tempWeights.emplace(substrs[j].ParseToInt32(), substrs[j + 1].ParseToFloat());
 
-	//			it++;
-	//		}
-	//	}
+				// calc diff between custom weights and parent
+				Float diff = 1.0;
+				for (auto const& n : tempWeights)
+				{
+					diff -= n.second;
+				}
 
-	//private:
-	//	std::vector<Vector> m_points;
-	//	UVWStruct m_uv;
-	//	std::vector<std::map<Int32, Float32>> m_weights;
-	//};
+				if (Abs(diff) > 0.0001)
+				{
+					tempWeights.emplace(ParentBone, diff);
+				}
+
+				m_weights.push_back(tempWeights);
+				substrs.clear();
+				tempWeights.clear();
+
+				it++;
+			}
+			m_uv.a = m_uv_raw[0];
+			m_uv.b = m_uv_raw[1];
+			m_uv.c = m_uv_raw[2];
+			m_uv_raw.clear();
+			error = 0;
+		}
+
+	private:
+		String m_material;
+		std::vector<Vector> m_points;
+		std::vector<Vector> m_uv_raw;
+		UVWStruct m_uv;
+		std::vector<std::map<Int32, Float>> m_weights;
+	};
 }
 
 //----------------------------------------------------------------------------------------
