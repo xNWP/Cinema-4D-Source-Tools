@@ -1,4 +1,6 @@
 == INSTALLATION ==
+Delete any existing Cinema 4D Source Tool Installations.
+
 Copy this folder into the Cinema 4D Plugins folder.
 
 	C:\Program Files\MAXON\Cinema 4D\plugins
