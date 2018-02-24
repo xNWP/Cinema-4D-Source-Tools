@@ -18,8 +18,8 @@
 #define str(s) #s
 
 #define VERSION_MAJOR	0
-#define VERSION_MINOR	28
-#define VERSION_TAG		"-alpha"
+#define VERSION_MINOR	29
+#define VERSION_TAG		"-dev"
 
 // About Dialog
 #define ABOUT_ID		1040531
@@ -44,7 +44,7 @@ namespace ST
 	//----------------------------------------------------------------------------------------
 	/// Opens specified url in default browser.
 	///
-	/// @param[in] URL				The URL to open.
+	/// @param[in] url				The URL to open.
 	//----------------------------------------------------------------------------------------
 	void OpenURL(const String &url);
 

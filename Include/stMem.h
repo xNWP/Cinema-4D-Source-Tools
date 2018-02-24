@@ -10,18 +10,36 @@
 #include <vector>
 
 //----------------------------------------------------------------------------------------
-/// Deletes a std::vector with pointer members safely.
+/// Clears the contents of a std::vector with pointer members safely.
 ///
 /// @param[in] V					std::vector<type*> *V
 //----------------------------------------------------------------------------------------
-#define DeletePtrVector(V)						\
-	decltype(V->size()) it = V->size() - 1;		\
-	while (it > 0)								\
+#define PtrVecClear(V)							\
+	if (V != nullptr)							\
+	{											\
+		decltype(V->size()) it = V->size() - 1;	\
+		while (it > 0)							\
 		{										\
 			DeleteObj((*V)[it]);				\
 			it--;								\
 		}										\
 		DeleteObj((*V)[0]);						\
-		DeleteObj(V);				
+		V->clear();								\
+	}
+
+//----------------------------------------------------------------------------------------
+/// Deletes a std::vector with pointer members safely.
+///
+/// @param[in] V					std::vector<type*> *V
+//----------------------------------------------------------------------------------------
+#define DeletePtrVector(V)						\
+	if (V != nullptr)							\
+	{											\
+		if (V->size() > 0)						\
+		{										\
+			PtrVecClear(V);						\
+		}										\
+		DeleteObj(V);							\
+	}
 
 #endif

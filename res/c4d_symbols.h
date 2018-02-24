@@ -33,6 +33,8 @@ enum
 
 	// SMD Import
 	IDS_SMD,
+	IDS_NO_MAT_DIR,
+	IDS_NO_MAT,
 
 	// End of symbol definition
 	_DUMMY_ELEMENT_

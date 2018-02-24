@@ -158,6 +158,7 @@
     <ClInclude Include="Include\stMath.h" />
     <ClInclude Include="Include\stMem.h" />
     <ClInclude Include="Include\stParseTools.h" />
+    <ClInclude Include="Include\stVMT.h" />
     <ClInclude Include="Include\UserConfig.h" />
     <ClInclude Include="Include\VTFLoaderSaver.h" />
     <ClInclude Include="lib\curl\curl.h" />

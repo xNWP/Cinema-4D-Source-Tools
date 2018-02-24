@@ -7,7 +7,9 @@
 #define ST_PARSE_TOOLS_H
 
 #include "c4d.h"
+#include "stVMT.h"
 #include <vector>
+#include "VTFLib/VTFLib.h"
 
 namespace ST
 {
@@ -18,9 +20,75 @@ namespace ST
 		///
 		/// @param[in] data				The input string.
 		///
-		/// @return						Pointer to std::vector<String>& array of individual lines.
+		/// @return						Pointer to std::vector<String>* array of individual lines.
 		//----------------------------------------------------------------------------------------
 		std::vector<String>* ParseLines(const String &data);
+
+		//----------------------------------------------------------------------------------------
+		/// Split line into its individual components.
+		///
+		/// @param[in] data				The input string.
+		///
+		/// @return						Pointer to std::vector<String>* array of components.
+		//----------------------------------------------------------------------------------------
+		std::vector<String>* split(const String &data);
+
+		//----------------------------------------------------------------------------------------
+		/// Find's a child by name of object start.
+		///
+		/// @param[in] start			Object to look through.
+		/// @param[in] name				Name of the object we're looking for.
+		///
+		/// @return						BaseObject* found child, can be nullptr.
+		//----------------------------------------------------------------------------------------
+		BaseObject* FindChild(BaseObject *start, const String &name);
+
+		//----------------------------------------------------------------------------------------
+		/// Fills a VertexLitGeneric struct will all values from a VMT file. (assumes VTFLib.dll is loaded)
+		///
+		/// @param[in] vmtfile			The vmtfile to read from. Can be VertexLitGeneric or patch.
+		/// @param[in] MaterialRoot		The root material folder i.e. pak01_dir/materials
+		///
+		/// @return						VertexLitGeneric of filled in data.
+		//----------------------------------------------------------------------------------------
+		VertexLitGeneric ParseVertexLitGeneric(const VTFLib::CVMTFile *vmtfile, const Filename &MaterialRoot);
+
+		//----------------------------------------------------------------------------------------
+		/// Fills a VertexLitGeneric struct will all values from a VMT file. Uses VLG as a basis and overwrites values. (assumes VTFLib.dll is loaded)
+		///
+		/// @param[in] vmtfile			The vmtfile to read from. Can be VertexLitGeneric or patch.
+		/// @param[in] MaterialRoot		The root material folder i.e. pak01_dir/materials
+		/// @param[in] vlg				The file to base return of off, overwrites values.
+		///
+		/// @return						VertexLitGeneric of filled in data.
+		//----------------------------------------------------------------------------------------
+		VertexLitGeneric ParseVertexLitGeneric(const VTFLib::CVMTFile *vmtfile, const Filename &MaterialRoot, const VertexLitGeneric &vlg);
+
+		//----------------------------------------------------------------------------------------
+		/// Goes up a level in directory. C:\SomeDir\Dir2 becomes C:\SomeDir
+		///
+		/// @param[in]					The input path.
+		///
+		/// @return						The parent directory.
+		//----------------------------------------------------------------------------------------
+		Filename ParentDirectory(const Filename &filename);
+
+		//----------------------------------------------------------------------------------------
+		/// Converts forward slashes to back slashes.
+		///
+		/// @param[in]					The string to convert.
+		///
+		/// @return						The converted string.
+		//----------------------------------------------------------------------------------------
+		String FSlashToBSlash(const String &string);
+
+		//----------------------------------------------------------------------------------------
+		/// Read's a node and fills out the respective value in vlg.
+		///
+		/// @param[in]					The node to read.
+		/// @param[out]					The vlg to modify.
+		//----------------------------------------------------------------------------------------
+		void ParseVertexLitGenericNode(VTFLib::Nodes::CVMTNode *node, VertexLitGeneric &vlg);
 	}
 }
 

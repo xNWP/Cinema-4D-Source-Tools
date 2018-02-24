@@ -1,11 +1,31 @@
 STRINGTABLE Fsmdloader
 {
-	Fsmdloader	"Source Studio Model Data (SMD)";
+	Fsmdloader	"Source Studio Model Data (SMD) / Quake C (QC)"; // DNT
 
 	S_SCALEORIENTATION	"Scale/Orientation";
 	SMD_LOADER_SCALE	"Scale";
 
 	S_IMPORTOPTIONS		"Import";
 	SMD_IMPORT_ANIMATION	"Animation";
-	SMD_IMPORT_MESH		"Mesh (currently does nothing)";
+	SMD_IMPORT_MESH		"Mesh";
+	SMD_IMPORT_QC		"Use QC";
+	SMD_IMPORT_QC_BODYGROUP	"Body Groups";
+	BODYGROUP_ALL		"All";
+	BODYGROUP_ASK		"Ask";
+
+	S_MESH				"Mesh";
+	SMD_IMPORT_MESH_WELD	"Weld Points";
+	SMD_IMPORT_MESH_WELD_TOLERANCE	"Weld Tolerance";
+	SMD_IMPORT_MESH_MATERIALS	"Materials";
+	SMD_IMPORT_MESH_UV	"UV";
+	SMD_IMPORT_MESH_NORMALS	"Normals";
+
+	S_QC				"QC";
+	SMD_IMPORT_MATERIAL_ROOT	"Root Material Directory";
+	SMD_IMPORT_IK		"IK";
+	SMD_IMPORT_IK_ORIENTATION	"IK Display Orientation";
+	IK_CAMERA			"Camera";
+	IK_XY				"XY";
+	IK_ZY				"ZY";
+	IK_XZ				"XZ";
 }

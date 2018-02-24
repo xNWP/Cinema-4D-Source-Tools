@@ -102,6 +102,9 @@
     <ClInclude Include="Include\stMem.h">
       <Filter>Includes</Filter>
     </ClInclude>
+    <ClInclude Include="Include\stVMT.h">
+      <Filter>Includes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\strings_us\c4d_strings.str">

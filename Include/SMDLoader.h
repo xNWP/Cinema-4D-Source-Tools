@@ -6,19 +6,69 @@
 #ifndef ST_SMD_LOADER_H
 #define ST_SMD_LOADER_H
 
+#define Tik						1019561
+#define ID_CA_IK_TAG_TIP		2000
+#define ID_CA_IK_TAG_TARGET		2001
+#define ID_CA_IK_TAG_SOLVER		2003
+#define ID_CA_IK_TAG_SOLVER_2D	1
+#define ID_CA_IK_TAG_SOLVER_3D	2
+
 #include "c4d.h"
 #include "c4d_symbols.h"
 #include "Globals.h"
 #include "fsmdloader.h"
+#include "lib_modeling.h"
 #include <map>
 #include "stParseTools.h"
 #include "stMath.h"
 #include "stMem.h"
 #include <vector>
+#include "VTFLib/VTFLib.h"
 
 namespace ST
 {
 	class SourceSkeletonBone;
+
+	struct QCBodyGroup
+	{
+		String name;
+		std::vector<String> mesh;
+	};
+
+	struct IKDecl
+	{
+		String name;
+		String bone;
+	};
+
+	struct QCFile
+	{
+		std::vector<String> body;
+		std::vector<QCBodyGroup> bodygroup;
+		std::vector<String> cdmaterials;
+		std::vector<IKDecl> ikchain;
+	};
+
+	//----------------------------------------------------------------------------------------
+	/// Holds all the settings passed during import.
+	//----------------------------------------------------------------------------------------
+	struct SMDLoaderSettings
+	{
+		Float scale;
+		Bool animation;
+		Bool mesh;
+		Bool qc;
+		Bool qc_all;
+		Bool mesh_weld;
+		Float mesh_weld_tolerance;
+		Bool mesh_normals;
+		Bool mesh_uv;
+		Bool mesh_materials;
+		Filename material_root;
+		Bool ik;
+		Int32 ik_orientation;
+		QCFile qc_file;
+	};
 
 	//----------------------------------------------------------------------------------------
 	/// Allows the importing of Studio Model Data (SMD) files.
@@ -26,10 +76,41 @@ namespace ST
 	class SMDLoader : public SceneLoaderData
 	{
 	public:
-		Bool Init(GeListNode* node);
+		Bool Init(GeListNode *node);
+		Bool GetDParameter(GeListNode *node, const DescID &id, GeData &t_data, DESCFLAGS_GET &flags);
+		Bool GetDEnabling(GeListNode *node, const DescID &id, const GeData &t_data, DESCFLAGS_ENABLE flags, const BaseContainer *itemdesc);
 		Bool Identify(BaseSceneLoader* node, const Filename& name, UChar* probe, Int32 size);
 		FILEERROR Load(BaseSceneLoader* node, const Filename& name, BaseDocument* doc, SCENEFILTER filterflags, String* error, BaseThread* bt);
 		static NodeData* Alloc() { return NewObjClear(SMDLoader); }
+		
+		//----------------------------------------------------------------------------------------
+		/// Parse a QC file and build all its parts.
+		///
+		/// @param[in] name					Filename of the QC to load.
+		/// @param[in] settings				The settings passed during import.
+		/// @param[in,out] doc				The document to insert the models/skeleton into.
+		/// @param[in] parent				Object to insert elements under.
+		/// @param[in] filterflags			Flags passed during import.
+		/// @param[out] error				Error message on failed import.
+		///
+		/// @return							FILEERROR result of reading QC.
+		//----------------------------------------------------------------------------------------
+		FILEERROR ParseQC(const Filename &name, SMDLoaderSettings &settings, BaseDocument *doc, BaseObject *parent, SCENEFILTER filterflags, String *error);
+
+		//----------------------------------------------------------------------------------------
+		/// Parse an SMD file and build all its parts.
+		///
+		/// @param[in] name					Filename of the smd to load.
+		/// @param[in] settings				The settings passed during import.
+		/// @param[in,out] doc				The document to insert the SMD into.
+		/// @param[in] parent				Object to insert SMD under.
+		/// @param[in] filterflags			Flags passed during import.
+		/// @param[out] error				Error message on failed import.
+		/// @param[in] BuildSkeleton		Whether or not to build the skeleton.
+		///
+		/// @return							FILEERROR result of reading smd.
+		//----------------------------------------------------------------------------------------
+		FILEERROR ParseSMD(const Filename &name, const SMDLoaderSettings &settings, BaseDocument *doc, BaseObject *parent, SCENEFILTER filterflags, String *error, Bool BuildSkeleton);
 
 		//----------------------------------------------------------------------------------------
 		/// Creates SourceSkeletonBones from nodes class.
@@ -45,19 +126,32 @@ namespace ST
 		/// Parse Skeleton animation/positions
 		///
 		/// @param[in] data					std::vector of strings that contains the data seperated by lines.
-		/// @param[in] doc					The document to insert the skeleton into.
+		/// @param[in] settings				The settings passed during import.
+		/// @param[in,out] doc				The document to insert the skeleton into.
 		/// @param[in] flags				The flags passed during load.
 		/// @param[in] parent				The object to parent the skeleton to, can be nullptr.
-		/// @param[in] scale				Factor in which to scale the skeleton.
-		/// @param[in] animate				Whether or not the skeleton is to be animated.
 		/// @param[in,out] it				Which line the skeleton class is declared. Returns as where the end occured.
 		///
 		/// @return							Bool true if successful.
 		//----------------------------------------------------------------------------------------
-		Bool ParseSkeleton(const std::vector<String> *data, BaseDocument *doc, SCENEFILTER flags, BaseObject *parent, const Float &scale, const Bool &animate, Int32 &it);
+		Bool ParseSkeleton(const std::vector<String> *data, const SMDLoaderSettings &settings, BaseDocument *doc, SCENEFILTER flags, BaseObject *parent, Int32 &it);
 
+		//----------------------------------------------------------------------------------------
+		/// Parse mesh triangles
+		///
+		/// @param[in] data					std::vector of strings that contains the data seperated by lines.
+		/// @param[in] settings				The settings passed during import.
+		/// @param[in] name					The name of the mesh.
+		/// @param[in,out] doc				The document to insert the mesh(s) into.
+		/// @param[in] parent				The object to parent the mesh(s) to, can be nullptr.
+		/// @param[in,out] it				Which line the mesh(s) are declared (<material> tag). Returns as where the end occured.
+		///
+		/// @return							Int32 error value, 0 good, -1 invalid triangle.
+		//----------------------------------------------------------------------------------------
+		Int32 ParseTriangles(const std::vector<String> *data, const SMDLoaderSettings &settings, const String &name, BaseDocument *doc, BaseObject *parent, Int32 &it);
 	private:
 		std::vector<ST::SourceSkeletonBone*> *m_skeleton;
+		Bool m_qc_file;
 	};
 
 	//----------------------------------------------------------------------------------------
@@ -70,7 +164,6 @@ namespace ST
 		//----------------------------------------------------------------------------------------
 		/// Creates a SourceSkeletonBone from name and id's.
 		///
-		/// @param[in] name				Name of the bone.
 		/// @param[in] id				ID of the bone.
 		/// @param[in] parentid			ID of the parent bone.
 		//----------------------------------------------------------------------------------------
@@ -93,6 +186,8 @@ namespace ST
 		const Int32& GetParentId() const { return m_parentid; }
 		void SetParentId(const Int32 &id) { m_parentid = id; }
 		void SetLocalMatrix(const Matrix &mat) { m_bone->SetMl(mat); }
+		const Vector& GetGlobalRefPos() const { return m_base_pos_g; }
+		void SetGlobalRefPos(const Vector &pos) { m_base_pos_g = pos; }
 		CTrack* GetXPTrack() const { return m_xPtrack; }
 		void SetXPTrack(CTrack *track) { m_xPtrack = track; }
 		CTrack* GetYPTrack() const { return m_yPtrack; }
@@ -110,6 +205,7 @@ namespace ST
 		Int32 m_id;
 		Int32 m_parentid;
 		BaseObject *m_bone;
+		Vector m_base_pos_g;
 		CTrack *m_xPtrack;
 		CTrack *m_yPtrack;
 		CTrack *m_zPtrack;
@@ -169,9 +265,9 @@ namespace ST
 				}
 
 				Int32 ParentBone = substrs[0].ParseToInt32();
-				m_points.push_back(Vector(substrs[1].ParseToFloat(), substrs[2].ParseToFloat(), substrs[3].ParseToFloat()));
-				// skip normal [4-6]
-				m_uv_raw.push_back(Vector(substrs[7].ParseToFloat(), substrs[8].ParseToFloat(), 1));
+				m_points.push_back(Vector(substrs[1].ParseToFloat(), substrs[2].ParseToFloat(), -substrs[3].ParseToFloat()));
+				m_normals.push_back(Vector(substrs[4].ParseToFloat(), substrs[5].ParseToFloat(), -substrs[6].ParseToFloat()));
+				m_uv_raw.push_back(Vector(substrs[7].ParseToFloat(), 1 - substrs[8].ParseToFloat(), 0));
 				
 				std::map<Int32, Float> tempWeights;
 				for (Int32 j = 10; j < substrs.size(); j += 2)
@@ -195,18 +291,26 @@ namespace ST
 
 				it++;
 			}
-			m_uv.a = m_uv_raw[0];
-			m_uv.b = m_uv_raw[1];
-			m_uv.c = m_uv_raw[2];
+			m_uv = UVWStruct(m_uv_raw[2], m_uv_raw[1], m_uv_raw[0]);
 			m_uv_raw.clear();
 			error = 0;
 		}
 
+		// methods
+		Vector GetPointA() const { return m_points[0]; }
+		Vector GetPointB() const { return m_points[1]; }
+		Vector GetPointC() const { return m_points[2]; }
+		Vector GetNormalA() const { return m_normals[0].GetNormalized(); }
+		Vector GetNormalB() const { return m_normals[1].GetNormalized(); }
+		Vector GetNormalC() const { return m_normals[2].GetNormalized(); }
+		UVWStruct GetUVW() const { return m_uv; }
+
 	private:
 		String m_material;
 		std::vector<Vector> m_points;
+		std::vector<Vector> m_normals;
 		std::vector<Vector> m_uv_raw;
-		UVWStruct m_uv;
+		UVWStruct m_uv = UVWStruct(DC); // don't construct
 		std::vector<std::map<Int32, Float>> m_weights;
 	};
 }
