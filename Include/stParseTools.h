@@ -67,7 +67,7 @@ namespace ST
 		//----------------------------------------------------------------------------------------
 		/// Goes up a level in directory. C:\SomeDir\Dir2 becomes C:\SomeDir
 		///
-		/// @param[in]					The input path.
+		/// @param[in] filename			The input path.
 		///
 		/// @return						The parent directory.
 		//----------------------------------------------------------------------------------------
@@ -76,7 +76,7 @@ namespace ST
 		//----------------------------------------------------------------------------------------
 		/// Converts forward slashes to back slashes.
 		///
-		/// @param[in]					The string to convert.
+		/// @param[in] string			The string to convert.
 		///
 		/// @return						The converted string.
 		//----------------------------------------------------------------------------------------
@@ -85,8 +85,8 @@ namespace ST
 		//----------------------------------------------------------------------------------------
 		/// Read's a node and fills out the respective value in vlg.
 		///
-		/// @param[in]					The node to read.
-		/// @param[out]					The vlg to modify.
+		/// @param[in] node				The node to read.
+		/// @param[out]	vlg				The VertexLitGeneric to modify.
 		//----------------------------------------------------------------------------------------
 		void ParseVertexLitGenericNode(VTFLib::Nodes::CVMTNode *node, VertexLitGeneric &vlg);
 	}

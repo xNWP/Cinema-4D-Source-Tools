@@ -17,6 +17,7 @@
 #include "c4d_symbols.h"
 #include "Globals.h"
 #include "fsmdloader.h"
+#include "lib_ca.h"
 #include "lib_modeling.h"
 #include <map>
 #include "stParseTools.h"
@@ -64,6 +65,7 @@ namespace ST
 		Bool mesh_normals;
 		Bool mesh_uv;
 		Bool mesh_materials;
+		Bool mesh_weights;
 		Filename material_root;
 		Bool ik;
 		Int32 ik_orientation;
@@ -186,8 +188,8 @@ namespace ST
 		const Int32& GetParentId() const { return m_parentid; }
 		void SetParentId(const Int32 &id) { m_parentid = id; }
 		void SetLocalMatrix(const Matrix &mat) { m_bone->SetMl(mat); }
-		const Vector& GetGlobalRefPos() const { return m_base_pos_g; }
-		void SetGlobalRefPos(const Vector &pos) { m_base_pos_g = pos; }
+		const Matrix& GetRefMg() const { return m_ref_mg; }
+		void SetRefMg(const Matrix &mat) { m_ref_mg = mat; }
 		CTrack* GetXPTrack() const { return m_xPtrack; }
 		void SetXPTrack(CTrack *track) { m_xPtrack = track; }
 		CTrack* GetYPTrack() const { return m_yPtrack; }
@@ -205,7 +207,7 @@ namespace ST
 		Int32 m_id;
 		Int32 m_parentid;
 		BaseObject *m_bone;
-		Vector m_base_pos_g;
+		Matrix m_ref_mg;
 		CTrack *m_xPtrack;
 		CTrack *m_yPtrack;
 		CTrack *m_zPtrack;

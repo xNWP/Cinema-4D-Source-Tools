@@ -52,6 +52,7 @@ CONTAINER Fsmdloader
 					STEP 0.01;
 				}
 				BOOL SMD_IMPORT_MESH_UV {}
+				BOOL SMD_IMPORT_MESH_WEIGHTS {}
 			}
 		}
 

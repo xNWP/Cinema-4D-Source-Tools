@@ -18,7 +18,7 @@
 #define str(s) #s
 
 #define VERSION_MAJOR	0
-#define VERSION_MINOR	29
+#define VERSION_MINOR	30
 #define VERSION_TAG		"-dev"
 
 // About Dialog

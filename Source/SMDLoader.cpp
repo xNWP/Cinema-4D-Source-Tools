@@ -23,6 +23,7 @@ namespace ST
 		data->SetBool(SMD_IMPORT_MESH_UV, true);
 		data->SetBool(SMD_IMPORT_IK, true);
 		data->SetInt32(SMD_IMPORT_IK_ORIENTATION, IK_CAMERA);
+		data->SetBool(SMD_IMPORT_MESH_WEIGHTS, true);
 
 		return true;
 	}
@@ -148,6 +149,7 @@ namespace ST
 		settings.mesh_materials = node->GetData().GetBool(SMD_IMPORT_MESH_MATERIALS, 1);
 		settings.mesh_normals = node->GetData().GetBool(SMD_IMPORT_MESH_NORMALS, 1);
 		settings.mesh_uv = node->GetData().GetBool(SMD_IMPORT_MESH_UV, 1);
+		settings.mesh_weights = node->GetData().GetBool(SMD_IMPORT_MESH_WEIGHTS, 1);
 		settings.material_root = node->GetData().GetFilename(SMD_IMPORT_MATERIAL_ROOT);
 		settings.ik = node->GetData().GetBool(SMD_IMPORT_IK, 1);
 		settings.ik_orientation = node->GetData().GetInt32(SMD_IMPORT_IK_ORIENTATION, IK_XZ);
@@ -305,7 +307,7 @@ namespace ST
 						ik_target->SetParameter(DescID(NULLOBJECT_ORIENTATION), ikOr, DESCFLAGS_SET_0);
 
 						Matrix pos;
-						pos.off = (*m_skeleton)[bone]->GetGlobalRefPos();
+						pos.off = (*m_skeleton)[bone]->GetRefMg().off;
 						ik_target->SetMg(pos);
 						doc->InsertObject(ik_target, ik_null, nullptr);
 
@@ -548,7 +550,7 @@ namespace ST
 				// Set the reference position.
 				(*m_skeleton)[id]->SetLocalMatrix(mat);
 				Matrix GlobalMat = (*m_skeleton)[id]->GetBone()->GetMg();
-				(*m_skeleton)[id]->SetGlobalRefPos(GlobalMat.off);
+				(*m_skeleton)[id]->SetRefMg(GlobalMat);
 			}
 
 			if (settings.animation)
@@ -776,6 +778,19 @@ namespace ST
 			cd.bc = &bc;
 			cd.op = newPoly;
 			SendModelingCommand(MCOMMAND_OPTIMIZE, cd);
+		}
+
+		// Weights
+		if (settings.mesh_weights)
+		{
+			CAWeightTag *weightTag = CAWeightTag::Alloc();
+			newPoly->InsertTag(weightTag);
+
+			// Add Joints
+			for (Int32 i = 0; i < m_skeleton->size(); i++)
+			{
+				weightTag->AddJoint((*m_skeleton)[i]->GetBone());
+			}
 		}
 
 		DeletePtrVector(triangles);
