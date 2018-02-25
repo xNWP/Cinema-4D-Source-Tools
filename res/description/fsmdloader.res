@@ -8,12 +8,15 @@ CONTAINER Fsmdloader
 		{
 			NAME S_SCALEORIENTATION;
 			DEFAULT 1;
+
 			REAL SMD_LOADER_SCALE
 			{
 				MIN 0.01;
 				MAX 100;
 				STEP 0.1;
 			}
+
+			VECTOR SMD_LOADER_ROTATE { UNIT DEGREE; }
 		}
 
 		GROUP
@@ -65,14 +68,6 @@ CONTAINER Fsmdloader
 			
 			SEPARATOR {}
 
-			LONG SMD_IMPORT_QC_BODYGROUP
-			{
-				CYCLE
-				{
-					BODYGROUP_ALL;
-					BODYGROUP_ASK;
-				}
-			}
 			BOOL SMD_IMPORT_IK {}
 			LONG SMD_IMPORT_IK_ORIENTATION
 			{

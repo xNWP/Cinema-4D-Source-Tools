@@ -15,6 +15,7 @@
 
 #include "c4d.h"
 #include "c4d_symbols.h"
+#include <chrono>
 #include "Globals.h"
 #include "fsmdloader.h"
 #include "lib_ca.h"
@@ -56,10 +57,11 @@ namespace ST
 	struct SMDLoaderSettings
 	{
 		Float scale;
+		Vector orientation;
 		Bool animation;
 		Bool mesh;
 		Bool qc;
-		Bool qc_all;
+		Bool parent;
 		Bool mesh_weld;
 		Float mesh_weld_tolerance;
 		Bool mesh_normals;
@@ -154,6 +156,8 @@ namespace ST
 	private:
 		std::vector<ST::SourceSkeletonBone*> *m_skeleton;
 		Bool m_qc_file;
+		std::chrono::time_point<std::chrono::system_clock> start;
+		std::chrono::time_point<std::chrono::system_clock> end;
 	};
 
 	//----------------------------------------------------------------------------------------
@@ -306,6 +310,9 @@ namespace ST
 		Vector GetNormalB() const { return m_normals[1].GetNormalized(); }
 		Vector GetNormalC() const { return m_normals[2].GetNormalized(); }
 		UVWStruct GetUVW() const { return m_uv; }
+		std::map<Int32, Float>& GetWeightsA() { return m_weights[0]; }
+		std::map<Int32, Float>& GetWeightsB() { return m_weights[1]; }
+		std::map<Int32, Float>& GetWeightsC() { return m_weights[2]; }
 
 	private:
 		String m_material;

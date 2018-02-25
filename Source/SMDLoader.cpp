@@ -12,10 +12,10 @@ namespace ST
 		// Default settings, overriden by user-prefs
 		BaseContainer *data = ((BaseList2D*)node)->GetDataInstance();
 		data->SetFloat(SMD_LOADER_SCALE, 1.0);
+		data->SetVector(SMD_LOADER_ROTATE, Vector(0, 0, 0));
 		data->SetBool(SMD_IMPORT_ANIMATION, true);
 		data->SetBool(SMD_IMPORT_MESH, true);
 		data->SetBool(SMD_IMPORT_QC, true);
-		data->SetInt32(SMD_IMPORT_QC_BODYGROUP, BODYGROUP_ALL);
 		data->SetBool(SMD_IMPORT_MESH_WELD, true);
 		data->SetFloat(SMD_IMPORT_MESH_WELD_TOLERANCE, 0.01);
 		data->SetBool(SMD_IMPORT_MESH_MATERIALS, true);
@@ -60,6 +60,7 @@ namespace ST
 			case SMD_IMPORT_MESH_MATERIALS:
 			case SMD_IMPORT_MESH_NORMALS:
 			case SMD_IMPORT_MESH_UV:
+			case SMD_IMPORT_MESH_WEIGHTS:
 			{
 				GeData data;
 				node->GetParameter(SMD_IMPORT_MESH, data, DESCFLAGS_GET_0);
@@ -89,7 +90,6 @@ namespace ST
 					return true;
 			}
 
-			case SMD_IMPORT_QC_BODYGROUP:
 			case SMD_IMPORT_IK:
 			case SMD_IMPORT_IK_ORIENTATION:
 			{
@@ -137,13 +137,16 @@ namespace ST
 
 	FILEERROR SMDLoader::Load(BaseSceneLoader* node, const Filename& name, BaseDocument* doc, SCENEFILTER filterflags, String* error, BaseThread* bt)
 	{
+		// set timer
+		start = std::chrono::system_clock::now();
+
 		// get options
 		SMDLoaderSettings settings;
 		settings.scale = node->GetData().GetFloat(SMD_LOADER_SCALE, 1.0);
+		settings.orientation = node->GetData().GetVector(SMD_LOADER_ROTATE, Vector(0, 0, 0));
 		settings.animation = node->GetData().GetBool(SMD_IMPORT_ANIMATION, 1);
 		settings.mesh = node->GetData().GetBool(SMD_IMPORT_MESH, 1);
 		settings.qc = node->GetData().GetBool(SMD_IMPORT_QC, 1);
-		settings.qc_all = (node->GetData().GetInt32(SMD_IMPORT_QC_BODYGROUP, BODYGROUP_ALL) == BODYGROUP_ALL) ? true : false;
 		settings.mesh_weld = node->GetData().GetBool(SMD_IMPORT_MESH_WELD, 1);
 		settings.mesh_weld_tolerance = node->GetData().GetFloat(SMD_IMPORT_MESH_WELD_TOLERANCE, 0.01);
 		settings.mesh_materials = node->GetData().GetBool(SMD_IMPORT_MESH_MATERIALS, 1);
@@ -160,16 +163,23 @@ namespace ST
 		topNull->SetName(nameNoSuffix.GetFileString());
 		doc->InsertObject(topNull, nullptr, nullptr);
 
+		FILEERROR res;
 		if (settings.qc)
 		{
-			return ParseQC(name, settings, doc, topNull, filterflags, error);
+			res = ParseQC(name, settings, doc, topNull, filterflags, error);
 		}
 		else
 		{
-			return ParseSMD(name, settings, doc, topNull, filterflags, error, true);
+			res = ParseSMD(name, settings, doc, topNull, filterflags, error, true);
 		}
 
-		return FILEERROR_NONE;
+		// Rotation
+		Matrix mat = topNull->GetMg();
+		Matrix RotMat = HPBToMatrix(settings.orientation, ROTATIONORDER_HPB);
+		mat = RotMat * mat;
+		topNull->SetMg(mat);
+
+		return res;
 	}
 
 	FILEERROR SMDLoader::ParseQC(const Filename &name, SMDLoaderSettings &settings, BaseDocument *doc, BaseObject *parent, SCENEFILTER filterflags, String *error)
@@ -184,7 +194,16 @@ namespace ST
 		AutoAlloc<BaseFile> file;
 		Bool fres = file->Open(CorrectFile);
 		if (!fres)
-			return file->GetError();
+		{
+			if (!m_qc_file) // User selected qc-file but none found, just default to the smd
+			{
+				GePrint(name.GetFileString() + ": " + GeLoadString(IDS_NO_QC));
+				settings.qc = false;
+				return ParseSMD(name, settings, doc, parent, filterflags, error, true);
+			}
+			else
+				return file->GetError();
+		}
 
 		Filename nameNoSuffix = CorrectFile;
 		nameNoSuffix.ClearSuffix();
@@ -325,6 +344,12 @@ namespace ST
 
 		DeletePtrVector(m_skeleton);
 
+		end = std::chrono::system_clock::now();
+		std::chrono::duration<double> duration = end - start;
+		GePrint(GeLoadString(IDS_LOADED_FILE)
+			+ name.GetFileString() + GeLoadString(IDS_IN)
+			+ String::FloatToString(duration.count()) + "s");
+
 		return FILEERROR_NONE;
 	}
 
@@ -378,6 +403,15 @@ namespace ST
 
 		if (!settings.qc) // qc will still need this
 			DeletePtrVector(m_skeleton);
+
+		if (!settings.qc)
+		{
+			end = std::chrono::system_clock::now();
+			std::chrono::duration<double> duration = end - start;
+			GePrint(GeLoadString(IDS_LOADED_FILE)
+				+ name.GetFileString() + GeLoadString(IDS_IN)
+				+ String::FloatToString(duration.count()) + "s");
+		}
 
 		return FILEERROR_NONE;
 	}
@@ -441,6 +475,10 @@ namespace ST
 		CCurve *xPos=NULL, *yPos=NULL, *zPos=NULL;
 		CCurve *xRot=NULL, *yRot=NULL, *zRot=NULL;
 
+		BaseObject *skelRoot = BaseObject::Alloc(Onull);
+		skelRoot->SetName("skeleton");
+		doc->InsertObject(skelRoot, parent, nullptr);
+
 		while ((*data)[it] != "end" && it < data->size())
 		{
 			std::vector<String> substrs;
@@ -487,7 +525,7 @@ namespace ST
 				Int32 parentid = (*m_skeleton)[id]->GetParentId();
 				if (parentid == -1)
 				{
-					doc->InsertObject((*m_skeleton)[id]->GetBone(), parent, nullptr);
+					doc->InsertObject((*m_skeleton)[id]->GetBone(), skelRoot, nullptr);
 				}
 				else
 				{
@@ -767,6 +805,46 @@ namespace ST
 			}
 		}
 
+		// Weights
+		if (settings.mesh_weights)
+		{
+			CAWeightTag *weightTag = CAWeightTag::Alloc();
+			newPoly->InsertTag(weightTag);
+			BaseObject *sObj = BaseObject::Alloc(Oskin);
+			doc->InsertObject(sObj, newPoly, nullptr);
+
+			// Add Joints
+			for (Int32 i = 0; i < m_skeleton->size(); i++)
+			{
+				weightTag->AddJoint((*m_skeleton)[i]->GetBone());
+			}
+
+			// Weight Joints
+			for (Int32 j = 0; j < triangles->size(); j++)
+			{
+				// C Point
+				for (auto c = (*triangles)[j]->GetWeightsC().begin(); c != (*triangles)[j]->GetWeightsC().end(); c++)
+				{
+					Int32 pntindex = (j * 3);
+					weightTag->SetWeight(c->first, pntindex, c->second);
+				}
+
+				// B Point
+				for (auto b = (*triangles)[j]->GetWeightsB().begin(); b != (*triangles)[j]->GetWeightsB().end(); b++)
+				{
+					Int32 pntindex = (j * 3 + 1);
+					weightTag->SetWeight(b->first, pntindex, b->second);
+				}
+
+				// A Point
+				for (auto a = (*triangles)[j]->GetWeightsA().begin(); a != (*triangles)[j]->GetWeightsA().end(); a++)
+				{
+					Int32 pntindex = (j * 3 + 2);
+					weightTag->SetWeight(a->first, pntindex, a->second);
+				}
+			}
+		}
+
 		// Weld similar points
 		if (settings.mesh_weld)
 		{
@@ -778,19 +856,6 @@ namespace ST
 			cd.bc = &bc;
 			cd.op = newPoly;
 			SendModelingCommand(MCOMMAND_OPTIMIZE, cd);
-		}
-
-		// Weights
-		if (settings.mesh_weights)
-		{
-			CAWeightTag *weightTag = CAWeightTag::Alloc();
-			newPoly->InsertTag(weightTag);
-
-			// Add Joints
-			for (Int32 i = 0; i < m_skeleton->size(); i++)
-			{
-				weightTag->AddJoint((*m_skeleton)[i]->GetBone());
-			}
 		}
 
 		DeletePtrVector(triangles);

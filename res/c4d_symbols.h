@@ -35,6 +35,9 @@ enum
 	IDS_SMD,
 	IDS_NO_MAT_DIR,
 	IDS_NO_MAT,
+	IDS_NO_QC,
+	IDS_LOADED_FILE,
+	IDS_IN,
 
 	// End of symbol definition
 	_DUMMY_ELEMENT_

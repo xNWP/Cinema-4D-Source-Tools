@@ -4,14 +4,12 @@ STRINGTABLE Fsmdloader
 
 	S_SCALEORIENTATION	"Scale/Orientation";
 	SMD_LOADER_SCALE	"Scale";
+	SMD_LOADER_ROTATE	"Orientation";
 
 	S_IMPORTOPTIONS		"Import";
 	SMD_IMPORT_ANIMATION	"Animation";
 	SMD_IMPORT_MESH		"Mesh";
 	SMD_IMPORT_QC		"Use QC";
-	SMD_IMPORT_QC_BODYGROUP	"Body Groups";
-	BODYGROUP_ALL		"All";
-	BODYGROUP_ASK		"Ask";
 
 	S_MESH				"Mesh";
 	SMD_IMPORT_MESH_WELD	"Weld Points";
