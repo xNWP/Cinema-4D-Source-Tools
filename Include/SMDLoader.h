@@ -13,6 +13,11 @@
 #define ID_CA_IK_TAG_SOLVER_2D	1
 #define ID_CA_IK_TAG_SOLVER_3D	2
 
+#define Tconstraint				1019364
+#define ID_CA_CONSTRAINT_TAG_PSR	1000
+#define ID_CA_CONSTRAINT_TAG_PSR_POSITION	10005
+#define ID_CA_CONSTRAINT_TAG_PSR_TARGET	10001
+
 #include "c4d.h"
 #include "c4d_symbols.h"
 #include <chrono>

@@ -39,6 +39,9 @@ enum
 	IDS_LOADED_FILE,
 	IDS_IN,
 
+	// Source Animation Tag
+	IDS_SOURCE_ANIMATION,
+
 	// End of symbol definition
 	_DUMMY_ELEMENT_
 };

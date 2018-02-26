@@ -105,6 +105,9 @@
     <ClInclude Include="Include\stVMT.h">
       <Filter>Includes</Filter>
     </ClInclude>
+    <ClInclude Include="Include\SourceAnimation.h">
+      <Filter>Includes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\strings_us\c4d_strings.str">
@@ -151,6 +154,9 @@
       <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="Source\stMath.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\SourceAnimation.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
   </ItemGroup>

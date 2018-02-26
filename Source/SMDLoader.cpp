@@ -295,7 +295,7 @@ namespace ST
 		}
 		
 		// Build IK-Chain's
-		if (settings.ik)
+		if (settings.ik && NewQC.ikchain.size() > 0)
 		{
 			BaseObject *ik_null = BaseObject::Alloc(Onull);
 			ik_null->SetName("ik_goal");
@@ -325,9 +325,8 @@ namespace ST
 							ikOr = NULLOBJECT_ORIENTATION_XZ;
 						ik_target->SetParameter(DescID(NULLOBJECT_ORIENTATION), ikOr, DESCFLAGS_SET_0);
 
-						Matrix pos;
-						pos.off = (*m_skeleton)[bone]->GetRefMg().off;
-						ik_target->SetMg(pos);
+						Matrix loc = (*m_skeleton)[bone]->GetRefMg();
+						ik_target->SetMg(loc);
 						doc->InsertObject(ik_target, ik_null, nullptr);
 
 						BaseTag *ikTag = BaseTag::Alloc(Tik);
@@ -336,6 +335,12 @@ namespace ST
 						ikTag->SetParameter(DescID(ID_CA_IK_TAG_TARGET), ik_target, DESCFLAGS_SET_0);
 						ikTag->SetParameter(DescID(ID_CA_IK_TAG_SOLVER), ID_CA_IK_TAG_SOLVER_3D, DESCFLAGS_SET_0);
 
+						// constraint on bone
+						BaseTag *constraint = targ->MakeTag(Tconstraint);
+						constraint->SetParameter(ID_CA_CONSTRAINT_TAG_PSR, true, DESCFLAGS_SET_0);
+						constraint->SetParameter(ID_CA_CONSTRAINT_TAG_PSR_POSITION, false, DESCFLAGS_SET_0);
+						constraint->SetParameter(ID_CA_CONSTRAINT_TAG_PSR_TARGET, ik_target, DESCFLAGS_SET_0);
+						
 						break;
 					}
 				}
@@ -574,7 +579,7 @@ namespace ST
 				zPos = (*m_skeleton)[id]->GetZPTrack()->GetCurve();
 				xRot = (*m_skeleton)[id]->GetXRTrack()->GetCurve();
 				yRot = (*m_skeleton)[id]->GetYRTrack()->GetCurve();
-				zRot = (*m_skeleton)[id]->GetZRTrack()->GetCurve();
+				zRot = (*m_skeleton)[id]->GetZRTrack()->GetCurve();				
 			}
 
 			Int32 fps = doc->GetFps();
@@ -615,6 +620,18 @@ namespace ST
 
 			if (!settings.animation && id == m_skeleton->size() - 1)
 				break;
+		}
+
+		// delete tracks if only one frame
+		if (frame == 0)
+		{
+			// this is admitedly sloppy and adds extra cycles,
+			// however the effect is minimal, will likely create a class
+			// that manages this more gracefully later on.
+			for (Int32 i = 0; i < m_skeleton->size(); i++)
+			{
+				(*m_skeleton)[i]->GetBone()->GetCTrackRoot()->FlushAll();
+			}
 		}
 
 		// if we're not merging and we have animation, set the start & end accordingly

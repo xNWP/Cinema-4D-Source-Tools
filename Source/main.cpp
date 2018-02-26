@@ -12,6 +12,8 @@ Bool PluginStart(void)
 		return false;
 	if (!RegisterSMDLoader())
 		return false;
+	/*if (!RegisterSourceAnimationTag())
+		return false;*/
 	if (!RegisterVTFLoader())
 		return false;
 	if (!RegisterVTFSaver())

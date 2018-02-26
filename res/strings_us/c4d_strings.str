@@ -13,10 +13,13 @@ STRINGTABLE
 	IDS_VTF				"Valve Texture Format (VTF)"; // DNT
 
 	// SMD Import
-	IDS_SMD				"Source Studio Model Data (SMD) / Quake C (QC)";
+	IDS_SMD				"Source Studio Model Data (SMD) / Quake C (QC)"; // DNT
 	IDS_NO_MAT_DIR		"No material directory set, continuing without loading material.";
 	IDS_NO_MAT			"Could not find material, continuing without loading it.";
 	IDS_NO_QC			"No QC file found, continuing without using it.";
 	IDS_LOADED_FILE		"Loaded ";
 	IDS_IN				" in ";
+
+	// Source Animation Tag
+	IDS_SOURCE_ANIMATION	"Source Animation"; // DNT
 }
