@@ -89,6 +89,22 @@ namespace ST
 		/// @param[out]	vlg				The VertexLitGeneric to modify.
 		//----------------------------------------------------------------------------------------
 		void ParseVertexLitGenericNode(VTFLib::Nodes::CVMTNode *node, VertexLitGeneric &vlg);
+
+		//----------------------------------------------------------------------------------------
+		/// Removes beginning and ending " from string.
+		///
+		/// @param[in,out] string		The string to strip.
+		//----------------------------------------------------------------------------------------
+		void StripString(String &string);
+
+		//----------------------------------------------------------------------------------------
+		/// Removes preceeding tab spaces, and normal spaces from a string.
+		///
+		/// @param[in] istring			The string to trim.
+		///
+		/// @return String				The trimmed string.
+		//----------------------------------------------------------------------------------------
+		String trim(const String &istring);
 	}
 }
 

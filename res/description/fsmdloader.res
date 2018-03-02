@@ -23,13 +23,20 @@ CONTAINER Fsmdloader
 		{
 			NAME S_IMPORTOPTIONS;
 			DEFAULT 1;
+			LAYOUTGROUP; COLUMNS 2;
 
 			GROUP
 			{
 				BOOL SMD_IMPORT_ANIMATION {}
 				BOOL SMD_IMPORT_MESH {}
 				BOOL SMD_IMPORT_QC {}
-			}	
+			}
+
+			GROUP
+			{
+				BOOL SMD_IMPORT_TOP_NULL {}
+				BOOL SMD_IMPORT_SKELETON_JOINT {}
+			}
 		}
 
 		GROUP
@@ -80,6 +87,18 @@ CONTAINER Fsmdloader
 					IK_XZ;
 				}
 			}
+		}
+
+		GROUP
+		{
+			NAME S_MEMORY;
+
+			BOOL SMD_CACHE_MEMORY {};
+
+			SEPARATOR {}
+
+			STATICTEXT SMD_MEMORY_USAGE {};
+			BUTTON SMD_FLUSH_CACHE {};
 		}
 	}
 }

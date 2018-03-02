@@ -25,6 +25,11 @@
 #include "UserConfig.h"
 #include "VTFLoaderSaver.h"
 
+// Tests
+#ifdef _DEBUG
+#include "stTests.h"
+#endif
+
 // Methods
 
 //----------------------------------------------------------------------------------------

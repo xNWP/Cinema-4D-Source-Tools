@@ -19,6 +19,9 @@ STRINGTABLE
 	IDS_NO_QC			"No QC file found, continuing without using it.";
 	IDS_LOADED_FILE		"Loaded ";
 	IDS_IN				" in ";
+	IDS_BAD_REBUILD		"Critical error rebuilding SMD from master record.";
+	IDS_CACHE_FLUSHED	"Cache successfully flushed!";
+	IDS_FLUSHING_CACHE	"Flushing Cache";
 
 	// Source Animation Tag
 	IDS_SOURCE_ANIMATION	"Source Animation"; // DNT

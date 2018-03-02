@@ -1,4 +1,8 @@
-#pragma once
+// Copyright (c) 2018 Brett Anthony. All rights reserved.
+//
+// This work is licensed under the terms of the MIT license.
+// For a copy, see <https://opensource.org/licenses/MIT>.
+
 #ifndef SOURCE_ANIMATION_H
 #define SOURCE_ANIMATION_H
 
@@ -12,6 +16,7 @@ namespace ST
 	{
 	public:
 
+		static NodeData* Alloc() { return NewObj(SourceAnimation); }
 	};
 }
 

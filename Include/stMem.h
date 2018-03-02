@@ -42,4 +42,42 @@
 		DeleteObj(V);							\
 	}
 
+// Methods
+namespace ST
+{
+	namespace Mem
+	{
+		template <typename T>
+		//----------------------------------------------------------------------------------------
+		/// Returns the bytes a vector uses excluding the vector overhead.
+		///
+		/// @param[in] ptrvector				Pointer to the vector to check the size of.
+		///
+		/// @return size_t						The size in bytes.
+		//----------------------------------------------------------------------------------------
+		size_t SizeOfVector(std::vector<T*> *ptrvector)
+		{
+			size_t rval = sizeof(T) * ptrvector->size();
+			return rval;
+		}
+
+		template <typename T>
+		size_t SizeOfVector(std::vector<T> vector)
+		{
+			size_t rval = sizeof(T) * vector.size();
+			return rval;
+		}
+
+		//----------------------------------------------------------------------------------------
+		/// Converts bytes into it's highest divisor units and displays as a string.
+		/// bytes = 2040 produces the result '1.99 MiB'.
+		///
+		/// @param[in] bytes					The number of bytes.
+		///
+		/// @return String						The formatted string
+		//----------------------------------------------------------------------------------------
+		String FormatBytes(const size_t &bytes);
+	}
+}
+
 #endif

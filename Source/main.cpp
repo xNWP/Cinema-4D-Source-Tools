@@ -19,6 +19,14 @@ Bool PluginStart(void)
 	if (!RegisterVTFSaver())
 		return false;
 
+	// Tests
+#ifdef _DEBUG
+	if (!RegisterTest1())
+		return false;
+	if (!RegisterTest2())
+		return false;
+#endif
+
 	String StrLoc = GeGetPluginPath().GetString();
 	StrLoc += "\\";
 	StrLoc += USER_CONFIG_LOC;
@@ -89,9 +97,24 @@ Bool PluginMessage(Int32 id, void *data)
 {
 	switch (id)
 	{
-	case C4DPL_INIT_SYS: // Do not init w/o resources.
-		if (!resource.Init())
-			return false;
+		case C4DPL_INIT_SYS: // Do not init w/o resources.
+			if (!resource.Init())
+				return false;
+
+		case C4DPL_BUILDMENU:
+		{
+			BaseContainer *MainMenu = GetMenuResource("M_EDITOR");
+
+#ifdef _DEBUG
+			// ONLY IF TESTING
+			BaseContainer testMenu;
+			testMenu.InsData(MENURESOURCE_SUBTITLE, "C4DST Test");
+			testMenu.InsData(MENURESOURCE_COMMAND, "PLUGIN_CMD_1000001");
+			testMenu.InsData(MENURESOURCE_COMMAND, "PLUGIN_CMD_1000002");
+			MainMenu->InsData(MENURESOURCE_STRING, testMenu);
+#endif
+			return true;
+		}
 	}
 
 	return true;

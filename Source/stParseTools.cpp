@@ -222,7 +222,12 @@ namespace ST
 					vlg.BasemapLuminancePhongMask = intNode->GetValue();
 			}
 			else if (name.ToLower() == "$phongexponent")
-				vlg.PhongExponent = String(strNode->GetValue()).ToInt32();
+			{
+				if (type == NODE_TYPE_STRING)
+					vlg.PhongExponent = String(strNode->GetValue()).ToInt32();
+				else
+					vlg.PhongExponent = intNode->GetValue();
+			}
 			else if (name.ToLower() == "$translucent")
 			{
 				if (type == NODE_TYPE_STRING)
@@ -231,7 +236,36 @@ namespace ST
 					vlg.translucent = intNode->GetValue();
 			}
 			else if (name.ToLower() == "$alpha")
-				vlg.alpha = fNode->GetValue();
+			{
+				if (type == NODE_TYPE_STRING)
+					vlg.alpha = String(strNode->GetValue()).ToFloat();
+				else
+					vlg.alpha = fNode->GetValue();
+			}
+		}
+
+		void StripString(String &string)
+		{
+			string = string.SubStr(1, string.GetLength() - 2);
+		}
+
+		String trim(const String &istring)
+		{
+			String string = istring;
+			Bool bOk = false;
+			while (!bOk)
+			{
+				if (string[0] == ' ' || string[0] == '\t')
+					string = string.SubStr(1, string.GetLength() - 1);
+				if (string[string.GetLength()] == ' ' || string[string.GetLength()] == '\t')
+					string = string.SubStr(0, string.GetLength() - 1);
+				if (string[0] == ' ' || string[0] == '\t' ||
+					string[string.GetLength()] == ' ' || string[string.GetLength()] == '\t')
+					bOk = false;
+				else
+					bOk = true;
+			}
+			return string;
 		}
 	}
 }

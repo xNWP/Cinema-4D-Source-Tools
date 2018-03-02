@@ -154,11 +154,13 @@
     <ClInclude Include="Include\AboutDialog.h" />
     <ClInclude Include="Include\Globals.h" />
     <ClInclude Include="Include\main.h" />
+    <ClInclude Include="Include\QCSequenceAnimation.h" />
     <ClInclude Include="Include\SMDLoader.h" />
     <ClInclude Include="Include\SourceAnimation.h" />
     <ClInclude Include="Include\stMath.h" />
     <ClInclude Include="Include\stMem.h" />
     <ClInclude Include="Include\stParseTools.h" />
+    <ClInclude Include="Include\stTests.h" />
     <ClInclude Include="Include\stVMT.h" />
     <ClInclude Include="Include\UserConfig.h" />
     <ClInclude Include="Include\VTFLoaderSaver.h" />
@@ -197,10 +199,13 @@
     <ClCompile Include="Source\AboutDialog.cpp" />
     <ClCompile Include="Source\Globals.cpp" />
     <ClCompile Include="Source\main.cpp" />
+    <ClCompile Include="Source\QCSequenceAnimation.cpp" />
     <ClCompile Include="Source\SMDLoader.cpp" />
     <ClCompile Include="Source\SourceAnimation.cpp" />
     <ClCompile Include="Source\stMath.cpp" />
+    <ClCompile Include="Source\stMem.cpp" />
     <ClCompile Include="Source\stParseTools.cpp" />
+    <ClCompile Include="Source\stTests.cpp" />
     <ClCompile Include="Source\UserConfig.cpp" />
     <ClCompile Include="Source\VTFLoaderSaver.cpp" />
   </ItemGroup>

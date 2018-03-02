@@ -10,6 +10,8 @@ STRINGTABLE Fsmdloader
 	SMD_IMPORT_ANIMATION	"Animation";
 	SMD_IMPORT_MESH		"Mesh";
 	SMD_IMPORT_QC		"Use QC";
+	SMD_IMPORT_TOP_NULL	"Import Into a Null";
+	SMD_IMPORT_SKELETON_JOINT	"Skeleton Root is Joint";
 
 	S_MESH				"Mesh";
 	SMD_IMPORT_MESH_WELD	"Weld Points";
@@ -27,4 +29,8 @@ STRINGTABLE Fsmdloader
 	IK_XY				"XY";
 	IK_ZY				"ZY";
 	IK_XZ				"XZ";
+
+	S_MEMORY			"Memory";
+	SMD_CACHE_MEMORY	"Cache SMD/QC";
+	SMD_FLUSH_CACHE		"Flush Cache";
 }

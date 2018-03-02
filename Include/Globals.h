@@ -18,7 +18,7 @@
 #define str(s) #s
 
 #define VERSION_MAJOR	0
-#define VERSION_MINOR	32
+#define VERSION_MINOR	34
 #define VERSION_TAG		"-alpha"
 
 // About Dialog
@@ -32,7 +32,14 @@
 #define SMD_IMPORT_ID	1040673
 
 // Source Animation Tag
-#define SOURCE_ANIMATION_TAG_ID	 1000001
+#define SOURCE_ANIMATION_TAG_ID	 1000006
+
+// Tests
+#define TEST_RESERVE_0	1000001
+#define TEST_RESERVE_1	1000002
+#define TEST_RESERVE_2	1000003
+#define TEST_RESERVE_3	1000004
+#define TEST_RESERVE_4	1000005
 
 // DLL Locale
 #define VTFLIB_DLL		"lib\\VTFLib.dll"

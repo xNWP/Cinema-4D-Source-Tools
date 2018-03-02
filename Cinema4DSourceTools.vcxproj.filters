@@ -108,6 +108,12 @@
     <ClInclude Include="Include\SourceAnimation.h">
       <Filter>Includes</Filter>
     </ClInclude>
+    <ClInclude Include="Include\QCSequenceAnimation.h">
+      <Filter>Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\stTests.h">
+      <Filter>Includes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\strings_us\c4d_strings.str">
@@ -157,6 +163,15 @@
       <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="Source\SourceAnimation.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\QCSequenceAnimation.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\stMem.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\stTests.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
   </ItemGroup>
