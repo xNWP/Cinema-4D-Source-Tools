@@ -1,3 +1,6 @@
+== PREREQUISITES ==
+Cinema 4D R18 or newer.
+
 == INSTALLATION ==
 Delete any existing Cinema 4D Source Tool Installations.
 
@@ -17,7 +20,7 @@ Brett 'xNWP' Anthony
 	https://twitter.com/ThatNWP
 
 == LICENSE ==
-	MIT License
+	 MIT License
 
 	 Copyright (c) 2018 Brett Anthony
 

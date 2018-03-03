@@ -6,18 +6,32 @@
 #include "main.h"
 
 Bool PluginStart(void)
-{
-	// Register Components
+{	// Register Components
 	if (!RegisterAboutDialog())
+	{
+		GePrint("C4DST -- About DLG Failed Load");
 		return false;
+	}
 	if (!RegisterSMDLoader())
+	{
+		GePrint("C4DST -- SMDLoader Failed Load");
 		return false;
+	}
 	/*if (!RegisterSourceAnimationTag())
-		return false;*/
+	{
+	GePrint("C4DST -- SourceAnimation Failed Load");
+		return false;
+	}*/
 	if (!RegisterVTFLoader())
+	{
+		GePrint("C4DST -- VTFLoader Failed Load");
 		return false;
+	}
 	if (!RegisterVTFSaver())
+	{
+		GePrint("C4DST -- VTFSaver Failed Load");
 		return false;
+	}
 
 	// Tests
 #ifdef _DEBUG

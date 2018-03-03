@@ -160,7 +160,9 @@
     <ClInclude Include="Include\stMath.h" />
     <ClInclude Include="Include\stMem.h" />
     <ClInclude Include="Include\stParseTools.h" />
-    <ClInclude Include="Include\stTests.h" />
+    <ClInclude Include="Include\stTests.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="Include\stVMT.h" />
     <ClInclude Include="Include\UserConfig.h" />
     <ClInclude Include="Include\VTFLoaderSaver.h" />
@@ -205,7 +207,9 @@
     <ClCompile Include="Source\stMath.cpp" />
     <ClCompile Include="Source\stMem.cpp" />
     <ClCompile Include="Source\stParseTools.cpp" />
-    <ClCompile Include="Source\stTests.cpp" />
+    <ClCompile Include="Source\stTests.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Source\UserConfig.cpp" />
     <ClCompile Include="Source\VTFLoaderSaver.cpp" />
   </ItemGroup>

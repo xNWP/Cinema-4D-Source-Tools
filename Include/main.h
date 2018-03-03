@@ -21,7 +21,7 @@
 // Modules
 #include "AboutDialog.h"
 #include "SMDLoader.h"
-#include "SourceAnimation.h"
+//#include "SourceAnimation.h"
 #include "UserConfig.h"
 #include "VTFLoaderSaver.h"
 
