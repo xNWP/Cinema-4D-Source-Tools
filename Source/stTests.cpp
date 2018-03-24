@@ -58,7 +58,7 @@ namespace ST
 				debugout->WriteString(str + "\n");
 				DeleteMem(cstr);
 
-				LoadDocument(loadFile, SCENEFILTER_0, nullptr, error);
+				BaseDocument *doc = LoadDocument(loadFile, SCENEFILTER_0, nullptr, error);
 				if (error == nullptr)
 					error = NewObj(String, "N/A");
 
@@ -72,7 +72,7 @@ namespace ST
 				DeleteMem(cstr);
 				DeleteObj(error);
 
-				CloseAllDocuments();
+				BaseDocument::Free(doc);
 			}
 
 			GePrint("-- END TEST SMD IMPORT -- ");
@@ -131,7 +131,7 @@ namespace ST
 				debugout->WriteString(str + "\n");
 				DeleteMem(cstr);
 
-				LoadDocument(loadFile, SCENEFILTER_0, nullptr, error);
+				BaseDocument *doc = LoadDocument(loadFile, SCENEFILTER_0, nullptr, error);
 				if (error == nullptr)
 					error = NewObj(String, "N/A");
 
@@ -145,7 +145,7 @@ namespace ST
 				DeleteMem(cstr);
 				DeleteObj(error);
 
-				CloseAllDocuments();
+				BaseDocument::Free(doc);
 			}
 
 			GePrint("-- END TEST QC IMPORT -- ");

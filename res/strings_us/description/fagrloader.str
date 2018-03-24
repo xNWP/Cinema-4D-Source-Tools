@@ -1,0 +1,6 @@
+STRINGTABLE Fagrloader
+{
+	Fagrloader	"Advanced Effects Game Recording (AGR)"; // DNT
+
+	AGR_LOADER_ASSET_PATH	"Root Asset Path";
+}

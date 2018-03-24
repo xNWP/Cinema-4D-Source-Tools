@@ -20,7 +20,8 @@
 		decltype(V->size()) it = V->size() - 1;	\
 		while (it > 0)							\
 		{										\
-			DeleteObj((*V)[it]);				\
+			if ((*V)[it] != nullptr)			\
+				DeleteObj((*V)[it]);			\
 			it--;								\
 		}										\
 		DeleteObj((*V)[0]);						\

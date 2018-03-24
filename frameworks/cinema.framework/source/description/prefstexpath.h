@@ -1,0 +1,11 @@
+#ifndef PREFSTEXPATH_H__
+#define PREFSTEXPATH_H__
+
+enum
+{
+	PREF_TEXPATH_MAIN_GROUP = 999,
+
+	PREF_TEXPATH_DUMMY
+};
+
+#endif // PREFSTEXPATH_H__

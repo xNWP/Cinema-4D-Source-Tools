@@ -20,6 +20,7 @@
 
 // Modules
 #include "AboutDialog.h"
+#include "AGRLoader.h"
 #include "SMDLoader.h"
 //#include "SourceAnimation.h"
 #include "UserConfig.h"

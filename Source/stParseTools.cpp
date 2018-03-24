@@ -43,7 +43,7 @@ namespace ST
 				{
 					continue;
 				}
-				else if (i == data.GetLength())
+				else if (i == data.GetLength() && start != -1)
 				{
 					substrs->push_back((data.SubStr(start, i - start)));
 				}
@@ -266,6 +266,33 @@ namespace ST
 					bOk = true;
 			}
 			return string;
+		}
+
+		String ReadLine(BaseFile &file)
+		{
+			String rval;
+			Char *cval = NewMem(Char, 1024);
+			Int32 i = 0;
+			while (i < file.GetLength())
+			{
+				Char c;
+				file.ReadChar(&c);
+				if (c == '\r')
+				{
+					file.Seek(1);
+					break;
+				}
+				if (c == '\n')
+				{
+					break;
+				}
+				*(cval + i) = c;
+				i++;
+			}
+			*(cval + i) = '\0';
+			rval = cval;
+			DeleteMem(cval);
+			return rval;
 		}
 	}
 }

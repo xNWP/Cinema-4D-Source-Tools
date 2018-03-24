@@ -82,6 +82,9 @@ namespace ST
 			return false;
 
 		BaseContainer *data = ((BaseList2D*)node)->GetDataInstance();
+
+		data->SetString(SMD_CUSTOM_ROOT_NAME, "");
+
 		switch (id[0].id)
 		{
 			case SMD_IMPORT_QC:
@@ -209,6 +212,7 @@ namespace ST
 
 		// get options
 		SMDLoaderSettings settings;
+		settings.Custom_Root_Name = node->GetData().GetString(SMD_CUSTOM_ROOT_NAME, "");
 		settings.scale = node->GetData().GetFloat(SMD_LOADER_SCALE, 1.0);
 		settings.orientation = node->GetData().GetVector(SMD_LOADER_ROTATE, Vector(0, 0, 0));
 		settings.animation = node->GetData().GetBool(SMD_IMPORT_ANIMATION, 1);
@@ -233,7 +237,14 @@ namespace ST
 			Filename nameNoSuffix = name;
 			nameNoSuffix.ClearSuffix();
 			topNull = BaseObject::Alloc(Onull);
-			topNull->SetName(nameNoSuffix.GetFileString());
+			if (settings.Custom_Root_Name != "")
+			{
+				topNull->SetName(settings.Custom_Root_Name);
+			}
+			else
+			{
+				topNull->SetName(nameNoSuffix.GetFileString());
+			}
 			doc->InsertObject(topNull, nullptr, nullptr);
 		}
 
@@ -380,6 +391,8 @@ namespace ST
 
 		if (settings.cache)
 			m_master_qc_record->push_back(NewQC);
+		else
+			DeleteObj(NewQC);
 
 		end = std::chrono::system_clock::now();
 		std::chrono::duration<double> duration = end - start;
@@ -394,6 +407,7 @@ namespace ST
 	{
 		// Build Body Mesh(s)
 		Bool BuildSkeleton = true;
+		m_temporary_smd_record = NewObj(std::vector<SourceSMD*>);
 
 		for (Int32 bo = 0; bo < qc->body.size(); bo++)
 		{
@@ -429,7 +443,6 @@ namespace ST
 					return res;
 			}
 			BuildSkeleton = false;
-
 		}
 
 		// Build BodyGroup Mesh(s)
@@ -527,6 +540,7 @@ namespace ST
 			}
 		}
 
+		DeletePtrVector(m_temporary_smd_record);
 		return FILEERROR_NONE;
 	}
 
@@ -568,9 +582,13 @@ namespace ST
 
 		if (settings.cache)
 			m_master_smd_record->push_back(NewSMD);
+		else if (settings.qc)
+			m_temporary_smd_record->push_back(NewSMD);
 
 		if (!settings.qc)
 		{
+			if (!settings.cache)
+				DeleteObj(NewSMD);
 			end = std::chrono::system_clock::now();
 			std::chrono::duration<double> duration = end - start;
 			GePrint(GeLoadString(IDS_LOADED_FILE)
@@ -583,7 +601,9 @@ namespace ST
 
 	FILEERROR SMDLoader::BuildSMD(const SourceSMD *smd, const SMDLoaderSettings &settings, const QCFile *qc, BaseDocument *doc, BaseObject *parent, SCENEFILTER filterflags, String *error, Bool BuildSkeleton)
 	{
-		// Every time a skeleton is built we will store a pointer to it in the SMDLoader.
+		// Rotation
+		Matrix RotMat = HPBToMatrix(settings.orientation, ROTATIONORDER_HPB);
+
 		if (BuildSkeleton)
 		{
 			// build the skeleton
@@ -593,7 +613,7 @@ namespace ST
 			else
 				topNull = BaseObject::Alloc(Onull);
 			topNull->SetName("skeleton");
-			doc->InsertObject(topNull, parent, nullptr);
+			doc->InsertObject(topNull, parent, nullptr);		
 
 			std::vector<SourceSkeletonBone*> *skeleton = smd->GetSkeleton();
 			m_skeleton = skeleton;
@@ -684,12 +704,7 @@ namespace ST
 					}
 				}
 			}
-
-			// Rotation
-			Matrix mat = topNull->GetMg();
-			Matrix RotMat = HPBToMatrix(settings.orientation, ROTATIONORDER_HPB);
-			mat = RotMat * mat;
-			topNull->SetMg(mat);
+			topNull->SetMg(RotMat * topNull->GetMg());
 		}
 
 		// Build the mesh
@@ -717,9 +732,9 @@ namespace ST
 			for (Int32 p = 0; p < PolyCount; p++) // for each triangle
 			{
 				// z is flipped, build backwards to have proper front facing poly's
-				index.push_back(mod->AddPoint(newPoly, (*triangles)[p]->GetPointC() * settings.scale));
-				index.push_back(mod->AddPoint(newPoly, (*triangles)[p]->GetPointB() * settings.scale));
-				index.push_back(mod->AddPoint(newPoly, (*triangles)[p]->GetPointA() * settings.scale));
+				index.push_back(mod->AddPoint(newPoly, RotMat * (*triangles)[p]->GetPointC() * settings.scale));
+				index.push_back(mod->AddPoint(newPoly, RotMat * (*triangles)[p]->GetPointB() * settings.scale));
+				index.push_back(mod->AddPoint(newPoly, RotMat * (*triangles)[p]->GetPointA() * settings.scale));
 				Int32 *padr = &index[index.size() - 3];
 				mod->CreateNgon(newPoly, padr, 3);
 			}
@@ -739,9 +754,9 @@ namespace ST
 				{
 					const CPolygon CPoly = *(CPolyArr + i);
 					NormalStruct normals;
-					normals.a = (*triangles)[i]->GetNormalC();
-					normals.b = (*triangles)[i]->GetNormalB();
-					normals.c = (*triangles)[i]->GetNormalA();
+					normals.a = RotMat * (*triangles)[i]->GetNormalC();
+					normals.b = RotMat * (*triangles)[i]->GetNormalB();
+					normals.c = RotMat * (*triangles)[i]->GetNormalA();
 					NormalTag::Set(handle, i, normals);
 				}
 				newPoly->Message(MSG_UPDATE);
@@ -913,12 +928,6 @@ namespace ST
 				cd.op = newPoly;
 				SendModelingCommand(MCOMMAND_OPTIMIZE, cd);
 			}
-
-			// Rotation
-			Matrix mat = newPoly->GetMg();
-			Matrix RotMat = HPBToMatrix(settings.orientation, ROTATIONORDER_HPB);
-			mat = RotMat * mat;
-			newPoly->SetMg(mat);
 		}
 
 		return FILEERROR_NONE;

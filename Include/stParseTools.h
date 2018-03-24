@@ -105,6 +105,15 @@ namespace ST
 		/// @return String				The trimmed string.
 		//----------------------------------------------------------------------------------------
 		String trim(const String &istring);
+
+		//----------------------------------------------------------------------------------------
+		/// Reads a line from a file.
+		///
+		/// @param[in] file				The file to read from.
+		///
+		/// @return String				The Line.
+		//----------------------------------------------------------------------------------------
+		String ReadLine(BaseFile &file);
 	}
 }
 

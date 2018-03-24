@@ -23,6 +23,11 @@ STRINGTABLE
 	IDS_CACHE_FLUSHED	"Cache successfully flushed!";
 	IDS_FLUSHING_CACHE	"Flushing Cache";
 
+	// AGR Import
+	IDS_AGR				"Advanced Effects Game Recording (AGR)";
+	IDS_AGR_BAD_VERSION	"AGR Version ";
+	IDS_AGR_BAD_VERSION_1	" is incompatible with this version of Cinema 4D Source Tools.";
+
 	// Source Animation Tag
 	IDS_SOURCE_ANIMATION	"Source Animation"; // DNT
 }

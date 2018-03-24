@@ -1,0 +1,10 @@
+# This file is used by Ubsan to exclude some third party libraries and/or functions from being sanitized.
+# For more information check out http://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html#issue-suppression
+
+# Python: Needs to be excluded because the readdir(..) c library call triggers a warning in the wrap_readdir(...) function
+unsigned-integer-overflow:GetHashCode
+unsigned-integer-overflow:ParallelFor
+unsigned-integer-overflow:hash_md5.cpp
+unsigned-integer-overflow:ge_crypto.cpp
+unsigned-integer-overflow:Get01
+unsigned-integer-overflow:ComputeHashValue

@@ -3,7 +3,7 @@
 
 enum
 {
-	_DUMMY_FIRST_ = 10200,
+	_SMD_DUMMY_FIRST_ = 10200,
 
 	Fsmdloader,
 	SMD_LOADER_SCALE,
@@ -30,7 +30,10 @@ enum
 	SMD_MEMORY_USAGE,
 	SMD_FLUSH_CACHE,
 
-	_DUMMY_LAST_
+	// Hidden
+	SMD_CUSTOM_ROOT_NAME,
+
+	_SMD_DUMMY_LAST_
 };
 
 #endif

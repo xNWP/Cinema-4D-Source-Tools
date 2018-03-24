@@ -18,8 +18,12 @@
 #define str(s) #s
 
 #define VERSION_MAJOR	0
-#define VERSION_MINOR	35
+#define VERSION_MINOR	38
+#ifdef _DEBUG
+#define VERSION_TAG		"-dev"
+#else
 #define VERSION_TAG		"-alpha"
+#endif
 
 // About Dialog
 #define ABOUT_ID		1040531
@@ -30,6 +34,9 @@
 
 // SMD Import
 #define SMD_IMPORT_ID	1040673
+
+// AGR Import
+#define AGR_IMPORT_ID	1000007
 
 // Source Animation Tag
 #define SOURCE_ANIMATION_TAG_ID	 1000006

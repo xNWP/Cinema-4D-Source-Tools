@@ -12,6 +12,11 @@ Bool PluginStart(void)
 		GePrint("C4DST -- About DLG Failed Load");
 		return false;
 	}
+	/*if (!RegisterAGRLoader())
+	{
+		GePrint("C4DST -- AGRLoader Failed Load");
+		return false;
+	}*/
 	if (!RegisterSMDLoader())
 	{
 		GePrint("C4DST -- SMDLoader Failed Load");
@@ -117,9 +122,9 @@ Bool PluginMessage(Int32 id, void *data)
 
 		case C4DPL_BUILDMENU:
 		{
+#ifdef _DEBUG
 			BaseContainer *MainMenu = GetMenuResource("M_EDITOR");
 
-#ifdef _DEBUG
 			// ONLY IF TESTING
 			BaseContainer testMenu;
 			testMenu.InsData(MENURESOURCE_SUBTITLE, "C4DST Test");

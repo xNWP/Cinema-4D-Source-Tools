@@ -114,6 +114,12 @@
     <ClInclude Include="Include\stTests.h">
       <Filter>Includes</Filter>
     </ClInclude>
+    <ClInclude Include="Include\AGRLoader.h">
+      <Filter>Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="res\description\fagrloader.h">
+      <Filter>Resources\description</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\strings_us\c4d_strings.str">
@@ -125,12 +131,18 @@
     <None Include="res\strings_us\description\fsmdloader.str">
       <Filter>Resources\strings_us\description</Filter>
     </None>
+    <None Include="res\strings_us\description\fagrloader.str">
+      <Filter>Resources\strings_us\description</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="res\dialogs\ABOUTDLG.res">
       <Filter>Resources\dialogs</Filter>
     </Resource>
     <Resource Include="res\description\fsmdloader.res">
+      <Filter>Resources\description</Filter>
+    </Resource>
+    <Resource Include="res\description\fagrloader.res">
       <Filter>Resources\description</Filter>
     </Resource>
   </ItemGroup>
@@ -172,6 +184,9 @@
       <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="Source\stTests.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\AGRLoader.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
   </ItemGroup>

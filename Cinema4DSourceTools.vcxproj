@@ -83,6 +83,7 @@
     <ClCompile>
       <AdditionalIncludeDirectories>./source;./res;./res/description;./lib;./Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BrowseInformation>true</BrowseInformation>
+      <DisableSpecificWarnings>4702;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <IgnoreSpecificDefaultLibraries />
@@ -108,6 +109,7 @@
     <ClCompile>
       <AdditionalIncludeDirectories>./source;./res;./res/description;./lib;./Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <DisableSpecificWarnings>4702;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <IgnoreSpecificDefaultLibraries />
@@ -127,6 +129,7 @@
     </Midl>
     <ClCompile>
       <AdditionalIncludeDirectories>./source;./res;./res/description;./lib;./Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4702;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <IgnoreSpecificDefaultLibraries />
@@ -152,6 +155,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\AboutDialog.h" />
+    <ClInclude Include="Include\AGRLoader.h" />
     <ClInclude Include="Include\Globals.h" />
     <ClInclude Include="Include\main.h" />
     <ClInclude Include="Include\QCSequenceAnimation.h" />
@@ -177,14 +181,21 @@
     <ClInclude Include="lib\tinyxml2\tinyxml2.h" />
     <ClInclude Include="lib\VTFLib\VTFLib.h" />
     <ClInclude Include="res\c4d_symbols.h" />
+    <ClInclude Include="res\description\fagrloader.h" />
     <ClInclude Include="res\description\fsmdloader.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\strings_us\c4d_strings.str" />
+    <None Include="res\strings_us\description\fagrloader.str" />
     <None Include="res\strings_us\description\fsmdloader.str" />
     <None Include="res\strings_us\dialogs\ABOUTDLG.str" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="res\description\fagrloader.res">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Intel|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </Resource>
     <Resource Include="res\description\fsmdloader.res">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Intel|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -199,6 +210,7 @@
   <ItemGroup>
     <ClCompile Include="lib\tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="Source\AboutDialog.cpp" />
+    <ClCompile Include="Source\AGRLoader.cpp" />
     <ClCompile Include="Source\Globals.cpp" />
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\QCSequenceAnimation.cpp" />

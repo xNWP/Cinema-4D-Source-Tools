@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+  <!--
+  TO DO:
+  
+  GeData
+  BaseContainer
+  BaseBitmap (use Bitmap visualizer)
+  -->
+  
+  <!-- BaseList2D -->
+  <Type Name="BaseList2D">
+    <DisplayString Condition="sizeof(int*) == 4">{*(String*)(((char*)this) + 404)}</DisplayString>
+    <DisplayString Condition="sizeof(int*) == 8">{*(String*)(((char*)this) + 576)}</DisplayString>
+  </Type>
+
+  <!-- Other BaseList2D derivatives (the ones where we want to see the Plugin ID) -->
+  <Type Name="BaseShader">
+    <DisplayString Condition="sizeof(int*) == 4">{{ {*(BaseList2D*)this}, id={*(int*)((*(int*)(((char*)this) + 44)) + 4)} }</DisplayString>
+    <DisplayString Condition="sizeof(int*) == 8">{{ {*(BaseList2D*)this}, id={*(int*)((*(int*)(((char*)this) + 72)) + 8)} }</DisplayString>
+  </Type>
+  <Type Name="BasePlugin">
+    <DisplayString Condition="sizeof(int*) == 4">{{ {*(BaseList2D*)this}, id={*(int*)((*(int*)(((char*)this) + 44)) + 4)} }</DisplayString>
+    <DisplayString Condition="sizeof(int*) == 8">{{ {*(BaseList2D*)this}, id={*(int*)((*(int*)(((char*)this) + 72)) + 8)} }</DisplayString>
+  </Type>
+  <Type Name="BaseSceneHook">
+    <DisplayString Condition="sizeof(int*) == 4">{{ {*(BaseList2D*)this}, id={*(int*)((*(int*)(((char*)this) + 44)) + 4)} }</DisplayString>
+    <DisplayString Condition="sizeof(int*) == 8">{{ {*(BaseList2D*)this}, id={*(int*)((*(int*)(((char*)this) + 72)) + 8)} }</DisplayString>
+  </Type>
+  <Type Name="BaseSceneLoader">
+    <DisplayString Condition="sizeof(int*) == 4">{{ {*(BaseList2D*)this}, id={*(int*)((*(int*)(((char*)this) + 44)) + 4)} }</DisplayString>
+    <DisplayString Condition="sizeof(int*) == 8">{{ {*(BaseList2D*)this}, id={*(int*)((*(int*)(((char*)this) + 72)) + 8)} }</DisplayString>
+  </Type>
+  <Type Name="BaseSceneSaver">
+    <DisplayString Condition="sizeof(int*) == 4">{{ {*(BaseList2D*)this}, id={*(int*)((*(int*)(((char*)this) + 44)) + 4)} }</DisplayString>
+    <DisplayString Condition="sizeof(int*) == 8">{{ {*(BaseList2D*)this}, id={*(int*)((*(int*)(((char*)this) + 72)) + 8)} }</DisplayString>
+  </Type>
+  <Type Name="BaseTag">
+    <DisplayString Condition="sizeof(int*) == 4">{{ {*(BaseList2D*)this}, id={*(int*)((*(int*)(((char*)this) + 44)) + 4)} }</DisplayString>
+    <DisplayString Condition="sizeof(int*) == 8">{{ {*(BaseList2D*)this}, id={*(int*)((*(int*)(((char*)this) + 72)) + 8)} }</DisplayString>
+  </Type>
+  <Type Name="BaseVideoPost">
+    <DisplayString Condition="sizeof(int*) == 4">{{ {*(BaseList2D*)this}, id={*(int*)((*(int*)(((char*)this) + 44)) + 4)} }</DisplayString>
+    <DisplayString Condition="sizeof(int*) == 8">{{ {*(BaseList2D*)this}, id={*(int*)((*(int*)(((char*)this) + 72)) + 8)} }</DisplayString>
+  </Type>
+  <Type Name="CCurve">
+    <DisplayString Condition="sizeof(int*) == 4">{{ {*(BaseList2D*)this}, id={*(int*)((*(int*)(((char*)this) + 44)) + 4)} }</DisplayString>
+    <DisplayString Condition="sizeof(int*) == 8">{{ {*(BaseList2D*)this}, id={*(int*)((*(int*)(((char*)this) + 72)) + 8)} }</DisplayString>
+  </Type>
+  <Type Name="CTrack">
+    <DisplayString Condition="sizeof(int*) == 4">{{ {*(BaseList2D*)this}, id={*(int*)((*(int*)(((char*)this) + 44)) + 4)} }</DisplayString>
+    <DisplayString Condition="sizeof(int*) == 8">{{ {*(BaseList2D*)this}, id={*(int*)((*(int*)(((char*)this) + 72)) + 8)} }</DisplayString>
+  </Type>
+  <Type Name="GvNode">
+    <DisplayString Condition="sizeof(int*) == 4">{{ {*(BaseList2D*)this}, id={*(int*)((*(int*)(((char*)this) + 44)) + 4)} }</DisplayString>
+    <DisplayString Condition="sizeof(int*) == 8">{{ {*(BaseList2D*)this}, id={*(int*)((*(int*)(((char*)this) + 72)) + 8)} }</DisplayString>
+  </Type>
+
+  <!-- BaseObject -->
+  <Type Name="BaseObject">
+    <DisplayString Condition="sizeof(int*) == 4">{{ {*(BaseList2D*)this}, id={*(int*)((*(int*)(((char*)this) + 44)) + 4)} }</DisplayString>
+    <DisplayString Condition="sizeof(int*) == 8">{{ {*(BaseList2D*)this}, id={*(int*)((*(int*)(((char*)this) + 72)) + 8)} }</DisplayString>
+    <Expand>
+      <Item Condition="sizeof(int*) == 4" Name="AbsPos">*(Vector*)(((char*)this) + 896)</Item>
+      <Item Condition="sizeof(int*) == 8" Name="AbsPos">*(Vector*)(((char*)this) + 1152)</Item>
+      <Item Condition="sizeof(int*) == 4" Name="AbsRot">*(Vector*)(((char*)this) + 872)</Item>
+      <Item Condition="sizeof(int*) == 8" Name="AbsRot">*(Vector*)(((char*)this) + 1128)</Item>
+      <Item Condition="sizeof(int*) == 4" Name="AbsScale">*(Vector*)(((char*)this) + 920)</Item>
+      <Item Condition="sizeof(int*) == 8" Name="AbsScale">*(Vector*)(((char*)this) + 1176)</Item>
+    </Expand>
+  </Type>
+
+  <!-- Vector32, Vector 64 -->
+  <Type Name="Vector32">
+    <AlternativeType Name="Vector64"></AlternativeType>
+    <DisplayString>{{ {x}, {y}, {z} }</DisplayString>
+    <Expand>
+      <Item Name="x">x</Item>
+      <Item Name="y">y</Item>
+      <Item Name="z">z</Item>
+      <Item Name="Length (3. approx)">0.5*((x*x+y*y+z*z) * (0.125+1/(0.5*(x*x+y*y+z*z)+2))+0.5) + (x*x+y*y+z*z) / (2*((x*x+y*y+z*z) * (0.125+1/(0.5*(x*x+y*y+z*z)+2))+0.5))</Item>
+    </Expand>
+  </Type>
+
+  <!-- String -->
+	<Type Name="String">
+			<DisplayString Condition="(*(char**)this) == 0">nullptr</DisplayString>
+
+			<DisplayString Condition="(*(char**)this) != 0 &amp;&amp; *(((short*)(*(char**)this))+5) == -1 &amp;&amp; *(((int*)(*(char**)this))+3) == -1 &amp;&amp; *(((char*)(*(char**)this))+8) &lt; 0">{{ "{(*((char**)(((char*)(*(char**)this))+32))), [(*((int*)(((char*)(*(char**)this))+32+sizeof(char*))))]sb}" RefCnt: {(*((long*)(((char*)(*(char**)this))+0)))}x }</DisplayString>
+			<DisplayString Condition="(*(char**)this) != 0 &amp;&amp; *(((short*)(*(char**)this))+5) == -1 &amp;&amp; *(((int*)(*(char**)this))+3) == -1 &amp;&amp; *(((char*)(*(char**)this))+8) == 0">{{ "{(*((unsigned short**)(((char*)(*(char**)this))+32))), [(*((int*)(((char*)(*(char**)this))+32+sizeof(char*))))/2]sub}" RefCnt: {(*((long*)(((char*)(*(char**)this))+0)))}x }</DisplayString>
+			<DisplayString Condition="(*(char**)this) != 0 &amp;&amp; *(((short*)(*(char**)this))+5) == -1 &amp;&amp; *(((int*)(*(char**)this))+3) == -1 &amp;&amp; *(((char*)(*(char**)this))+8) == 1">{{ "[4byte-unicode]{(*((unsigned int**)(((char*)(*(char**)this))+32))), [(*((int*)(((char*)(*(char**)this))+32+sizeof(char*))))/2]su}" RefCnt: {(*((long*)(((char*)(*(char**)this))+0)))}x }</DisplayString>
+
+			<StringView Condition="(*(char**)this) != 0 &amp;&amp; *(((short*)(*(char**)this))+5) == -1 &amp;&amp; *(((int*)(*(char**)this))+3) == -1 &amp;&amp; *(((char*)(*(char**)this))+8) &lt; 0">(*((char**)(((char*)(*(char**)this))+32))), [(*((int*)(((char*)(*(char**)this))+32+sizeof(char*))))]sb</StringView>
+			<StringView Condition="(*(char**)this) != 0 &amp;&amp; *(((short*)(*(char**)this))+5) == -1 &amp;&amp; *(((int*)(*(char**)this))+3) == -1 &amp;&amp; *(((char*)(*(char**)this))+8) == 0">(*((unsigned short**)(((char*)(*(char**)this))+32))), [(*((int*)(((char*)(*(char**)this))+32+sizeof(char*))))/2]sub</StringView>
+
+			<Expand>
+					<Item Name="Length" Condition="(*(char**)this) != 0 &amp;&amp; *(((short*)(*(char**)this))+5) == -1 &amp;&amp; *(((int*)(*(char**)this))+3) == -1 &amp;&amp; *(((char*)(*(char**)this))) &lt; 0">(*((int*)(((char*)(*(char**)this))+32+sizeof(char*))))</Item>
+					<Item Name="Length" Condition="(*(char**)this) != 0 &amp;&amp; *(((short*)(*(char**)this))+5) == -1 &amp;&amp; *(((int*)(*(char**)this))+3) == -1 &amp;&amp; *(((char*)(*(char**)this))) == 0">(*((int*)(((char*)(*(char**)this))+32+sizeof(char*))))</Item>
+					<Item Name="Length" Condition="(*(char**)this) != 0 &amp;&amp; *(((short*)(*(char**)this))+5) == -1 &amp;&amp; *(((int*)(*(char**)this))+3) == -1 &amp;&amp; *(((char*)(*(char**)this))) == 1">(*((int*)(((char*)(*(char**)this))+32+sizeof(char*))))</Item>
+					<Item Name="Width"  Condition="(*(char**)this) != 0 &amp;&amp; *(((short*)(*(char**)this))+5) == -1 &amp;&amp; *(((int*)(*(char**)this))+3) == -1 &amp;&amp; *(((char*)(*(char**)this))) &lt; 0">1</Item>
+					<Item Name="Width"  Condition="(*(char**)this) != 0 &amp;&amp; *(((short*)(*(char**)this))+5) == -1 &amp;&amp; *(((int*)(*(char**)this))+3) == -1 &amp;&amp; *(((char*)(*(char**)this))) == 0">2</Item>
+					<Item Name="Width"  Condition="(*(char**)this) != 0 &amp;&amp; *(((short*)(*(char**)this))+5) == -1 &amp;&amp; *(((int*)(*(char**)this))+3) == -1 &amp;&amp; *(((char*)(*(char**)this))) == 1">4</Item>
+					<Item Name="RefCnt">*((long*)(((char*)(*(char**)this))+0))</Item>
+			</Expand>
+	</Type>
+
+  <!-- Filename -->
+	<Type Name="Filename">
+			<DisplayString Condition="(*(char**)this) == 0">nullptr</DisplayString>
+			<DisplayString Condition="(*(char**)this) != 0 &amp;&amp; (*(char**)((Filename*)(((int*)(((char*)(*(char**)this))+8+2*sizeof(char*)+sizeof(char*)))))) == 0">{{ {*(char**)(((int*)(((*(char**)this))+8))),sb} Path: {*(String*)(((int*)(((*(char**)this))+8+2*sizeof(char*))))} RefCnt: {(*((long*)(((*(char**)this))+0)))}x }</DisplayString>
+			<DisplayString Condition="(*(char**)this) != 0 &amp;&amp; (*(char**)((Filename*)(((int*)(((char*)(*(char**)this))+8+2*sizeof(char*)+sizeof(char*)))))) != 0">{{ {*(char**)(((int*)(((*(char**)this))+8))),sb} Path: {*(String*)(((int*)(((*(char**)this))+8+2*sizeof(char*))))} Authority: {*(Filename*)(((int*)(((*(char**)this))+8+3*sizeof(char*))))} RefCnt: {(*((long*)(((*(char**)this))+0)))}x }</DisplayString>
+			<Expand>
+					<Item Name="Protocol">*(char**)(((int*)(((char*)(*(char**)this))+8))),sb</Item>
+					<Item Name="Path">*(String*)(((int*)(((char*)(*(char**)this))+8+2*sizeof(char*))))</Item>
+					<Item Name="Authority">*(Filename*)(((int*)(((char*)(*(char**)this))+8+3*sizeof(char*))))</Item>
+					<Item Name="RefCnt">*((long*)(((char*)(*(char**)this))+0))</Item>
+			</Expand>
+	</Type>
+
+  <!-- SMinMax, LMinMax -->
+  <Type Name="SMinMax">
+    <AlternativeType Name="LMinMax"></AlternativeType>
+    <DisplayString>{{ Min={min}, Max={max} }</DisplayString>
+  </Type>
+
+  <!-- BaseTime -->
+  <Type Name="BaseTime">
+    <DisplayString>{{ {numerator/denominator} }</DisplayString>
+  </Type>
+
+  <!-- DateTime -->
+  <Type Name="DateTime">
+    <DisplayString>{{ {year}-{month}-{day}, {hour}:{minute}:{second} }</DisplayString>
+  </Type>
+
+  <!-- TriState -->
+  <Type Name="TriState&lt;*&gt;">
+    <DisplayString Condition="tri ==-1">{{ value={value} (unchanged) }</DisplayString>
+    <DisplayString Condition="tri == 0">{{ value={value} }</DisplayString>
+    <DisplayString Condition="tri == 1">{{ value={value} (Tri) }</DisplayString>
+  </Type>
+
+  <!-- CPolygon -->
+  <Type Name="CPolygon">
+    <DisplayString Condition="c == d">{{ {a}, {b}, {c} (Tri) }</DisplayString>
+    <DisplayString Condition="c != d">{{ {a}, {b}, {c}, {d} (Quad) }</DisplayString>
+    <Expand>
+      <Item Name="a">a</Item>
+      <Item Name="b">b</Item>
+      <Item Name="c">c</Item>
+      <Item Condition="c != d" Name="d">d</Item>
+      <Synthetic Condition="c == d" Name="Type">
+        <DisplayString>Triangle</DisplayString>
+      </Synthetic>
+      <Synthetic Condition="c != d" Name="Type">
+        <DisplayString>Quadrangle</DisplayString>
+      </Synthetic>
+    </Expand>
+  </Type>
+
+  <!-- UUID -->
+  <Type Name="C4DUuid">
+    <DisplayString>{*(_GUID*)this}</DisplayString>
+  </Type>
+
+  <!-- BaseArray -->
+  <Type Name="maxon::BaseArray&lt;*&gt;">
+    <DisplayString Condition="_cnt &gt; 3">{{ Count={(size_t) _cnt} [{_ptr[0]}, {_ptr[1]}, {_ptr[2]}, {_ptr[3]}, ...] }</DisplayString>
+    <DisplayString Condition="_cnt == 3">{{ Count={(size_t) _cnt} [{_ptr[0]}, {_ptr[1]}, {_ptr[2]}] }</DisplayString>
+    <DisplayString Condition="_cnt == 2">{{ Count={(size_t) _cnt} [{_ptr[0]}, {_ptr[1]}] }</DisplayString>
+    <DisplayString Condition="_cnt == 1">{{ Count={(size_t) _cnt} [{_ptr[0]}] }</DisplayString>
+    <DisplayString Condition="_cnt == 0">{{ Count={(size_t) _cnt} }</DisplayString>
+    <Expand>
+      <Item Name="Size">_cnt</Item>
+      <Item Name="Capacity">_capacity</Item>
+      <ArrayItems>
+        <Size>_cnt</Size>
+        <ValuePointer>_ptr</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+
+  <!-- BlockArray -->
+  <Type Name="maxon::BlockArray&lt;*&gt;">
+    <DisplayString Condition="_blocks._cnt == 1">Elements: {{ Count={(size_t) _blocks._ptr[0]._cnt} }</DisplayString>
+    <DisplayString Condition="_blocks._cnt != 1">Blocks: {{ Count={(size_t) _blocks._cnt} }</DisplayString>
+    <Expand>
+      <Item Name="IsContinuous" >_isContinuous</Item>
+      <Item Condition="_blocks._cnt == 1" Name="Size" >_blocks._ptr[0]._cnt</Item>
+      <Item Condition="_blocks._cnt == 1" Name="Capacity">_blocks._ptr[0]._capacity</Item>
+      <ArrayItems Condition="_blocks._cnt == 1">
+        <Size>_blocks._ptr[0]._cnt</Size>
+        <ValuePointer>_blocks._ptr[0]._ptr</ValuePointer>
+      </ArrayItems>
+
+      <Item Condition="_blocks._cnt != 1" Name="Blocks" >_blocks._cnt</Item>
+      <ArrayItems Condition="_blocks._cnt != 1">
+        <Size>_blocks._cnt</Size>
+        <ValuePointer>_blocks._ptr</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+
+  <!-- HashMap -->
+  <!-- define it twice, one without, one with value, the first one is needed for HashSet (which is a HashMap with an EmptyClass -->
+  <Type Name="maxon::HashMap&lt;*&gt;::Bucket{*">
+    <DisplayString>{{ Hash={list->_hashCode,x} Key={list->_key} }</DisplayString>
+  </Type>
+
+    <!-- second implementation with value, this one overwrites the other one if possible with the current datatype -->
+    <Type Name="maxon::HashMap&lt;*&gt;::Bucket{*">
+      <DisplayString>{{ Hash={list->_hashCode,x} Key={list->_key} Value={list->_value} }</DisplayString>
+    </Type>
+  
+    <!-- HashMap main imlpementation -->
+    <Type Name="maxon::HashMap&lt;*&gt;">
+      <DisplayString Condition="_size == 0">{{ Count={(size_t) _size} }</DisplayString>
+      <DisplayString Condition="_size != 0">{{ Count={(size_t) _size} }</DisplayString>
+      <Expand>
+        <Item Name="Size">_size</Item>
+        <ArrayItems>
+          <Size>_size</Size>
+          <ValuePointer>_nonemptyBuckets</ValuePointer>
+        </ArrayItems>
+      </Expand>
+    </Type>
+
+  <!-- SortedArray -->
+  <Type Name="maxon::SortedArray&lt;*&gt;">
+    <DisplayString Condition="_array._cnt &gt; 3">{{ Sorted={_sorted}, Count={(size_t) _array._cnt} [{_array._ptr[0]}, {_array._ptr[1]}, {_array._ptr[2]}, {_array._ptr[3]}, ...] }</DisplayString>
+    <DisplayString Condition="_array._cnt == 3">{{ Sorted={_sorted}, Count={(size_t) _array._cnt} [{_array._ptr[0]}, {_array._ptr[1]}, {_array._ptr[2]}] }</DisplayString>
+    <DisplayString Condition="_array._cnt == 2">{{ Sorted={_sorted}, Count={(size_t) _array._cnt} [{_array._ptr[0]}, {_array._ptr[1]}] }</DisplayString>
+    <DisplayString Condition="_array._cnt == 1">{{ Sorted={_sorted}, Count={(size_t) _array._cnt} [{_array._ptr[0]}] }</DisplayString>
+    <DisplayString Condition="_array._cnt == 0">{{ Sorted={_sorted}, Count={(size_t) _array._cnt} }</DisplayString>
+    <Expand>
+      <Item Name="Sorted">_sorted</Item>
+      <ExpandedItem>_array</ExpandedItem>
+    </Expand>
+  </Type>
+
+  <!-- BaseBitmap -->
+  <Type Name="BaseBitmap">
+    <DisplayString Condition="sizeof(int*) == 4">{{ {*(int*)(this + 76)}x{*(int*)(this + 80)}, Bpp={*(int*)((*(int*)(((char*)this) + 24)) + 12)}, {(COLORMODE)(*(int*)(this + 92))} }</DisplayString>
+    <DisplayString Condition="sizeof(int*) == 8">{{ {*(int*)(this + 152)}x{*(int*)(this + 156)}, Bpp={*(int*)((*(int*)(((char*)this) + 48)) + 16)}, {(COLORMODE)(*(int*)(this + 168))} }</DisplayString>
+    <Expand>
+      <Item Condition="sizeof(int*) == 4" Name="Width">*(int*)(this + 76)</Item>
+      <Item Condition="sizeof(int*) == 8" Name="Width">*(int*)(this + 152)</Item>
+      <Item Condition="sizeof(int*) == 4" Name="Height">*(int*)(this + 80)</Item>
+      <Item Condition="sizeof(int*) == 8" Name="Height">*(int*)(this + 156)</Item>
+      <Item Condition="sizeof(int*) == 4" Name="Is Multipass">*(int*)(this + 88)</Item>
+      <Item Condition="sizeof(int*) == 8" Name="Is Multipass">*(int*)(this + 164)</Item>
+      <Item Condition="sizeof(int*) == 4" Name="Bits per pixel">*(int*)((*(int*)(((char*)this) + 24)) + 12)</Item>
+      <Item Condition="sizeof(int*) == 8" Name="Bits per pixel">*(int*)((*(int*)(((char*)this) + 48)) + 16)</Item>
+      <Item Condition="sizeof(int*) == 4" Name="Colormode">(COLORMODE)(*(int*)(this + 92))</Item>
+      <Item Condition="sizeof(int*) == 8" Name="Colormode">(COLORMODE)(*(int*)(this + 168))</Item>
+    </Expand>
+  </Type>
+  
+  <!-- IconData -->
+  <Type Name="IconData">
+    <DisplayString>{{ w={w}, h={h}, x={x}, y={y}, {flags} }</DisplayString>
+  </Type>
+
+  <!-- Kerning -->
+  <Type Name="KerningTriState">
+    <AlternativeType Name="Kerning"></AlternativeType>
+    <DisplayString>{{ kerning={_kerning}, tracking={_tracking}, scale={_scale}, scaleH={_scaleH}, scaleV={_scaleV}, baselineShift={_baselineShift} }</DisplayString>
+  </Type>
+
+  <Type Name="KerningData">
+    <DisplayString Condition="sizeof(int*) == 4">{{ count={(*(maxon::BaseArray&lt;Kerning,16,0,maxon::DefaultAllocator&gt;*)this)._cnt}, string={*(String*)(this + 12)}, selStart={*(Int*)(this + 28)}, selEnd={*(Int*)(this + 32)}, editMode={*(Bool*)(this + 36)} }</DisplayString>
+    <DisplayString Condition="sizeof(int*) == 8">{{ count={(*(maxon::BaseArray&lt;Kerning,16,0,maxon::DefaultAllocator&gt;*)this)._cnt}, string={*(String*)(this + 24)}, selStart={*(Int*)(this + 48)}, selEnd={*(Int*)(this + 52)}, editMode={*(Bool*)(this + 56)} }</DisplayString>
+    <Expand>
+      <Item Condition="sizeof(int*) == 4" Name="string">*(String*)(this + 12)</Item>
+      <Item Condition="sizeof(int*) == 8" Name="string">*(String*)(this + 24)</Item>
+      <Item Condition="sizeof(int*) == 4" Name="selectionStart">*(int*)(this + 28)</Item>
+      <Item Condition="sizeof(int*) == 8" Name="selectionStart">*(int*)(this + 48)</Item>
+      <Item Condition="sizeof(int*) == 4" Name="selectionEnd">*(int*)(this + 32)</Item>
+      <Item Condition="sizeof(int*) == 8" Name="selectionEnd">*(int*)(this + 52)</Item>
+      <Item Condition="sizeof(int*) == 4" Name="editMode">*(Bool*)(this + 36)</Item>
+      <Item Condition="sizeof(int*) == 8" Name="editMode">*(Bool*)(this + 56)</Item>
+      <ExpandedItem>*(maxon::BaseArray&lt;Kerning,16,0,maxon::DefaultAllocator&gt;*)this</ExpandedItem>
+    </Expand>
+  </Type>
+
+</AutoVisualizer>

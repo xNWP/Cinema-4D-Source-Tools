@@ -1,0 +1,7 @@
+# This file is used by Asan to exclude some third party libraries and/or functions from being sanitized.
+# For more information check out http://clang.llvm.org/docs/AddressSanitizer.html#suppressing-reports-in-external-libraries
+
+# Python: Needs to be excluded because the readdir(..) c library call triggers a warning in the wrap_readdir(...) function
+interceptor_via_fun:case_ok
+interceptor_via_fun:posix_listdir
+interceptor_via_fun:_rlm_add_dot_lic
