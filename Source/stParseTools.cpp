@@ -14,13 +14,33 @@ namespace ST
 			std::vector<String> *rval = NewObj(std::vector<String>);
 			Int32 it = 0;
 			Int32 pos = 0;
+			Bool FavourLF = false;
 
 			while (pos < data.GetLength())
 			{
-				if (data.FindFirst("\r\n", &it, pos))
+				if (FavourLF)
+				{
+					if (data.FindFirst("\n", &it, pos))
+					{
+						rval->push_back(data.SubStr(pos, it - pos));
+						pos = it + 1;
+						continue;
+					}
+					else
+					{
+						FavourLF = false;
+					}
+				}
+				else if (data.FindFirst("\r\n", &it, pos))
 				{
 					rval->push_back(data.SubStr(pos, it - pos));
 					pos = it + 2;
+				}
+				else if (data.FindFirst("\n", &it, pos))
+				{
+					rval->push_back(data.SubStr(pos, it - pos));
+					pos = it + 1;
+					FavourLF = true;
 				}
 				else
 				{
@@ -51,7 +71,7 @@ namespace ST
 				{
 					start = i;
 				}
-				else if (data[i] == ' ' && start != -1)
+				else if ((data[i] == ' ' || data[i] == '\t') && start != -1)
 				{
 					substrs->push_back(data.SubStr(start, i - start));
 					start = -1;

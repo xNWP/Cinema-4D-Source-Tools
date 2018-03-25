@@ -955,6 +955,9 @@ namespace ST
 
 		for (Int32 i = 0; i < fileLineData->size(); i++)
 		{
+			StatusSetText("Line " + String::IntToString(i) + " of " + String::IntToString(Int32(fileLineData->size())));
+			StatusSetBar(Int32(1.0f * i / fileLineData->size() * 100));
+
 			String line = (*fileLineData)[i];
 			if (line == "nodes")
 			{
@@ -988,6 +991,8 @@ namespace ST
 				}
 			}
 		}
+
+		StatusClear();
 
 		if (settings.mesh)
 			m_mesh_built = true;
@@ -1100,6 +1105,11 @@ namespace ST
 				it++;
 				DeleteObj(substrs);
 				continue;
+			}
+
+			if (substrs->size() < 7) // bad skeleton
+			{
+				return false;
 			}
 
 			Int32 id = (*substrs)[0].ParseToInt32();
