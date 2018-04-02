@@ -14,21 +14,21 @@ namespace ST
 		Bool IsClass = false;
 		while (data[tIt] != "}")
 		{
-			std::vector<String> *cmd = ST::Parse::split(data[tIt]);
+			std::vector<String> cmd = ST::Parse::split(data[tIt]);
 
-			for (Int32 i = 0; i < cmd->size(); i++)
+			for (Int32 i = 0; i < cmd.size(); i++)
 			{
 				if (tIt == it) // first line
 				{
-					String name = (*cmd)[1];
+					String name = cmd[1];
 					ST::Parse::StripString(name);
 					m_name = name;
-					String smd = (*cmd)[2];
+					String smd = cmd[2];
 					ST::Parse::StripString(smd);
 					m_smd = Filename(smd);
-					if (cmd->size() > 3)
+					if (cmd.size() > 3)
 					{
-						if ((*cmd)[3] == "{")
+						if (cmd[3] == "{")
 							IsClass = true;
 						else // single liner parse
 						{
@@ -37,8 +37,6 @@ namespace ST
 					}
 				}
 			}
-
-			DeleteObj(cmd);
 
 			if (!IsClass)
 				break;

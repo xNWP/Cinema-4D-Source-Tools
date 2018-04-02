@@ -12,7 +12,6 @@ namespace ST
 		if (!probe || size < 18)
 			return false;
 
-		UInt32 *p = (UInt32*)probe;
 		Int32 v1 = *(probe + 14);
 		Char *c = (Char*)probe;
 		String header(c);
@@ -33,7 +32,7 @@ namespace ST
 		frame = -1;
 
 		AutoAlloc<BaseFile> file;
-		file->Open(name);
+		file->Open(name, FILEOPEN_READ, FILEDIALOG_NONE, BYTEORDER_INTEL);
 		if (!file)
 			return file->GetError();
 
@@ -57,6 +56,7 @@ namespace ST
 		pdata->SetBool(SMD_IMPORT_MESH, true);
 		pdata->SetFloat(SMD_LOADER_SCALE, 1.0);
 		pdata->SetVector(SMD_LOADER_ROTATE, Vector(0, 0, 0));
+		pdata->SetBool(SMD_LOADER_SWAPYZ, false);
 
 		Int32 ModelIt = 1;
 		while (true)
@@ -75,7 +75,6 @@ namespace ST
 				frame++;
 				Float32 v;
 				file->ReadFloat32(&v);
-				lMotor(&v);
 				if (m_time[0] == -1)
 				{
 					m_time[0] = v;
@@ -88,19 +87,16 @@ namespace ST
 				Int32 HiddenOffset;
 				file->ReadInt32(&HiddenOffset);
 				Int64 CurrentOffset = file->GetPosition();
-				lMotor(&HiddenOffset);
 
 				if (HiddenOffset != 0)
 				{
 					file->Seek(HiddenOffset - 4, FILESEEK_RELATIVE);
 					Int32 NumHidden;
 					file->ReadInt32(&NumHidden);
-					lMotor(&NumHidden);
 					for (Int32 i = 0; i < NumHidden; i++)
 					{
 						Int32 h;
 						file->ReadInt32(&h);
-						lMotor(&h);
 						m_hiddenHandles.emplace(h);
 					}
 					file->Seek(CurrentOffset, FILESEEK_START);
@@ -110,7 +106,6 @@ namespace ST
 			{
 				Int32 EntityHandle;
 				file->ReadInt32(&EntityHandle);
-				lMotor(&EntityHandle);
 				Bool NewHandle;
 
 				ModelHandle *handle;
@@ -162,7 +157,11 @@ namespace ST
 							Filename Full = settings.RootModelDir.GetString() + Model.GetString().SubStr(1, Model.GetString().GetLength() - 1).ToLower() + "/" + Model.GetFileString();
 							Full.SetSuffix("qc");
 							if (!MergeDocument(doc, Full, SCENEFILTER_OBJECTS | SCENEFILTER_MATERIALS | SCENEFILTER_MERGESCENE, nullptr))
+							{
+								String er = GeLoadString(IDS_NO_FILE) + Full.GetString() + GeLoadString(IDS_NO_FILE_0);
+								*error = er;
 								return FILEERROR_READ;
+							}
 
 							// Build the skeleton cache
 							handle->BuildSkeletonCache(Full);
@@ -264,15 +263,36 @@ namespace ST
 					{
 						Int32 BCount;
 						file->ReadInt32(&BCount);
-						lMotor(&BCount);
 						for (Int32 i = 0; i < BCount; i++)
 						{
 							
 							BaseObject *bone = ST::Parse::FindChild(handle->Skeleton, (*handle->m_skeleton)[i]->GetName());
 							Vector Pos = ReadVector(file);
-							Quaternion quat = ReadQuaternion(file, true);
-							Matrix rotm = quat.GetMatrix();
-							Vector Rot = MatrixToHPB(rotm, ROTATIONORDER_XYZGLOBAL);
+
+							Quaternion quat = ReadQuaternion(file);
+
+							Matrix m = quat.GetMatrix();
+
+							Vector Rot;
+
+							if (bone->GetUp()->GetName() == "skeleton")
+							{
+								Rot = MatrixToHPB(m, ROTATIONORDER_XYZGLOBAL);
+								Float tX = Pos.x;
+								Pos.x = -Pos.y;
+								Pos.y = tX;
+
+								Rot.y = -Rot.y;
+								Rot.z = -Rot.z - PI / 2;
+							}
+							else
+							{
+								Rot = MatrixToHPB(m, ROTATIONORDER_YXZGLOBAL);
+								Float tX = Rot.x;
+								Rot.x = Rot.y;
+								Rot.y = tX;
+								Rot.z = -Rot.z;
+							}
 
 							CTrack *xP = bone->FindCTrack(DescID(DescLevel(ID_BASEOBJECT_ABS_POSITION, DTYPE_VECTOR, 0),
 								DescLevel(VECTOR_X, DTYPE_REAL, 0)));
@@ -362,7 +382,6 @@ namespace ST
 				Vector rot = ReadQAngle(file);
 				Float32 fov;
 				file->ReadFloat32(&fov);
-				lMotor(&fov);
 				CamPos.push_back(pos);
 				CamRot.push_back(rot);
 				CamFov.push_back(fov);
@@ -371,14 +390,12 @@ namespace ST
 			{
 				Int32 handle;
 				file->ReadInt32(&handle);
-				lMotor(&handle);
 				m_deletedHandles.emplace(handle);
 			}
 			else if (cmd == "afxHidden")
 			{
 				Int32 HCount, handle;
 				file->ReadInt32(&HCount);
-				lMotor(&HCount);
 				for (Int32 i = 0; i < HCount; i++)
 					file->ReadInt32(&handle);
 			}
@@ -405,7 +422,6 @@ namespace ST
 		Int32 KeyWrd;
 		String cmd;
 		file.ReadInt32(&KeyWrd);
-		lMotor(&KeyWrd);
 		if (KeyWrd != -1)
 		{
 			std::map<Int32, String>::iterator it = m_dictionary.find(KeyWrd);
@@ -435,29 +451,28 @@ namespace ST
 		return String("BAD");
 	}
 
-	Vector& AGRLoader::ReadVector(BaseFile &file, Bool quakeformat)
+	Vector AGRLoader::ReadVector(BaseFile &file, Bool quakeformat)
 	{
 		Float32 x, y, z;
 		file.ReadFloat32(&x);
 		file.ReadFloat32(&y);
 		file.ReadFloat32(&z);
-		lMotor(&x); lMotor(&y); lMotor(&z);
 
 		if (isinf(x) || isinf(y) || isinf(z))
 		{
 			x = 0; y = 0; z = 0;
 		}
 
-		return quakeformat ? Vector(-y, x, z) : Vector(x, y, z);
+		return quakeformat ? Vector(-y, z, x) : Vector(x, y, -z);
 	}
 
-	Vector& AGRLoader::ReadQAngle(BaseFile &file)
+	Vector AGRLoader::ReadQAngle(BaseFile &file)
 	{
+		auto test = file.GetPosition();
 		Float32 x, y, z;
 		file.ReadFloat32(&x);
 		file.ReadFloat32(&y);
 		file.ReadFloat32(&z);
-		lMotor(&x); lMotor(&y); lMotor(&z);
 		x = DegToRad(x); y = DegToRad(y); z = DegToRad(z);
 
 		if (isinf(x) || isinf(y) || isinf(z))
@@ -468,14 +483,13 @@ namespace ST
 		return Vector(x, y, z);
 	}
 
-	Quaternion& AGRLoader::ReadQuaternion(BaseFile &file, Bool quakeformat)
+	Quaternion AGRLoader::ReadQuaternion(BaseFile &file)
 	{
 		Float32 x, y, z, w;
 		file.ReadFloat32(&x);
 		file.ReadFloat32(&y);
 		file.ReadFloat32(&z);
 		file.ReadFloat32(&w);
-		lMotor(&x); lMotor(&y); lMotor(&z); lMotor(&w);
 
 		if (isinf(w) || isinf(x) || isinf(y) || isinf(z))
 		{
@@ -484,7 +498,7 @@ namespace ST
 
 		Quaternion r;
 		r.w = w;
-		r.v = quakeformat ? Vector64(-y, x, z) : Vector64(x, y, z);
+		r.v = Vector64(x, y, z);
 		return r;
 	}
 
@@ -499,31 +513,28 @@ namespace ST
 		while (i < file->GetLength())
 		{
 			String line = ST::Parse::ReadLine(file);
-			std::vector<String> *lines = ST::Parse::split(line);
+			i = file->GetPosition();
+			if (line == "")
+				continue;
+			std::vector<String> lines = ST::Parse::split(line);
 
-			if ((*lines)[0] == "$body")
+			if (lines[0] == "$body")
 			{
-				String r = (*lines)[2];
-				DeleteObj(lines);
+				String r = lines[2];
 				ST::Parse::StripString(r);
 				SMD = r;
 				break;
 			}
-			if ((*lines)[0] == "$bodygroup")
+			if (lines[0] == "$bodygroup")
 			{
-				DeleteObj(lines);
 				ST::Parse::ReadLine(file);
 				line = ST::Parse::ReadLine(file);
 				lines = ST::Parse::split(line);
-				String r = (*lines)[1];
-				DeleteObj(lines);
+				String r = lines[1];
 				ST::Parse::StripString(r);
 				SMD = r;
 				break;
 			}
-
-			DeleteObj(lines);
-			i = file->GetPosition();
 		}
 
 		file->Close();
@@ -540,15 +551,13 @@ namespace ST
 		// Fill data
 		while (line != "end")
 		{
-			std::vector<String> *sub = ST::Parse::split(line);
-			Int32 id = (*sub)[0].ParseToInt32();
-			String name = (*sub)[1]; ST::Parse::StripString(name);
-			Int32 pid = (*sub)[2].ParseToInt32();
+			std::vector<String> sub = ST::Parse::split(line);
+			Int32 id = sub[0].ParseToInt32();
+			String name = sub[1]; ST::Parse::StripString(name);
+			Int32 pid = sub[2].ParseToInt32();
 
 			ST::SourceSkeletonBone *newBone = NewObj(ST::SourceSkeletonBone, id, name, pid);
 			m_skeleton->push_back(newBone);
-
-			DeleteObj(sub);
 
 			line = ST::Parse::ReadLine(file);
 		}

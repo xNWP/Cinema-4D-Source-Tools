@@ -17,5 +17,13 @@ namespace ST
 			mr.off = pos;
 			obj->SetMg(mr);
 		}
+
+		Float64 Dot(const Quaternion &q1, const Quaternion &q2)
+		{
+			Vector64 a = q1.v;
+			Vector64 b = q2.v;
+			Float64 c = q1.w * q2.w;
+			return Dot(a, b) + c;
+		}
 	}
 }

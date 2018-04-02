@@ -61,6 +61,12 @@ namespace ST
 		std::vector<IKDecl> ikchain;
 	};
 
+	struct VMTMat
+	{
+		String name;
+		std::vector<BaseMaterial*> materials;
+	};
+
 	//----------------------------------------------------------------------------------------
 	/// Holds all the settings passed during import.
 	//----------------------------------------------------------------------------------------
@@ -70,6 +76,7 @@ namespace ST
 
 		Float scale;
 		Vector orientation;
+		Bool SwapYZ;
 		Bool animation;
 		Bool mesh;
 		Bool qc;
@@ -176,6 +183,8 @@ namespace ST
 		std::vector<QCFile*> *m_master_qc_record;
 		std::vector<SourceSMD*> *m_master_smd_record;
 		std::vector<SourceSMD*> *m_temporary_smd_record;
+		std::vector<VMTMat> m_material_cache;
+
 		std::chrono::time_point<std::chrono::system_clock> start;
 		std::chrono::time_point<std::chrono::system_clock> end;
 	};
@@ -341,6 +350,7 @@ namespace ST
 		/// Fills the object with all needed info from a standard format SMD file (seperated by lines).
 		///
 		/// @param[in] data				The line data from the SMD file.
+		/// @param[in] settings			The settings to use.
 		/// @param[in,out] it			Should point to the beginning <material> tag of the triangle, will return the line location after the last vertex.
 		/// @param[out] error			Returns 0 if no error creating, negative otherwise.
 		//----------------------------------------------------------------------------------------
@@ -352,23 +362,30 @@ namespace ST
 			// Read the data into a substring
 			while (it < (it + 3))
 			{
-				std::vector<String> *substrs = Parse::split((*data)[it]);
+				std::vector<String> substrs = Parse::split((*data)[it]);
 
-				if (substrs->size() < 9)
+				if (substrs.size() < 9)
 				{
 					error = -1; // bad vertex
-					DeleteObj(substrs);
 					break;
 				}
 
-				Int32 ParentBone = (*substrs)[0].ParseToInt32();
-				m_points.push_back(Vector((*substrs)[1].ParseToFloat(), (*substrs)[2].ParseToFloat(), -(*substrs)[3].ParseToFloat()));
-				m_normals.push_back(Vector((*substrs)[4].ParseToFloat(), (*substrs)[5].ParseToFloat(), -(*substrs)[6].ParseToFloat()));
-				m_uv_raw.push_back(Vector((*substrs)[7].ParseToFloat(), 1 - (*substrs)[8].ParseToFloat(), 0));
+				Int32 ParentBone = substrs[0].ParseToInt32();
+				Float x = substrs[1].ParseToFloat();
+				Float y = substrs[2].ParseToFloat();
+				Float z = -substrs[3].ParseToFloat();
+				Float nX = substrs[4].ParseToFloat();
+				Float nY = substrs[5].ParseToFloat();
+				Float nZ = -substrs[6].ParseToFloat();
+
+				m_points.push_back(Vector(x, y, z));
+				m_normals.push_back(Vector(nX, nY, nZ));
+
+				m_uv_raw.push_back(Vector(substrs[7].ParseToFloat(), 1 - substrs[8].ParseToFloat(), 0));
 				
 				std::map<Int32, Float> tempWeights;
-				for (Int32 j = 10; j < substrs->size(); j += 2)
-					tempWeights.emplace((*substrs)[j].ParseToInt32(), (*substrs)[j + 1].ParseToFloat());
+				for (Int32 j = 10; j < substrs.size(); j += 2)
+					tempWeights.emplace(substrs[j].ParseToInt32(), substrs[j + 1].ParseToFloat());
 
 				// calc diff between custom weights and parent
 				Float diff = 1.0;
@@ -383,9 +400,8 @@ namespace ST
 				}
 
 				m_weights.push_back(tempWeights);
-				substrs->clear();
+				substrs.clear();
 				tempWeights.clear();
-				DeleteObj(substrs);
 
 				it++;
 			}

@@ -23,6 +23,9 @@ namespace ST
 		Filename PhongExponentTexture;
 		Float alpha = -1.0;
 		Bool translucent = 0;
+		Filename Iris;
+		Filename AmbientOcclTexture;
+		Filename Envmap;
 	};
 }
 

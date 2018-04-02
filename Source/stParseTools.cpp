@@ -51,10 +51,11 @@ namespace ST
 			return rval;
 		}
 
-		std::vector<String>* split(const String &data)
+		std::vector<String> split(const String &data)
 		{
-			String name;
-			std::vector<String> *substrs = NewObj(std::vector<String>);
+			std::vector<String> substrs;
+			if (trim(data) == "")
+				return substrs;
 
 			Int32 start = -1;
 			for (Int32 i = 0; i <= data.GetLength(); i++)
@@ -65,7 +66,7 @@ namespace ST
 				}
 				else if (i == data.GetLength() && start != -1)
 				{
-					substrs->push_back((data.SubStr(start, i - start)));
+					substrs.push_back((data.SubStr(start, i - start)));
 				}
 				else if (start == -1)
 				{
@@ -73,7 +74,50 @@ namespace ST
 				}
 				else if ((data[i] == ' ' || data[i] == '\t') && start != -1)
 				{
-					substrs->push_back(data.SubStr(start, i - start));
+					substrs.push_back(data.SubStr(start, i - start));
+					start = -1;
+				}
+			}
+			return substrs;
+		}
+
+		std::vector<String> splitParam(const String &data)
+		{
+			std::vector<String> substrs;
+			if (trim(data) == "")
+				return substrs;
+
+			Int32 start = -1;
+			for (Int32 i = 0; i <= data.GetLength(); i++)
+			{
+				if ((data[i] == ' ' || data[i] == '\t') && start == -1)
+				{
+					continue;
+				}
+				else if (data[i] == '"')
+				{
+					start = i + 1;
+					i++;
+					while (data[i] != '"')
+					{
+						i++;
+					}
+					if (start != i)
+						substrs.push_back(data.SubStr(start, i - start));
+
+					start = -1;
+				}
+				else if (i == data.GetLength() && start != -1)
+				{
+					substrs.push_back((data.SubStr(start, i - start)));
+				}
+				else if (start == -1)
+				{
+					start = i;
+				}
+				else if ((data[i] == ' ' || data[i] == '\t') && start != -1)
+				{
+					substrs.push_back(data.SubStr(start, i - start));
 					start = -1;
 				}
 			}
@@ -108,58 +152,53 @@ namespace ST
 			return nullptr;
 		}
 
-		VertexLitGeneric ParseVertexLitGeneric(const VTFLib::CVMTFile *vmtfile, const Filename &MaterialRoot)
+		VertexLitGeneric ParseVertexLitGeneric(BaseFile &vmtfile, const Filename &MaterialRoot)
 		{
 			VertexLitGeneric rval;
 			rval = ParseVertexLitGeneric(vmtfile, MaterialRoot, rval);
 			return rval;
 		}
 
-		VertexLitGeneric ParseVertexLitGeneric(const VTFLib::CVMTFile *vmtfile, const Filename &MaterialRoot, const VertexLitGeneric &vlg)
+		VertexLitGeneric ParseVertexLitGeneric(BaseFile &vmtfile, const Filename &MaterialRoot, const VertexLitGeneric &vlg)
 		{
 			VertexLitGeneric rval = vlg;
-			VTFLib::Nodes::CVMTGroupNode *groupnode = NULL;
-			groupnode = vmtfile->GetRoot();
-			VTFLib::Nodes::CVMTNode *node = NULL;
+			String line = ReadLine(vmtfile);
+			std::vector<String> lines = Parse::splitParam(line);
 
-			String nodeName = groupnode->GetName();
-			if (nodeName.ToLower() == "patch") // patch, get include first
+			if (lines[0] == "patch") // patch, get include first
 			{
-				for (UInt32 i = 0; i < groupnode->GetNodeCount(); i++)
+				for (Int64 i = vmtfile.GetPosition(); i < vmtfile.GetLength(); i = vmtfile.GetPosition())
 				{
-					node = groupnode->GetNode(i);
-					String name = node->GetName();
+					line = ReadLine(vmtfile);
+					lines = Parse::splitParam(line);
 
-					if (name.ToLower() == "include")
+					if (lines[0] == "include")
 					{
-						VTFLib::Nodes::CVMTStringNode *strNode = (VTFLib::Nodes::CVMTStringNode*)node;
-						String incLoc = ParentDirectory(MaterialRoot).GetString() + "\\" + strNode->GetValue();
+						String incLoc = ParentDirectory(MaterialRoot).GetString() + "\\" + lines[1];
 						incLoc = FSlashToBSlash(incLoc);
-						Char *cIncLoc = NewMem(Char, incLoc.GetCStringLen() + 1);
-						incLoc.GetCString(cIncLoc, incLoc.GetCStringLen() + 1);
-						VTFLib::CVMTFile *inc = NewObj(VTFLib::CVMTFile);
-						if(inc->Load(cIncLoc))
+						AutoAlloc<BaseFile> inc;
+
+						if(inc->Open(incLoc))
 							rval = ParseVertexLitGeneric(inc, MaterialRoot, rval);
-						DeleteObj(inc);
-						DeleteMem(cIncLoc);
 					}
-					else if (name.ToLower() == "insert" || name.ToLower() == "replace")
+					else if (lines[0] == "insert" || lines[0] == "replace")
 					{
-						VTFLib::Nodes::CVMTGroupNode *gn = (VTFLib::Nodes::CVMTGroupNode*)node;
-						for (UInt32 j = 0; j < gn->GetNodeCount(); j++)
+						line = ReadLine(vmtfile);
+						while (line != "}")
 						{
-							VTFLib::Nodes::CVMTNode *irNode = gn->GetNode(j);
-							ParseVertexLitGenericNode(irNode, rval);
+							lines = splitParam(line);
+							ParseVertexLitGenericNode(lines, rval);
 						}
 					}
 				}
 			}
 			else
 			{
-				for (UInt32 h = 0; h < groupnode->GetNodeCount(); h++)
+				for (Int64 i = vmtfile.GetPosition(); i < vmtfile.GetLength(); i = vmtfile.GetPosition())
 				{
-					VTFLib::Nodes::CVMTNode *node = groupnode->GetNode(h);
-					ParseVertexLitGenericNode(node, rval);
+					line = ReadLine(vmtfile);
+					lines = splitParam(line);
+					ParseVertexLitGenericNode(lines, rval);
 				}
 			}
 
@@ -192,75 +231,73 @@ namespace ST
 			return rval;
 		}
 
-		void ParseVertexLitGenericNode(VTFLib::Nodes::CVMTNode *node, VertexLitGeneric &vlg)
+		void ParseVertexLitGenericNode(const std::vector<String> &params, VertexLitGeneric &vlg)
 		{
-			VTFLib::Nodes::CVMTStringNode *strNode = (VTFLib::Nodes::CVMTStringNode*)node;
-			VTFLib::Nodes::CVMTSingleNode *fNode = (VTFLib::Nodes::CVMTSingleNode*)node;
-			VTFLib::Nodes::CVMTIntegerNode *intNode = (VTFLib::Nodes::CVMTIntegerNode*)node;
-			String name = node->GetName();
-			VMTNodeType type = node->GetType();
+			if (params.size() == 0)
+				return;
 
-			if (name.ToLower() == "$basetexture")
+			if (params[0] == "$basetexture")
 			{
-				vlg.basetexture = Filename(strNode->GetValue());
+				vlg.basetexture = Filename(params[1]);
 				vlg.basetexture.SetSuffix("vtf");
 			}
-			else if (name.ToLower() == "$bumpmap")
+			else if (params[0] == "$bumpmap")
 			{
-				vlg.bumpmap = Filename(strNode->GetValue());
+				vlg.bumpmap = Filename(params[1]);
 				vlg.bumpmap.SetSuffix("vtf");
 			}
-			else if (name.ToLower() == "$detail")
+			else if (params[0] == "$detail")
 			{
-				vlg.detail = Filename(strNode->GetValue());
+				vlg.detail = Filename(params[1]);
 				vlg.detail.SetSuffix("vtf");
 			}
-			else if (name.ToLower() == "$phongexponenttexture")
+			else if (params[0] == "$phongexponenttexture")
 			{
-				vlg.PhongExponentTexture = Filename(strNode->GetValue());
+				vlg.PhongExponentTexture = Filename(params[1]);
 				vlg.PhongExponentTexture.SetSuffix("vtf");
 			}
-			else if (name.ToLower() == "$phong")
+			else if (params[0] == "$phong")
 			{
-				if (type == NODE_TYPE_STRING)
-					vlg.phong = String(strNode->GetValue()).ToInt32();
-				else
-					vlg.phong = intNode->GetValue();
+				vlg.phong = (Bool)params[1].ToInt();
 			}
-			else if (name.ToLower() == "$basemapalphaphongmask")
+			else if (params[0] == "$basemapalphaphongmask")
 			{
-				if (type == NODE_TYPE_STRING)
-					vlg.BasemapAlphaPhongMask = String(strNode->GetValue()).ToInt32();
-				else
-					vlg.BasemapAlphaPhongMask = intNode->GetValue();
+				vlg.BasemapAlphaPhongMask = (Bool)params[1].ToInt();
 			}
-			else if (name.ToLower() == "$basemapluminancephongmash")
+			else if (params[0] == "$basemapluminancephongmash")
 			{
-				if (type == NODE_TYPE_STRING)
-					vlg.BasemapLuminancePhongMask = String(strNode->GetValue()).ToInt32();
-				else
-					vlg.BasemapLuminancePhongMask = intNode->GetValue();
+				vlg.BasemapLuminancePhongMask = (Bool)params[1].ToInt();
 			}
-			else if (name.ToLower() == "$phongexponent")
+			else if (params[0] == "$phongexponent")
 			{
-				if (type == NODE_TYPE_STRING)
-					vlg.PhongExponent = String(strNode->GetValue()).ToInt32();
-				else
-					vlg.PhongExponent = intNode->GetValue();
+				vlg.PhongExponent = params[1].ToInt32();
 			}
-			else if (name.ToLower() == "$translucent")
+			else if (params[0] == "$translucent")
 			{
-				if (type == NODE_TYPE_STRING)
-					vlg.translucent = String(strNode->GetValue()).ToInt32();
-				else
-					vlg.translucent = intNode->GetValue();
+				vlg.translucent = (Bool)params[1].ToInt();
 			}
-			else if (name.ToLower() == "$alpha")
+			else if (params[0] == "$alphatest")
 			{
-				if (type == NODE_TYPE_STRING)
-					vlg.alpha = String(strNode->GetValue()).ToFloat();
-				else
-					vlg.alpha = fNode->GetValue();
+				vlg.translucent = (Bool)params[1].ToInt();
+			}
+			else if (params[0] == "$alpha")
+			{
+				vlg.alpha = params[1].ToFloat();
+			}
+			else if (params[0] == "$Iris")
+			{
+				vlg.Iris = Filename(params[1]);
+				vlg.Iris.SetSuffix("vtf");
+			}
+			else if (params[0] == "$AmbientOcclTexture")
+			{
+				vlg.AmbientOcclTexture = Filename(params[1]);
+				vlg.AmbientOcclTexture.SetSuffix("vtf");
+			}
+			else if (params[0] == "$Envmap")
+			{
+				vlg.Envmap = Filename(params[1]);
+				vlg.Envmap.SetSuffix("vtf");
 			}
 		}
 
@@ -272,6 +309,8 @@ namespace ST
 		String trim(const String &istring)
 		{
 			String string = istring;
+			if (string == "")
+				return string;
 			Bool bOk = false;
 			while (!bOk)
 			{
@@ -292,11 +331,13 @@ namespace ST
 		{
 			String rval;
 			Char *cval = NewMem(Char, 1024);
-			Int32 i = 0;
+			Int64 i = file.GetPosition();
+			Int32 it = 0;
 			while (i < file.GetLength())
 			{
 				Char c;
 				file.ReadChar(&c);
+				i = file.GetPosition();
 				if (c == '\r')
 				{
 					file.Seek(1);
@@ -306,12 +347,20 @@ namespace ST
 				{
 					break;
 				}
-				*(cval + i) = c;
-				i++;
+				*(cval + it) = c;
+				it++;
 			}
-			*(cval + i) = '\0';
+			*(cval + it) = '\0';
 			rval = cval;
 			DeleteMem(cval);
+			return rval;
+		}
+
+		String PeekLine(BaseFile &file)
+		{
+			auto pos = file.GetPosition();
+			String rval = ReadLine(file);
+			file.Seek(pos, FILESEEK_START);
 			return rval;
 		}
 	}

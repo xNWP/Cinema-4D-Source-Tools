@@ -27,6 +27,8 @@ STRINGTABLE
 	IDS_AGR				"Advanced Effects Game Recording (AGR)";
 	IDS_AGR_BAD_VERSION	"AGR Version ";
 	IDS_AGR_BAD_VERSION_1	" is incompatible with this version of Cinema 4D Source Tools.";
+	IDS_NO_FILE			"Could not find the model '";
+	IDS_NO_FILE_0		"' please verify your asset path.";
 
 	// Source Animation Tag
 	IDS_SOURCE_ANIMATION	"Source Animation"; // DNT

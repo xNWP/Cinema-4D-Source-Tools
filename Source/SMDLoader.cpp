@@ -13,12 +13,13 @@ namespace ST
 		BaseContainer *data = ((BaseList2D*)node)->GetDataInstance();
 		data->SetFloat(SMD_LOADER_SCALE, 1.0);
 		data->SetVector(SMD_LOADER_ROTATE, Vector(0, 0, 0));
+		data->SetBool(SMD_LOADER_SWAPYZ, false);
 		data->SetBool(SMD_IMPORT_ANIMATION, true);
 		data->SetBool(SMD_IMPORT_MESH, true);
 		data->SetBool(SMD_IMPORT_QC, true);
 		data->SetBool(SMD_IMPORT_TOP_NULL, true);
 		data->SetBool(SMD_IMPORT_SKELETON_JOINT, false);
-		data->SetBool(SMD_IMPORT_MESH_WELD, true);
+		data->SetBool(SMD_IMPORT_MESH_WELD, false);
 		data->SetFloat(SMD_IMPORT_MESH_WELD_TOLERANCE, 0.01);
 		data->SetBool(SMD_IMPORT_MESH_MATERIALS, true);
 		data->SetBool(SMD_IMPORT_MESH_NORMALS, true);
@@ -215,6 +216,7 @@ namespace ST
 		settings.Custom_Root_Name = node->GetData().GetString(SMD_CUSTOM_ROOT_NAME, "");
 		settings.scale = node->GetData().GetFloat(SMD_LOADER_SCALE, 1.0);
 		settings.orientation = node->GetData().GetVector(SMD_LOADER_ROTATE, Vector(0, 0, 0));
+		settings.SwapYZ = node->GetData().GetBool(SMD_LOADER_SWAPYZ, 0);
 		settings.animation = node->GetData().GetBool(SMD_IMPORT_ANIMATION, 1);
 		settings.mesh = node->GetData().GetBool(SMD_IMPORT_MESH, 1);
 		settings.qc = node->GetData().GetBool(SMD_IMPORT_QC, 1);
@@ -257,6 +259,8 @@ namespace ST
 		{
 			res = ParseSMD(name, settings, doc, nullptr, topNull, filterflags, error, true);
 		}
+
+		m_material_cache.clear();
 
 		if (res != FILEERROR_NONE)
 		{
@@ -310,8 +314,7 @@ namespace ST
 		}
 
 		AutoAlloc<BaseFile> file;
-		Bool fres = file->Open(CorrectFile);
-		if (!fres)
+		if (!file->Open(CorrectFile))
 		{
 			if (!m_qc_file) // User selected qc-file but none found, just default to the smd
 			{
@@ -326,64 +329,63 @@ namespace ST
 		Filename nameNoSuffix = CorrectFile;
 		nameNoSuffix.ClearSuffix();
 
-		// read data into byte array and seperate it into lines.
-		Char *fileData = NewMem(Char, file->GetLength());
-		file->ReadBytes(fileData, file->GetLength());
-		std::vector<String> *fileLineData = ST::Parse::ParseLines(fileData);
-		DeleteMem(fileData);
-
 		QCFile *NewQC = NewObj(QCFile);
 		NewQC->file = CorrectFile;
 
-		for (Int32 it = 0; it < fileLineData->size(); it++) // for each line
+		for (Int64 it = file->GetPosition(); it < file->GetLength(); it = file->GetPosition()) // for each line
 		{
-			std::vector<String> *substrs = ST::Parse::split((*fileLineData)[it]);
+			String line = Parse::ReadLine(file);
+			std::vector<String> substrs = ST::Parse::splitParam(line);
 
-			if (substrs->size() == 0)
+			if (substrs.size() == 0)
 			{
-				DeleteObj(substrs);
 				continue;
 			}
-			else if ((*substrs)[0] == "$body")
+			else if (substrs[0] == "$model")
 			{
-				NewQC->body.push_back((*substrs)[2].SubStr(1, (*substrs)[2].GetLength() - 2));
+				NewQC->body.push_back(substrs[2]);
 			}
-			else if ((*substrs)[0] == "$bodygroup")
+			else if (substrs[0] == "$body")
+			{
+				NewQC->body.push_back(substrs[1]);
+			}
+			else if (substrs[0] == "$bodygroup")
 			{
 				QCBodyGroup newBodyGroup;
-				newBodyGroup.name = (*substrs)[1].SubStr(1, (*substrs)[1].GetLength() - 2);
-				for (Int32 j = it + 1; (*fileLineData)[j] != "}"; j++)
+				newBodyGroup.name = substrs[1];
+
+				line = Parse::ReadLine(file);
+				substrs = Parse::splitParam(line);
+				while (line != "}")
 				{
-					std::vector<String> *line = ST::Parse::split((*fileLineData)[j]);
-					if ((*line)[0] == "studio")
+					if (substrs[0] == "studio")
 					{
-						newBodyGroup.mesh.push_back((*line)[1].SubStr(1, (*line)[1].GetLength() - 2));
+						newBodyGroup.mesh.push_back(substrs[1]);
 					}
-					DeleteObj(line);
-					it = j + 1;
+					line = Parse::ReadLine(file);
+					substrs = Parse::splitParam(line);
 				}
 				NewQC->bodygroup.push_back(newBodyGroup);
 			}
-			else if ((*substrs)[0] == "$cdmaterials")
+			else if (substrs[0] == "$cdmaterials")
 			{
-				if ((*substrs)[1].GetLength() > 2)
-					NewQC->cdmaterials.push_back((*substrs)[1].SubStr(1, (*substrs)[1].GetLength() - 2));
+				if (substrs.size() > 1)
+				{
+					NewQC->cdmaterials.push_back(substrs[1]);
+				}
 			}
-			else if ((*substrs)[0] == "$ikchain")
+			else if (substrs[0] == "$ikchain")
 			{
 				IKDecl newChain;
-				String name = (*substrs)[1].SubStr(1, (*substrs)[1].GetLength() - 2); // name
-				String bone = (*substrs)[2].SubStr(1, (*substrs)[2].GetLength() - 2); // lock name
+				String name = substrs[1]; // name
+				String bone = substrs[2]; // lock name
 				newChain.name = name;
 				newChain.bone = bone;
 				NewQC->ikchain.push_back(newChain);
 			}
-
-			DeleteObj(substrs);
 		}
 
 		file->Close();
-		DeleteObj(fileLineData);
 
 		FILEERROR res = BuildQC(NewQC, CorrectFile, settings, doc, parent, filterflags, error);
 		if (res != FILEERROR_NONE)
@@ -540,6 +542,7 @@ namespace ST
 			}
 		}
 
+		m_material_cache.clear();
 		DeletePtrVector(m_temporary_smd_record);
 		return FILEERROR_NONE;
 	}
@@ -602,7 +605,15 @@ namespace ST
 	FILEERROR SMDLoader::BuildSMD(const SourceSMD *smd, const SMDLoaderSettings &settings, const QCFile *qc, BaseDocument *doc, BaseObject *parent, SCENEFILTER filterflags, String *error, Bool BuildSkeleton)
 	{
 		// Rotation
-		Matrix RotMat = HPBToMatrix(settings.orientation, ROTATIONORDER_HPB);
+		Matrix RotMat;
+		if (settings.SwapYZ)
+		{
+			RotMat = HPBToMatrix(settings.orientation, ROTATIONORDER_HPB) * MatrixRotX(-PI / 2);
+		}
+		else
+		{
+			RotMat = HPBToMatrix(settings.orientation, ROTATIONORDER_HPB);
+		}
 
 		if (BuildSkeleton)
 		{
@@ -623,8 +634,12 @@ namespace ST
 				Int32 ParentId = (*skeleton)[i]->GetParentId();
 				BaseObject *boneparent = ParentId == -1 ? topNull : (*skeleton)[ParentId]->GetBone();
 				doc->InsertObject(bone, boneparent, nullptr);
-				bone->SetRelPos((*skeleton)[i]->GetPos(0));
-				bone->SetRelRot((*skeleton)[i]->GetRot(0));
+
+				Vector refPos = (*skeleton)[i]->GetPos(0);
+				Vector refRot = (*skeleton)[i]->GetRot(0);
+
+				bone->SetRelPos(refPos);
+				bone->SetRelRot(refRot);
 
 				// Animation
 				if (settings.animation && smd->FrameCount() > 1)
@@ -731,10 +746,14 @@ namespace ST
 
 			for (Int32 p = 0; p < PolyCount; p++) // for each triangle
 			{
+				Vector A = (*triangles)[p]->GetPointA();
+				Vector B = (*triangles)[p]->GetPointB();
+				Vector C = (*triangles)[p]->GetPointC();
+
 				// z is flipped, build backwards to have proper front facing poly's
-				index.push_back(mod->AddPoint(newPoly, RotMat * (*triangles)[p]->GetPointC() * settings.scale));
-				index.push_back(mod->AddPoint(newPoly, RotMat * (*triangles)[p]->GetPointB() * settings.scale));
-				index.push_back(mod->AddPoint(newPoly, RotMat * (*triangles)[p]->GetPointA() * settings.scale));
+				index.push_back(mod->AddPoint(newPoly, RotMat * C * settings.scale));
+				index.push_back(mod->AddPoint(newPoly, RotMat * B * settings.scale));
+				index.push_back(mod->AddPoint(newPoly, RotMat * A * settings.scale));
 				Int32 *padr = &index[index.size() - 3];
 				mod->CreateNgon(newPoly, padr, 3);
 			}
@@ -752,11 +771,15 @@ namespace ST
 				const CPolygon *CPolyArr = newPoly->GetPolygonR();
 				for (Int32 i = 0; i < PolyCount; i++)
 				{
+					Vector A = (*triangles)[i]->GetNormalA();
+					Vector B = (*triangles)[i]->GetNormalB();
+					Vector C = (*triangles)[i]->GetNormalC();
+
 					const CPolygon CPoly = *(CPolyArr + i);
 					NormalStruct normals;
-					normals.a = RotMat * (*triangles)[i]->GetNormalC();
-					normals.b = RotMat * (*triangles)[i]->GetNormalB();
-					normals.c = RotMat * (*triangles)[i]->GetNormalA();
+					normals.a = RotMat * C;
+					normals.b = RotMat * B;
+					normals.c = RotMat * A;
 					NormalTag::Set(handle, i, normals);
 				}
 				newPoly->Message(MSG_UPDATE);
@@ -804,76 +827,145 @@ namespace ST
 						polySel = polySel->GetNext();
 						continue;
 					}
-					TextureTag *newTag = TextureTag::Alloc();
-					newPoly->InsertTag(newTag);
 
-					Material *newMat = Material::Alloc();
-					newMat->SetName(polySel->GetName());
-
-					newMat->SetChannelState(CHANNEL_REFLECTION, false);
-					newMat->SetParameter(MATERIAL_USE_REFLECTION, false, DESCFLAGS_SET_0);
-
-					if (settings.qc)
+					// Check if the material exists in the cache
+					Bool foundRecord = false;
+					for (Int32 i = 0; i < m_material_cache.size(); i++)
 					{
-						HMODULE dll = LoadPluginDLL(VTFLIB_DLL);
-						Filename MatRoot = settings.material_root;
-						if (MatRoot.GetString() == "")
+						if (polySel->GetName() == m_material_cache[i].name)
 						{
-							GePrint(newMat->GetName() + ": " + GeLoadString(IDS_NO_MAT_DIR));
-						}
-						else
-						{
-							VTFLib::CVMTFile *vmt_file = NewObj(VTFLib::CVMTFile);
-							String s_root_dir = settings.material_root.GetString() + "\\";
-							for (Int32 cd = 0; cd < qc->cdmaterials.size(); cd++) // iterate through material directories
+							foundRecord = true;
+							for (Int32 j = 0; j < m_material_cache[i].materials.size(); j++)
 							{
-								String s_vmt_filename = s_root_dir + qc->cdmaterials[cd] + newMat->GetName() + ".vmt";
-								Char *vmt_filename = NewMem(Char, s_vmt_filename.GetCStringLen() + 1);
-								s_vmt_filename.GetCString(vmt_filename, s_vmt_filename.GetCStringLen() + 1);
-								if (vmt_file->Load(vmt_filename))
-								{
-									DeleteMem(vmt_filename);
-									VertexLitGeneric tmp = Parse::ParseVertexLitGeneric(vmt_file, settings.material_root);
-
-									newMat->SetChannelState(CHANNEL_REFLECTION, false);
-									newMat->GetDataInstance()->SetBool(REFLECTION_LAYER_IMPORTED, true);
-
-									if (tmp.basetexture.Content())
-									{
-										Filename fullpath = Filename(settings.material_root.GetString() + tmp.basetexture.GetString().SubStr(1, tmp.basetexture.GetString().GetLength() - 1));
-										BaseShader *sha = BaseShader::Alloc(Xbitmap);
-										sha->SetParameter(BITMAPSHADER_FILENAME, fullpath, DESCFLAGS_SET_0);
-										newMat->InsertShader(sha);
-										newMat->SetParameter(MATERIAL_COLOR_SHADER, sha, DESCFLAGS_SET_0);
-									}
-									if (tmp.bumpmap.Content())
-									{
-										Filename fullpath = Filename(settings.material_root.GetString() + tmp.bumpmap.GetString().SubStr(1, tmp.bumpmap.GetString().GetLength() - 1));
-										BaseShader *sha = BaseShader::Alloc(Xbitmap);
-										sha->SetParameter(BITMAPSHADER_FILENAME, fullpath, DESCFLAGS_SET_0);
-										newMat->InsertShader(sha);
-										newMat->SetParameter(MATERIAL_NORMAL_SHADER, sha, DESCFLAGS_SET_0);
-										newMat->SetChannelState(CHANNEL_NORMAL, true);
-									}
-
-									break;
-								}
-								else
-									DeleteMem(vmt_filename);
+								TextureTag *newTag = TextureTag::Alloc();
+								newPoly->InsertTag(newTag);
+								newTag->SetMaterial(m_material_cache[i].materials[j]);
+								newTag->SetParameter(DescID(TEXTURETAG_RESTRICTION), polySel->GetName(), DESCFLAGS_SET_0);
+								newTag->SetParameter(DescID(TEXTURETAG_PROJECTION), TEXTURETAG_PROJECTION_UVW, DESCFLAGS_SET_0);
 							}
-							DeleteObj(vmt_file);
+							break;
 						}
-						UnloadPluginDLL(dll);
 					}
 
-					doc->InsertMaterial(newMat);
+					if (!foundRecord)
+					{
+						Material *newMat = Material::Alloc();
+						newMat->SetName(polySel->GetName());
 
-					newTag->SetMaterial(newMat);
-					newTag->SetParameter(DescID(TEXTURETAG_RESTRICTION), polySel->GetName(), DESCFLAGS_SET_0);
-					newTag->SetParameter(DescID(TEXTURETAG_PROJECTION), TEXTURETAG_PROJECTION_UVW, DESCFLAGS_SET_0);
+						if (settings.qc)
+						{
+							Filename MatRoot = settings.material_root;
+							if (MatRoot.GetString() == "")
+							{
+								GePrint(newMat->GetName() + ": " + GeLoadString(IDS_NO_MAT_DIR));
+							}
+							else
+							{
+								AutoAlloc<BaseFile> vmt_file;
+								String s_root_dir = settings.material_root.GetString() + "\\";
+								for (Int32 cd = 0; cd < qc->cdmaterials.size(); cd++) // iterate through material directories
+								{
+									String s_vmt_filename = s_root_dir + qc->cdmaterials[cd] + newMat->GetName() + ".vmt";
+									if (vmt_file->Open(s_vmt_filename))
+									{
+										VertexLitGeneric tmp = Parse::ParseVertexLitGeneric(vmt_file, settings.material_root);
+
+										newMat->SetChannelState(CHANNEL_REFLECTION, false);
+										newMat->GetDataInstance()->SetBool(REFLECTION_LAYER_IMPORTED, true);
+
+										VMTMat NewVMT;
+
+										if (tmp.basetexture.Content())
+										{
+											Filename fullpath = Filename(settings.material_root.GetString() + tmp.basetexture.GetString().SubStr(1, tmp.basetexture.GetString().GetLength() - 1));
+											BaseShader *sha = BaseShader::Alloc(Xbitmap);
+											sha->SetParameter(BITMAPSHADER_FILENAME, fullpath, DESCFLAGS_SET_0);
+											newMat->InsertShader(sha);
+											newMat->SetParameter(MATERIAL_COLOR_SHADER, sha, DESCFLAGS_SET_0);
+										}
+										if (tmp.bumpmap.Content())
+										{
+											Filename fullpath = Filename(settings.material_root.GetString() + tmp.bumpmap.GetString().SubStr(1, tmp.bumpmap.GetString().GetLength() - 1));
+											BaseShader *sha = BaseShader::Alloc(Xbitmap);
+											sha->SetParameter(BITMAPSHADER_FILENAME, fullpath, DESCFLAGS_SET_0);
+											newMat->InsertShader(sha);
+											newMat->SetParameter(MATERIAL_NORMAL_SHADER, sha, DESCFLAGS_SET_0);
+											newMat->SetChannelState(CHANNEL_NORMAL, true);
+										}
+										if (tmp.translucent)
+										{
+											if (tmp.basetexture.Content())
+											{
+												Filename fullpath = Filename(settings.material_root.GetString() + tmp.basetexture.GetString().SubStr(1, tmp.basetexture.GetString().GetLength() - 1));
+												BaseShader *sha = BaseShader::Alloc(Xbitmap);
+												sha->SetParameter(BITMAPSHADER_FILENAME, fullpath, DESCFLAGS_SET_0);
+												newMat->InsertShader(sha);
+												newMat->SetParameter(MATERIAL_ALPHA_SHADER, sha, DESCFLAGS_SET_0);
+												newMat->SetChannelState(CHANNEL_ALPHA, true);
+											}
+										}
+										if (tmp.Iris.Content())
+										{
+											Filename fullpath = Filename(settings.material_root.GetString() + tmp.Iris.GetString().SubStr(1, tmp.Iris.GetString().GetLength() - 1));
+											BaseShader *sha = BaseShader::Alloc(Xbitmap);
+											sha->SetParameter(BITMAPSHADER_FILENAME, fullpath, DESCFLAGS_SET_0);
+											newMat->InsertShader(sha);
+											newMat->SetParameter(MATERIAL_COLOR_SHADER, sha, DESCFLAGS_SET_0);
+										}
+										if (tmp.Envmap.Content())
+										{
+											Filename fullpath = Filename(settings.material_root.GetString() + tmp.Envmap.GetString().SubStr(1, tmp.Envmap.GetString().GetLength() - 1));
+											BaseShader *sha = BaseShader::Alloc(Xbitmap);
+											sha->SetParameter(BITMAPSHADER_FILENAME, fullpath, DESCFLAGS_SET_0);
+											newMat->InsertShader(sha);
+											newMat->SetParameter(MATERIAL_ENVIRONMENT_SHADER, sha, DESCFLAGS_SET_0);
+											newMat->SetChannelState(CHANNEL_ENVIRONMENT, true);
+										}
+										if (tmp.AmbientOcclTexture.Content())
+										{
+											Filename fullpath = Filename(settings.material_root.GetString() + tmp.AmbientOcclTexture.GetString().SubStr(1, tmp.Envmap.GetString().GetLength() - 1));
+											BaseShader *sha = BaseShader::Alloc(Xbitmap);
+											sha->SetParameter(BITMAPSHADER_FILENAME, fullpath, DESCFLAGS_SET_0);
+											Material *AO = Material::Alloc();
+											AO->InsertShader(sha);
+											AO->SetParameter(MATERIAL_COLOR_SHADER, sha, DESCFLAGS_SET_0);
+											BaseShader *sha2 = BaseShader::Alloc(Xbitmap);
+											sha2->SetParameter(BITMAPSHADER_FILENAME, fullpath, DESCFLAGS_SET_0);
+											AO->InsertShader(sha2);
+											AO->SetParameter(MATERIAL_ALPHA_SHADER, sha2, DESCFLAGS_SET_0);
+											AO->SetChannelState(CHANNEL_ALPHA, true);
+											AO->SetChannelState(CHANNEL_REFLECTION, false);
+											AO->GetDataInstance()->SetBool(REFLECTION_LAYER_IMPORTED, true);
+											AO->SetName(polySel->GetName() + "_AO");
+											NewVMT.materials.push_back(AO);
+										}
+
+										NewVMT.name = polySel->GetName();
+										NewVMT.materials.push_back(newMat);
+										m_material_cache.push_back(NewVMT);
+
+										break;
+									}
+								}
+							}
+						}
+
+						for (Int32 i = 0; i < m_material_cache[m_material_cache.size() - 1].materials.size(); i++)
+						{
+							TextureTag *newTag = TextureTag::Alloc();
+							newPoly->InsertTag(newTag);
+							doc->InsertMaterial(m_material_cache[m_material_cache.size() - 1].materials[i]);
+							newTag->SetMaterial(m_material_cache[m_material_cache.size() - 1].materials[i]);
+							newTag->SetParameter(DescID(TEXTURETAG_RESTRICTION), polySel->GetName(), DESCFLAGS_SET_0);
+							newTag->SetParameter(DescID(TEXTURETAG_PROJECTION), TEXTURETAG_PROJECTION_UVW, DESCFLAGS_SET_0);
+						}
+					}
 
 					polySel = polySel->GetNext();
 				}
+
+				if (!settings.qc)
+					m_material_cache.clear();
 			}
 
 			// Weights
@@ -955,9 +1047,6 @@ namespace ST
 
 		for (Int32 i = 0; i < fileLineData->size(); i++)
 		{
-			StatusSetText("Line " + String::IntToString(i) + " of " + String::IntToString(Int32(fileLineData->size())));
-			StatusSetBar(Int32(1.0f * i / fileLineData->size() * 100));
-
 			String line = (*fileLineData)[i];
 			if (line == "nodes")
 			{
@@ -991,8 +1080,6 @@ namespace ST
 				}
 			}
 		}
-
-		StatusClear();
 
 		if (settings.mesh)
 			m_mesh_built = true;
@@ -1057,22 +1144,20 @@ namespace ST
 		{
 			Int32 id, parentid;
 			String name;
-			std::vector<String> *substrs = ST::Parse::split((*data)[it]);
-			if ((*substrs).size() < 3)
+			std::vector<String> substrs = ST::Parse::splitParam((*data)[it]);
+			if (substrs.size() < 3)
 			{
-				DeleteObj(substrs);
 				return false;
 			}
 
-			id = (*substrs)[0].ParseToInt32();
-			name = (*substrs)[1].SubStr(1, (*substrs)[1].GetLength() - 2);
-			parentid = (*substrs)[2].ParseToInt32();
+			id = substrs[0].ParseToInt32();
+			name = substrs[1];
+			parentid = substrs[2].ParseToInt32();
 
 			ST::SourceSkeletonBone *bone = NewObj(ST::SourceSkeletonBone, id, name, parentid);
 			m_skeleton->push_back(bone);
 
 			it++;
-			DeleteObj(substrs);
 		}
 
 		return (it == data->size()) ? false : true;
@@ -1089,32 +1174,38 @@ namespace ST
 
 		while ((*data)[it] != "end" && it < data->size())
 		{
-			std::vector<String> *substrs = ST::Parse::split((*data)[it]);
+			std::vector<String> substrs = ST::Parse::split((*data)[it]);
 
-			if ((*substrs)[0] == "time")
+			if (substrs[0] == "time")
 			{
-				frame = (*substrs)[1].ParseToInt32();
+				frame = substrs[1].ParseToInt32();
 
 				if (frame > 0 && !settings.animation)
 				{
 					m_anim_start = it;
-					DeleteObj(substrs);
 					break;
 				}
 
 				it++;
-				DeleteObj(substrs);
 				continue;
 			}
 
-			if (substrs->size() < 7) // bad skeleton
+			if (substrs.size() < 7) // bad skeleton
 			{
 				return false;
 			}
 
-			Int32 id = (*substrs)[0].ParseToInt32();
-			Vector pos((*substrs)[1].ParseToFloat(), (*substrs)[2].ParseToFloat(), -(*substrs)[3].ParseToFloat());
-			Vector rot(-(*substrs)[4].ParseToFloat(), -(*substrs)[5].ParseToFloat(), (*substrs)[6].ParseToFloat());
+			Float x = substrs[1].ParseToFloat();
+			Float y = substrs[2].ParseToFloat();
+			Float z = -substrs[3].ParseToFloat();
+			Float rX = -substrs[4].ParseToFloat();
+			Float rY = -substrs[5].ParseToFloat();
+			Float rZ = substrs[6].ParseToFloat();
+
+			Int32 id = substrs[0].ParseToInt32();
+
+			Vector pos = Vector(x, y, z);
+			Vector rot = Vector(rX, rY, rZ);
 
 			Matrix mat = HPBToMatrix(rot, ROTATIONORDER_XYZLOCAL);
 			mat = ~mat; // invert the matrix to make euler angles local
@@ -1131,7 +1222,6 @@ namespace ST
 			(*m_skeleton)[id]->PushBackRot(FinalRot);
 
 			it++;
-			DeleteObj(substrs);
 		}
 
 		m_frames = m_frames > frame + 1 ? m_frames : frame + 1;

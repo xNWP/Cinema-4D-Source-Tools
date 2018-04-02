@@ -7,6 +7,7 @@
 #define ST_MATH_H
 
 #include "c4d.h"
+#include "c4d_quaternion.h"
 
 namespace ST
 {
@@ -20,6 +21,16 @@ namespace ST
 		/// @param[in] order				The rotation order to use, default HPB.
 		//----------------------------------------------------------------------------------------
 		void SetWorldRotation(BaseObject *obj, const Vector &angle, const ROTATIONORDER &order = ROTATIONORDER_HPB);
+
+		//----------------------------------------------------------------------------------------
+		/// Returns the dot product of two quaternions.
+		///
+		/// @param[in] q1					The first quaternion.
+		/// @param[in] q2					The second quaternion to dot with.
+		///
+		/// @return Float64					The dot product of q1 and q2.
+		//----------------------------------------------------------------------------------------
+		Float64 Dot(const Quaternion &q1, const Quaternion &q2);
 	}
 }
 

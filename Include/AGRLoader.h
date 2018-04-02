@@ -43,9 +43,9 @@ namespace ST
 		void AddToDictionary(const String &value);
 		String ReadFromDictionary(BaseFile &file);
 
-		Vector& ReadVector(BaseFile &file, Bool quakeformat = false);
-		Vector& ReadQAngle(BaseFile &file);
-		Quaternion& ReadQuaternion(BaseFile &file, Bool quakeformat = false);
+		Vector ReadVector(BaseFile &file, Bool quakeformat = false);
+		Vector ReadQAngle(BaseFile &file);
+		Quaternion ReadQuaternion(BaseFile &file);
 
 		std::map<Int32, ModelHandle*> m_handles;
 		std::vector<ModelHandle*> *m_FreeHandles;

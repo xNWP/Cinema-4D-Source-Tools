@@ -5,6 +5,7 @@ STRINGTABLE Fsmdloader
 	S_SCALEORIENTATION	"Scale/Orientation";
 	SMD_LOADER_SCALE	"Scale";
 	SMD_LOADER_ROTATE	"Orientation";
+	SMD_LOADER_SWAPYZ	"Swap Y/Z Axis";
 
 	S_IMPORTOPTIONS		"Import";
 	SMD_IMPORT_ANIMATION	"Animation";

@@ -29,9 +29,19 @@ namespace ST
 		///
 		/// @param[in] data				The input string.
 		///
-		/// @return						Pointer to std::vector<String>* array of components.
+		/// @return						std::vector<String> array of components.
 		//----------------------------------------------------------------------------------------
-		std::vector<String>* split(const String &data);
+		std::vector<String> split(const String &data);
+
+		//----------------------------------------------------------------------------------------
+		/// Similar to split however paramaters encapsulated in quotations (") will not be split.
+		/// i.e. name "Brett Anthony" => [0]name, [1]Brett Anthony
+		///
+		/// @param[in] data				The input string.
+		///
+		/// @return						std::vector<String> array of components.
+		//----------------------------------------------------------------------------------------
+		std::vector<String> splitParam(const String &data);
 
 		//----------------------------------------------------------------------------------------
 		/// Find's a child by name of object start.
@@ -44,17 +54,17 @@ namespace ST
 		BaseObject* FindChild(BaseObject *start, const String &name);
 
 		//----------------------------------------------------------------------------------------
-		/// Fills a VertexLitGeneric struct will all values from a VMT file. (assumes VTFLib.dll is loaded)
+		/// Fills a VertexLitGeneric struct will all values from a VMT file.
 		///
 		/// @param[in] vmtfile			The vmtfile to read from. Can be VertexLitGeneric or patch.
 		/// @param[in] MaterialRoot		The root material folder i.e. pak01_dir/materials
 		///
 		/// @return						VertexLitGeneric of filled in data.
 		//----------------------------------------------------------------------------------------
-		VertexLitGeneric ParseVertexLitGeneric(const VTFLib::CVMTFile *vmtfile, const Filename &MaterialRoot);
+		VertexLitGeneric ParseVertexLitGeneric(BaseFile &vmtfile, const Filename &MaterialRoot);
 
 		//----------------------------------------------------------------------------------------
-		/// Fills a VertexLitGeneric struct will all values from a VMT file. Uses VLG as a basis and overwrites values. (assumes VTFLib.dll is loaded)
+		/// Fills a VertexLitGeneric struct will all values from a VMT file. Uses VLG as a basis and overwrites values.
 		///
 		/// @param[in] vmtfile			The vmtfile to read from. Can be VertexLitGeneric or patch.
 		/// @param[in] MaterialRoot		The root material folder i.e. pak01_dir/materials
@@ -62,7 +72,7 @@ namespace ST
 		///
 		/// @return						VertexLitGeneric of filled in data.
 		//----------------------------------------------------------------------------------------
-		VertexLitGeneric ParseVertexLitGeneric(const VTFLib::CVMTFile *vmtfile, const Filename &MaterialRoot, const VertexLitGeneric &vlg);
+		VertexLitGeneric ParseVertexLitGeneric(BaseFile &vmtfile, const Filename &MaterialRoot, const VertexLitGeneric &vlg);
 
 		//----------------------------------------------------------------------------------------
 		/// Goes up a level in directory. C:\SomeDir\Dir2 becomes C:\SomeDir
@@ -85,10 +95,10 @@ namespace ST
 		//----------------------------------------------------------------------------------------
 		/// Read's a node and fills out the respective value in vlg.
 		///
-		/// @param[in] node				The node to read.
+		/// @param[in] params			The paramaters to process.
 		/// @param[out]	vlg				The VertexLitGeneric to modify.
 		//----------------------------------------------------------------------------------------
-		void ParseVertexLitGenericNode(VTFLib::Nodes::CVMTNode *node, VertexLitGeneric &vlg);
+		void ParseVertexLitGenericNode(const std::vector<String> &params, VertexLitGeneric &vlg);
 
 		//----------------------------------------------------------------------------------------
 		/// Removes beginning and ending " from string.
@@ -114,6 +124,15 @@ namespace ST
 		/// @return String				The Line.
 		//----------------------------------------------------------------------------------------
 		String ReadLine(BaseFile &file);
+
+		//----------------------------------------------------------------------------------------
+		/// Reads a line from a file without altering the file position.
+		///
+		/// @param[in] file				The file to read from.
+		///
+		/// @return String				The Line.
+		//----------------------------------------------------------------------------------------
+		String PeekLine(BaseFile &file);
 	}
 }
 
