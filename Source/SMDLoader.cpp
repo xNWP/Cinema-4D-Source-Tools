@@ -851,6 +851,8 @@ namespace ST
 					{
 						Material *newMat = Material::Alloc();
 						newMat->SetName(polySel->GetName());
+						VMTMat NewVMT;
+						NewVMT.name = polySel->GetName();
 
 						if (settings.qc)
 						{
@@ -858,6 +860,8 @@ namespace ST
 							if (MatRoot.GetString() == "")
 							{
 								GePrint(newMat->GetName() + ": " + GeLoadString(IDS_NO_MAT_DIR));
+								NewVMT.materials.push_back(newMat);
+								m_material_cache.push_back(NewVMT);
 							}
 							else
 							{
@@ -872,8 +876,6 @@ namespace ST
 
 										newMat->SetChannelState(CHANNEL_REFLECTION, false);
 										newMat->GetDataInstance()->SetBool(REFLECTION_LAYER_IMPORTED, true);
-
-										VMTMat NewVMT;
 
 										if (tmp.basetexture.Content())
 										{
@@ -940,13 +942,12 @@ namespace ST
 											NewVMT.materials.push_back(AO);
 										}
 
-										NewVMT.name = polySel->GetName();
-										NewVMT.materials.push_back(newMat);
-										m_material_cache.push_back(NewVMT);
-
 										break;
 									}
 								}
+
+								NewVMT.materials.push_back(newMat);
+								m_material_cache.push_back(NewVMT);
 							}
 						}
 
