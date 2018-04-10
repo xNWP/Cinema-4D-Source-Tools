@@ -950,6 +950,11 @@ namespace ST
 								m_material_cache.push_back(NewVMT);
 							}
 						}
+						else
+						{
+							NewVMT.materials.push_back(newMat);
+							m_material_cache.push_back(NewVMT);
+						}
 
 						for (Int32 i = 0; i < m_material_cache[m_material_cache.size() - 1].materials.size(); i++)
 						{

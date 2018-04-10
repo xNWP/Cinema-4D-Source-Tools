@@ -18,7 +18,7 @@
 #define str(s) #s
 
 #define VERSION_MAJOR	0
-#define VERSION_MINOR	41
+#define VERSION_MINOR	42
 #ifdef _DEBUG
 #define VERSION_TAG		"-dev"
 #else
