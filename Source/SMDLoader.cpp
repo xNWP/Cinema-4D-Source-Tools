@@ -371,7 +371,10 @@ namespace ST
 			{
 				if (substrs.size() > 1)
 				{
-					NewQC->cdmaterials.push_back(substrs[1]);
+					if (substrs[1][substrs[1].GetLength() - 1] != '\\')
+						NewQC->cdmaterials.push_back(substrs[1] + "\\");
+					else
+						NewQC->cdmaterials.push_back(substrs[1]);
 				}
 			}
 			else if (substrs[0] == "$ikchain")
