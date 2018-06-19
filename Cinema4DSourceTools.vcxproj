@@ -42,20 +42,20 @@
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="./projectsettings.props" />
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="frameworks\settings\DebugWin64.props" />
-    <Import Project="frameworks\cinema.framework\project\cinema.framework.includes.props" />
+    <Import Project="$(MAXON_ROOTDIR)\frameworks\settings\DebugWin64.props" />
+    <Import Project="$(MAXON_ROOTDIR)\frameworks\cinema.framework\project\cinema.framework.includes.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="./projectsettings.props" />
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="frameworks\settings\ReleaseWin64.props" />
-    <Import Project="frameworks\cinema.framework\project\cinema.framework.includes.props" />
+    <Import Project="$(MAXON_ROOTDIR)\frameworks\settings\ReleaseWin64.props" />
+    <Import Project="$(MAXON_ROOTDIR)\frameworks\cinema.framework\project\cinema.framework.includes.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Intel|x64'" Label="PropertySheets">
     <Import Project="./projectsettings.props" />
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="frameworks\settings\IntelWin64.props" />
-    <Import Project="frameworks\cinema.framework\project\cinema.framework.includes.props" />
+    <Import Project="$(MAXON_ROOTDIR)\frameworks\settings\IntelWin64.props" />
+    <Import Project="$(MAXON_ROOTDIR)\frameworks\cinema.framework\project\cinema.framework.includes.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
@@ -144,7 +144,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="frameworks\cinema.framework\project\cinema.framework.vcxproj">
+    <ProjectReference Include="$(MAXON_ROOTDIR)\frameworks\cinema.framework\project\cinema.framework.vcxproj">
       <Project>{69BF9B7D-7EB2-7FC5-0009-38CB8C5CDEA3}</Project>
       <Private>true</Private>
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
