@@ -95,7 +95,10 @@
       <DelayLoadDLLs>VTFLib.dll;libcurl.dll</DelayLoadDLLs>
     </Link>
     <PostBuildEvent>
-      <Command>call "$(SolutionDir)push_to_c4d_debug.bat"</Command>
+      <Command>rmdir /S /Q "$(MAXON_ROOTDIR)\plugins\Cinema 4D Source Tools"
+xcopy "res\*.*" /F /S /Y "$(MAXON_ROOTDIR)\plugins\Cinema 4D Source Tools\res\"
+copy "Build\x64_Debug\*.cdl64" "$(MAXON_ROOTDIR)\plugins\Cinema 4D Source Tools\"
+xcopy "lib\*.dll" "$(MAXON_ROOTDIR)\plugins\Cinema 4D Source Tools\lib\"</Command>
       <Message>Moves required files to C4D Directory</Message>
     </PostBuildEvent>
     <Bscmake>
@@ -119,7 +122,10 @@
       <DelayLoadDLLs>VTFLib.dll;libcurl.dll</DelayLoadDLLs>
     </Link>
     <PostBuildEvent>
-      <Command>call "$(SolutionDir)push_to_c4d_release.bat"</Command>
+      <Command>rmdir /S /Q "$(MAXON_ROOTDIR)\plugins\Cinema 4D Source Tools"
+xcopy "res\*.*" /F /S /Y "$(MAXON_ROOTDIR)\plugins\Cinema 4D Source Tools\res\"
+copy "Build\x64_Release\*.cdl64" "$(MAXON_ROOTDIR)\plugins\Cinema 4D Source Tools\"
+xcopy "lib\*.dll" "$(MAXON_ROOTDIR)\plugins\Cinema 4D Source Tools\lib\"</Command>
       <Message>Moves required files to C4D Directory</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>

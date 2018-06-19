@@ -3,7 +3,12 @@ CLS
 
 SET BuildDir="Build\x64_Release"
 SET Package="Cinema 4D Source Tools"
-SET ArchName="C4D_Source_Tools-major_minor-tag"
+
+SET /P Major=Major Version: 
+SET /P Minor=Minor Version: 
+SET /P Tag=Tag (i.e. -alpha): 
+ 
+SET ArchName="C4D_Source_Tools-%Major%_%Minor%%Tag%"
 
 ECHO Moving files to build directory.
 
