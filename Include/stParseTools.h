@@ -75,7 +75,7 @@ namespace ST
 		VertexLitGeneric ParseVertexLitGeneric(BaseFile &vmtfile, const Filename &MaterialRoot, const VertexLitGeneric &vlg);
 
 		//----------------------------------------------------------------------------------------
-		/// Goes up a level in directory. C:\SomeDir\Dir2 becomes C:\SomeDir
+		/// Goes up a level in directory. C:\\SomeDir\\Dir2 becomes C:\\SomeDir
 		///
 		/// @param[in] filename			The input path.
 		///

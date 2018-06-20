@@ -350,8 +350,7 @@ namespace ST
 		/// Fills the object with all needed info from a standard format SMD file (seperated by lines).
 		///
 		/// @param[in] data				The line data from the SMD file.
-		/// @param[in] settings			The settings to use.
-		/// @param[in,out] it			Should point to the beginning <material> tag of the triangle, will return the line location after the last vertex.
+		/// @param[in,out] it			Should point to the beginning material tag of the triangle, will return the line location after the last vertex.
 		/// @param[out] error			Returns 0 if no error creating, negative otherwise.
 		//----------------------------------------------------------------------------------------
 		StudiomdlDataTriangle(const std::vector<String> *data, Int32 &it, Int32 &error)
