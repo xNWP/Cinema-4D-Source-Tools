@@ -31,6 +31,8 @@
 #include "stParseTools.h"
 #include "stMath.h"
 #include "stMem.h"
+#include "tinyxml2/tinyxml2.h"
+#include "UserConfig.h"
 #include <vector>
 #include "VTFLib/VTFLib.h"
 
@@ -93,6 +95,7 @@ namespace ST
 		Bool ik;
 		Int32 ik_orientation;
 		Bool cache;
+		Int32 mat_filetype;
 	};
 
 	//----------------------------------------------------------------------------------------

@@ -61,7 +61,8 @@ namespace ST
 		tinyxml2::XMLDocument *M_DOC = NewObj(tinyxml2::XMLDocument);
 		String StrLoc = GeGetPluginPath().GetString();
 		StrLoc += "\\"; StrLoc += USER_CONFIG_LOC;
-		char *ChaLoc = StrLoc.GetCStringCopy();
+		char *ChaLoc = NewMem(char, StrLoc.GetCStringLen() + 1);
+		StrLoc.GetCString(ChaLoc, StrLoc.GetCStringLen() + 1);
 		tinyxml2::XMLError error = M_DOC->LoadFile(ChaLoc);
 
 		if (error != tinyxml2::XML_SUCCESS)

@@ -236,65 +236,65 @@ namespace ST
 			if (params.size() == 0)
 				return;
 
-			if (params[0] == "$basetexture")
+			if (params[0].ToLower() == "$basetexture")
 			{
 				vlg.basetexture = Filename(params[1]);
 				vlg.basetexture.SetSuffix("vtf");
 			}
-			else if (params[0] == "$bumpmap")
+			else if (params[0].ToLower() == "$bumpmap")
 			{
 				vlg.bumpmap = Filename(params[1]);
 				vlg.bumpmap.SetSuffix("vtf");
 			}
-			else if (params[0] == "$detail")
+			else if (params[0].ToLower() == "$detail")
 			{
 				vlg.detail = Filename(params[1]);
 				vlg.detail.SetSuffix("vtf");
 			}
-			else if (params[0] == "$phongexponenttexture")
+			else if (params[0].ToLower() == "$phongexponenttexture")
 			{
 				vlg.PhongExponentTexture = Filename(params[1]);
 				vlg.PhongExponentTexture.SetSuffix("vtf");
 			}
-			else if (params[0] == "$phong")
+			else if (params[0].ToLower() == "$phong")
 			{
 				vlg.phong = (Bool)params[1].ToInt();
 			}
-			else if (params[0] == "$basemapalphaphongmask")
+			else if (params[0].ToLower() == "$basemapalphaphongmask")
 			{
 				vlg.BasemapAlphaPhongMask = (Bool)params[1].ToInt();
 			}
-			else if (params[0] == "$basemapluminancephongmash")
+			else if (params[0].ToLower() == "$basemapluminancephongmash")
 			{
 				vlg.BasemapLuminancePhongMask = (Bool)params[1].ToInt();
 			}
-			else if (params[0] == "$phongexponent")
+			else if (params[0].ToLower() == "$phongexponent")
 			{
 				vlg.PhongExponent = params[1].ToInt32();
 			}
-			else if (params[0] == "$translucent")
+			else if (params[0].ToLower() == "$translucent")
 			{
 				vlg.translucent = (Bool)params[1].ToInt();
 			}
-			else if (params[0] == "$alphatest")
+			else if (params[0].ToLower() == "$alphatest")
 			{
 				vlg.translucent = (Bool)params[1].ToInt();
 			}
-			else if (params[0] == "$alpha")
+			else if (params[0].ToLower() == "$alpha")
 			{
 				vlg.alpha = params[1].ToFloat();
 			}
-			else if (params[0] == "$Iris")
+			else if (params[0].ToLower() == "$iris")
 			{
 				vlg.Iris = Filename(params[1]);
 				vlg.Iris.SetSuffix("vtf");
 			}
-			else if (params[0] == "$AmbientOcclTexture")
+			else if (params[0].ToLower() == "$ambientoccltexture")
 			{
 				vlg.AmbientOcclTexture = Filename(params[1]);
 				vlg.AmbientOcclTexture.SetSuffix("vtf");
 			}
-			else if (params[0] == "$Envmap")
+			else if (params[0].ToLower() == "$envmap")
 			{
 				vlg.Envmap = Filename(params[1]);
 				vlg.Envmap.SetSuffix("vtf");

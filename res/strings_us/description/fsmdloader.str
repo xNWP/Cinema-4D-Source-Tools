@@ -34,4 +34,9 @@ STRINGTABLE Fsmdloader
 	S_MEMORY			"Memory";
 	SMD_CACHE_MEMORY	"Cache SMD/QC";
 	SMD_FLUSH_CACHE		"Flush Cache";
+
+	SMD_MAT_FILETYPE	"Material Filetype";
+	MATFT_VTF			"VTF";
+	MATFT_TGA			"TGA";
+	MATFT_CUSTOM		"Custom";
 }

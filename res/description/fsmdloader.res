@@ -75,6 +75,20 @@ CONTAINER Fsmdloader
 			DEFAULT 1;
 
 			FILENAME SMD_IMPORT_MATERIAL_ROOT { DIRECTORY; }
+
+			GROUP
+			{
+				LONG SMD_MAT_FILETYPE
+				{
+					CYCLE
+					{
+						MATFT_VTF;
+						MATFT_TGA;
+						-1;
+						MATFT_CUSTOM;
+					}
+				}
+			}
 			
 			SEPARATOR {}
 

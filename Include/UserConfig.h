@@ -10,6 +10,7 @@
 #include "tinyxml2/tinyxml2.h"
 
 #define CHECK_FOR_UPDATES		"CHECK_FOR_UPDATES"
+#define MATFT_CUSTOM_UC			"MATFT_CUSTOM"
 
 namespace ST
 {
@@ -42,5 +43,15 @@ namespace ST
 	/// @return						Bool true if successful.
 	//----------------------------------------------------------------------------------------
 	Bool SetUserConfig(tinyxml2::XMLDocument *doc, const char *element, const String &value);
+
+	//----------------------------------------------------------------------------------------
+	/// Searches for an element by name.
+	///
+	/// @param[in] doc				The XML document.
+	/// @param[in] element			The element to get.
+	///
+	/// @return tinyxml2::XMLNode*	The node or nullptr if not found.
+	//----------------------------------------------------------------------------------------
+	tinyxml2::XMLNode* GetNode(tinyxml2::XMLDocument *doc, const char *element);
 }
 #endif
