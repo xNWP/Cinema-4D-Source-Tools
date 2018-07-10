@@ -1228,6 +1228,37 @@ namespace ST
 
 			(*m_skeleton)[id]->PushBackPos(pos);
 			Vector FinalRot = MatrixToHPB(mat, ROTATIONORDER_HPB);
+
+			// Ensure rotation takes shortest path
+			if (frame > 0)
+			{
+				Vector LastRot = (*m_skeleton)[id]->GetRot(frame - 1);
+				
+				if (Abs(FinalRot.x - LastRot.x) > PI)
+				{
+					if (FinalRot.x >= LastRot.x)
+						FinalRot.x -= 2 * PI;
+					else
+						FinalRot.x += 2 * PI;
+				}
+
+				if (Abs(FinalRot.y - LastRot.y) > PI)
+				{
+					if (FinalRot.y >= LastRot.y)
+						FinalRot.y -= 2 * PI;
+					else
+						FinalRot.y += 2 * PI;
+				}
+
+				if (Abs(FinalRot.z - LastRot.z) > PI)
+				{
+					if (FinalRot.z >= LastRot.z)
+						FinalRot.z -= 2 * PI;
+					else
+						FinalRot.z += 2 * PI;
+				}
+			}
+
 			(*m_skeleton)[id]->PushBackRot(FinalRot);
 
 			it++;
