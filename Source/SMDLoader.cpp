@@ -89,16 +89,15 @@ namespace ST
 						{
 							if (SetUserConfig(M_DOC, MATFT_CUSTOM_UC, CustomFT))
 							{
-								data->SetInt32(SMD_MAT_FILETYPE, MATFT_CUSTOM);
 								M_DOC->SaveFile(ChaLoc);
 								m_MaterialExtension = CustomFT;
 							}
 						}
 
-							DeleteMem(ChaLoc);
-							DeleteObj(M_DOC);
+						DeleteMem(ChaLoc);
+						DeleteObj(M_DOC);
 
-							data->SetInt32(SMD_MAT_FILETYPE, -1);
+						data->SetInt32(SMD_MAT_FILETYPE, -1);
 					}
 					else
 					{
