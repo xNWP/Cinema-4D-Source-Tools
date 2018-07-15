@@ -88,6 +88,8 @@ CONTAINER Fsmdloader
 						MATFT_CUSTOM;
 					}
 				}
+
+				STATICTEXT SMD_MATFT_NOTIFY {};
 			}
 			
 			SEPARATOR {}

@@ -24,7 +24,7 @@ namespace ST
 		data->SetBool(SMD_IMPORT_MESH_MATERIALS, true);
 		data->SetBool(SMD_IMPORT_MESH_NORMALS, true);
 		data->SetBool(SMD_IMPORT_MESH_UV, true);
-		data->SetBool(SMD_MAT_FILETYPE, MATFT_VTF);
+		data->SetInt32(SMD_MAT_FILETYPE, MATFT_VTF);
 		data->SetBool(SMD_IMPORT_IK, true);
 		data->SetInt32(SMD_IMPORT_IK_ORIENTATION, IK_CAMERA);
 		data->SetBool(SMD_IMPORT_MESH_WEIGHTS, true);
@@ -63,11 +63,18 @@ namespace ST
 			{
 				BaseContainer *data = ((BaseList2D*)node)->GetDataInstance();
 
-				if (data->GetInt32(SMD_MAT_FILETYPE) == MATFT_CUSTOM)
+				Int32 SelectedImageExtension = data->GetInt32(SMD_MAT_FILETYPE, MATFT_VTF);
+
+				// Custom Option
+				if (SelectedImageExtension == MATFT_CUSTOM)
 				{
-					String CustomFT;
-					if (RenameDialog(&CustomFT))
+					String CustomFT = m_MaterialExtension;
+					if (RenameDialog(&CustomFT) && CustomFT.Content())
 					{
+						if (CustomFT[0] == '.')
+							CustomFT = CustomFT.SubStr(1, CustomFT.GetLength() - 1);
+						CustomFT = CustomFT.ToUpper();
+
 						// Add to config
 						tinyxml2::XMLDocument *M_DOC = NewObj(tinyxml2::XMLDocument);
 						String StrLoc = GeGetPluginPath().GetString();
@@ -80,27 +87,21 @@ namespace ST
 							MessageDialog(GeLoadString(IDS_CRITICAL_ERROR));
 						else
 						{
-							auto node = ST::GetNode(M_DOC, MATFT_CUSTOM_UC);
-							tinyxml2::XMLElement *NewNode = M_DOC->NewElement("CUSTOMEXTENSION");
-
-							if (CustomFT[0] == '.')
-								CustomFT = CustomFT.SubStr(1, CustomFT.GetLength() - 1);
-							CustomFT = CustomFT.ToUpper();
-
-							char *txt = NewMem(char, CustomFT.GetCStringLen() + 1);
-							CustomFT.GetCString(txt, CustomFT.GetCStringLen() + 1);
-
-							NewNode->SetText(txt);
-							node->InsertEndChild(NewNode);
-
-							M_DOC->SaveFile(ChaLoc);
-
-							DeleteMem(txt);
+							if (SetUserConfig(M_DOC, MATFT_CUSTOM_UC, CustomFT))
+							{
+								data->SetInt32(SMD_MAT_FILETYPE, MATFT_CUSTOM);
+								M_DOC->SaveFile(ChaLoc);
+								m_MaterialExtension = CustomFT;
+							}
 						}
 
-						DeleteMem(ChaLoc);
-						DeleteObj(M_DOC);
+							DeleteMem(ChaLoc);
+							DeleteObj(M_DOC);
 
+							data->SetInt32(SMD_MAT_FILETYPE, -1);
+					}
+					else
+					{
 						data->SetInt32(SMD_MAT_FILETYPE, MATFT_VTF);
 					}
 				}
@@ -137,6 +138,39 @@ namespace ST
 				String QCP = QC == "1" ? " QC." : " QC's.";
 				data->SetString(SMD_MEMORY_USAGE, SMD + SMDP + QC + QCP);
 				return true;
+			}
+
+			case SMD_MATFT_NOTIFY:
+			{
+				if (m_MaterialExtension.Content() && (data->GetInt32(SMD_MAT_FILETYPE, MATFT_VTF) == -1))
+				{
+					data->SetString(SMD_MATFT_NOTIFY, GeLoadString(IDS_MATFT_NOTIFY_PREFACE) + m_MaterialExtension);
+				}
+				else if (data->GetInt32(SMD_MAT_FILETYPE, MATFT_VTF) == -1) // load the extension from file
+				{
+					tinyxml2::XMLDocument *M_DOC = NewObj(tinyxml2::XMLDocument);
+					String StrLoc = GeGetPluginPath().GetString();
+					StrLoc += "\\"; StrLoc += USER_CONFIG_LOC;
+					char *ChaLoc = NewMem(char, StrLoc.GetCStringLen() + 1);
+					StrLoc.GetCString(ChaLoc, StrLoc.GetCStringLen() + 1);
+					tinyxml2::XMLError error = M_DOC->LoadFile(ChaLoc);
+
+					if (error != tinyxml2::XML_SUCCESS)
+						MessageDialog(GeLoadString(IDS_CRITICAL_ERROR));
+
+					String probe;
+					if (!ST::GetUserConfig(M_DOC, MATFT_CUSTOM_UC, probe))
+						MessageDialog(GeLoadString(IDS_CRITICAL_ERROR));
+					
+					this->m_MaterialExtension = probe;
+
+					DeleteObj(M_DOC);
+					DeleteMem(ChaLoc);
+				}
+				else
+				{
+					data->SetString(SMD_MATFT_NOTIFY, "");
+				}
 			}
 		}
 
@@ -263,10 +297,17 @@ namespace ST
 		settings.mesh_uv = node->GetData().GetBool(SMD_IMPORT_MESH_UV, 1);
 		settings.mesh_weights = node->GetData().GetBool(SMD_IMPORT_MESH_WEIGHTS, 1);
 		settings.material_root = node->GetData().GetFilename(SMD_IMPORT_MATERIAL_ROOT);
-		settings.mat_filetype = node->GetData().GetInt32(SMD_MAT_FILETYPE, MATFT_VTF);
 		settings.ik = node->GetData().GetBool(SMD_IMPORT_IK, 1);
 		settings.ik_orientation = node->GetData().GetInt32(SMD_IMPORT_IK_ORIENTATION, IK_XZ);
 		settings.cache = node->GetData().GetBool(SMD_CACHE_MEMORY, 1);
+
+		Int32 MatType = node->GetData().GetInt32(SMD_MAT_FILETYPE, MATFT_VTF);
+		if (MatType == -1)
+			settings.mat_filetype = m_MaterialExtension.ToLower();
+		else if (MatType == MATFT_TGA)
+			settings.mat_filetype = "tga";
+		else
+			settings.mat_filetype = "vtf";
 
 		BaseObject *topNull = nullptr;
 		if (settings.top_null)
@@ -918,8 +959,7 @@ namespace ST
 										if (tmp.basetexture.Content())
 										{
 											Filename fullpath = Filename(settings.material_root.GetString() + tmp.basetexture.GetString().SubStr(1, tmp.basetexture.GetString().GetLength() - 1));
-											if (settings.mat_filetype == MATFT_TGA)
-												fullpath.SetSuffix("tga");
+											fullpath.SetSuffix(settings.mat_filetype);
 
 											BaseShader *sha = BaseShader::Alloc(Xbitmap);
 											sha->SetParameter(BITMAPSHADER_FILENAME, fullpath, DESCFLAGS_SET_0);
@@ -929,9 +969,7 @@ namespace ST
 										if (tmp.bumpmap.Content())
 										{
 											Filename fullpath = Filename(settings.material_root.GetString() + tmp.bumpmap.GetString().SubStr(1, tmp.bumpmap.GetString().GetLength() - 1));
-											if (settings.mat_filetype == MATFT_TGA)
-												fullpath.SetSuffix("tga");
-
+											fullpath.SetSuffix(settings.mat_filetype);
 											BaseShader *sha = BaseShader::Alloc(Xbitmap);
 											sha->SetParameter(BITMAPSHADER_FILENAME, fullpath, DESCFLAGS_SET_0);
 											newMat->InsertShader(sha);
@@ -943,9 +981,7 @@ namespace ST
 											if (tmp.basetexture.Content())
 											{
 												Filename fullpath = Filename(settings.material_root.GetString() + tmp.basetexture.GetString().SubStr(1, tmp.basetexture.GetString().GetLength() - 1));
-												if (settings.mat_filetype == MATFT_TGA)
-													fullpath.SetSuffix("tga");
-
+												fullpath.SetSuffix(settings.mat_filetype);
 												BaseShader *sha = BaseShader::Alloc(Xbitmap);
 												sha->SetParameter(BITMAPSHADER_FILENAME, fullpath, DESCFLAGS_SET_0);
 												newMat->InsertShader(sha);
@@ -956,9 +992,7 @@ namespace ST
 										if (tmp.Iris.Content())
 										{
 											Filename fullpath = Filename(settings.material_root.GetString() + tmp.Iris.GetString().SubStr(1, tmp.Iris.GetString().GetLength() - 1));
-											if (settings.mat_filetype == MATFT_TGA)
-												fullpath.SetSuffix("tga");
-
+											fullpath.SetSuffix(settings.mat_filetype);
 											BaseShader *sha = BaseShader::Alloc(Xbitmap);
 											sha->SetParameter(BITMAPSHADER_FILENAME, fullpath, DESCFLAGS_SET_0);
 											newMat->InsertShader(sha);
@@ -967,9 +1001,7 @@ namespace ST
 										if (tmp.Envmap.Content())
 										{
 											Filename fullpath = Filename(settings.material_root.GetString() + tmp.Envmap.GetString().SubStr(1, tmp.Envmap.GetString().GetLength() - 1));
-											if (settings.mat_filetype == MATFT_TGA)
-												fullpath.SetSuffix("tga");
-
+											fullpath.SetSuffix(settings.mat_filetype);
 											BaseShader *sha = BaseShader::Alloc(Xbitmap);
 											sha->SetParameter(BITMAPSHADER_FILENAME, fullpath, DESCFLAGS_SET_0);
 											newMat->InsertShader(sha);
@@ -979,9 +1011,7 @@ namespace ST
 										if (tmp.AmbientOcclTexture.Content())
 										{
 											Filename fullpath = Filename(settings.material_root.GetString() + tmp.AmbientOcclTexture.GetString().SubStr(1, tmp.Envmap.GetString().GetLength() - 1));
-											if (settings.mat_filetype == MATFT_TGA)
-												fullpath.SetSuffix("tga");
-
+											fullpath.SetSuffix(settings.mat_filetype);
 											BaseShader *sha = BaseShader::Alloc(Xbitmap);
 											sha->SetParameter(BITMAPSHADER_FILENAME, fullpath, DESCFLAGS_SET_0);
 											Material *AO = Material::Alloc();

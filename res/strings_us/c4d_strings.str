@@ -22,6 +22,7 @@ STRINGTABLE
 	IDS_BAD_REBUILD		"Critical error rebuilding SMD from master record.";
 	IDS_CACHE_FLUSHED	"Cache successfully flushed!";
 	IDS_FLUSHING_CACHE	"Flushing Cache";
+	IDS_MATFT_NOTIFY_PREFACE	"Using extension ";
 
 	// AGR Import
 	IDS_AGR				"Advanced Effects Game Recording (AGR)";

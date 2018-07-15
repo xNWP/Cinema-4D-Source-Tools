@@ -27,7 +27,7 @@
 #include "lib_ca.h"
 #include "lib_modeling.h"
 #include <map>
-//#include "QCSequenceAnimation.h"
+#include <set>
 #include "stParseTools.h"
 #include "stMath.h"
 #include "stMem.h"
@@ -95,7 +95,7 @@ namespace ST
 		Bool ik;
 		Int32 ik_orientation;
 		Bool cache;
-		Int32 mat_filetype;
+		String mat_filetype;
 	};
 
 	//----------------------------------------------------------------------------------------
@@ -179,7 +179,7 @@ namespace ST
 		/// @return							FILEERROR result of building SMD.
 		//----------------------------------------------------------------------------------------
 		FILEERROR BuildSMD(const SourceSMD *smd, const SMDLoaderSettings &settings, const QCFile *qc, BaseDocument *doc, BaseObject *parent, SCENEFILTER filterflags, String *error, Bool BuildSkeleton);
-	
+
 		private:
 		Bool m_qc_file;
 		std::vector<ST::SourceSkeletonBone*> *m_skeleton;
@@ -187,6 +187,7 @@ namespace ST
 		std::vector<SourceSMD*> *m_master_smd_record;
 		std::vector<SourceSMD*> *m_temporary_smd_record;
 		std::vector<VMTMat> m_material_cache;
+		String m_MaterialExtension;
 
 		std::chrono::time_point<std::chrono::system_clock> start;
 		std::chrono::time_point<std::chrono::system_clock> end;

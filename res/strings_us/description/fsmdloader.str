@@ -39,4 +39,5 @@ STRINGTABLE Fsmdloader
 	MATFT_VTF			"VTF";
 	MATFT_TGA			"TGA";
 	MATFT_CUSTOM		"Custom";
+	SMD_MATFT_NOTIFY	"";
 }
