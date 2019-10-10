@@ -1,9 +1,0 @@
-CONTAINER Fagrloader
-{
-	NAME Fagrloader;
-	
-	GROUP
-	{
-		FILENAME AGR_LOADER_ASSET_PATH { DIRECTORY; }
-	}
-}
