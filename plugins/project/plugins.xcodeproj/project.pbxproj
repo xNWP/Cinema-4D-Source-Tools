@@ -1,0 +1,186 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 48;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		A08C5CDEA394016041000000 /* AllTargets */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = A06E0BD44100000000460000 /* Build configuration list for PBXAggregateTarget "AllTargets" */;
+			buildPhases = (
+			);
+			dependencies = (
+				A06E0BD441FC1A3AA0370000 /* PBXTargetDependency */,
+			);
+			name = AllTargets;
+			productName = AllTargets;
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXContainerItemProxy section */
+		A0E3A677A0FC1A3AA0040000 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A0E3A677A0FC1A3AA0020000 /* sourcetools.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = A08C5CDEA3FC1A3AA07B0000;
+			remoteInfo = sourcetools;
+		};
+		A0E3A677A0FC1A3AA0050000 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A0E3A677A0FC1A3AA0020000 /* sourcetools.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = A08C5CDEA3FC1A3AA0000000;
+			remoteInfo = sourcetools;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		A0E3A677A0FC1A3AA0020000 /* sourcetools.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = sourcetools.xcodeproj; path = ../../frameworks/sourcetools/project/sourcetools.xcodeproj; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		A06E0BD44100000000150000 /* frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = frameworks;
+			sourceTree = "<group>";
+		};
+		A06E0BD44100000000170000 /* modules */ = {
+			isa = PBXGroup;
+			children = (
+				A0E3A677A0FC1A3AA0020000 /* sourcetools.xcodeproj */,
+			);
+			name = modules;
+			sourceTree = "<group>";
+		};
+		A06E0BD441000000001E0000 = {
+			isa = PBXGroup;
+			children = (
+				A06E0BD44100000000150000 /* frameworks */,
+				A06E0BD44100000000170000 /* modules */,
+			);
+			sourceTree = "<group>";
+		};
+		A06E0BD441FC1A3AA0280000 /* products */ = {
+			isa = PBXGroup;
+			children = (
+				A0E3A677A0FC1A3AA0000000 /* sourcetools.xlib */,
+			);
+			name = products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXProject section */
+		A06E0BD441000000003C0000 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1099;
+			};
+			buildConfigurationList = A06E0BD44100000000410000 /* Build configuration list for PBXProject "plugins" */;
+			compatibilityVersion = "Xcode 8.0";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = A06E0BD441000000001E0000;
+			productRefGroup = A06E0BD441000000001E0000;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = A06E0BD441FC1A3AA0280000 /* products */;
+					ProjectRef = A0E3A677A0FC1A3AA0020000 /* sourcetools.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				A08C5CDEA394016041000000 /* AllTargets */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		A0E3A677A0FC1A3AA0000000 /* sourcetools.xlib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			path = sourcetools.xlib;
+			remoteRef = A0E3A677A0FC1A3AA0040000 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXTargetDependency section */
+		A06E0BD441FC1A3AA0370000 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = sourcetools;
+			targetProxy = A0E3A677A0FC1A3AA0050000 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		A06E0BD441000000004B0000 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				MAXON_ROOTDIR = ../../;
+				SYMROOT = "$(MAXON_ROOTDIR)build";
+			};
+			name = Debug;
+		};
+		A06E0BD44100000000500000 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				MAXON_ROOTDIR = ../../;
+				SYMROOT = "$(MAXON_ROOTDIR)build";
+			};
+			name = Release;
+		};
+		A06E0BD441000000005A0000 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_MASTER_OBJECT_FILE = YES;
+				KEEP_PRIVATE_EXTERNS = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		A06E0BD441000000005F0000 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_MASTER_OBJECT_FILE = YES;
+				KEEP_PRIVATE_EXTERNS = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A06E0BD44100000000410000 /* Build configuration list for PBXProject "plugins" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A06E0BD441000000004B0000 /* Debug */,
+				A06E0BD44100000000500000 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A06E0BD44100000000460000 /* Build configuration list for PBXAggregateTarget "AllTargets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A06E0BD441000000005A0000 /* Debug */,
+				A06E0BD441000000005F0000 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A06E0BD441000000003C0000 /* Project object */;
+}

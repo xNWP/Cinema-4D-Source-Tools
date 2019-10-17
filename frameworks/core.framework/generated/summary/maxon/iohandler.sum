@@ -1,0 +1,1 @@
+maxon.IoHandlerInterface	"net.maxon.interface.iohandler"	C:\dev\Cinema-4D-Source-Tools\frameworks\core.framework\source\maxon\iohandler.h(20,7)	ObjectInterface	AppendUrl,GetHandlerForScheme,GetSystemPath,GetUrlScheme,IoNormalize,Normalize,OpenConnection,RemoveUrl,SetSystemPath	hasStaticMethods=true	

@@ -1,0 +1,1 @@
+maxon.IoBrowseInterface	"net.maxon.interface.iobrowse"	C:\dev\Cinema-4D-Source-Tools\frameworks\core.framework\source\maxon\iobrowse.h(41,7)	ObjectInterface	GetBasePath,GetCurrentPath,GetExtraData,GetNext,GetSize,HasEntry,Init,IoGetAttributes,IoGetFlags,IoGetTime,Reset	

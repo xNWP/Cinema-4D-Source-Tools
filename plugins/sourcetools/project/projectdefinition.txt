@@ -1,0 +1,15 @@
+// plugin for win and macOS
+Platform=Win64
+Type=DLL
+
+// uses the "classic" API and the new core
+APIS=cinema.framework;core.framework
+
+// turns on additional legacy support
+C4D=true
+
+// to turn off stylechecks on can set the level to 0 or just set "stylecheck" to false
+stylecheck.level=0
+
+// custom module id
+ModuleId=com.thatnwp.Cinema4DSourceTools

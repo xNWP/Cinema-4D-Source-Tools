@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="generated">
+      <UniqueIdentifier>{21B8889A-3443-779C-0000-5284111A998F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="generated\hxx">
+      <UniqueIdentifier>{21B8889A-3443-779C-8ACC-618A6830A19B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source">
+      <UniqueIdentifier>{21B8889A-3443-779C-0000-0000CA90681B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\vtf">
+      <UniqueIdentifier>{c52948fb-a0eb-486d-a198-c1dcc0bfbaac}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\generated\hxx\interface_registration.cpp">
+      <Filter>generated\hxx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\generated\hxx\register.cpp">
+      <Filter>generated\hxx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\main.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\vtf\vtfloader.cpp">
+      <Filter>source\vtf</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\source\vtf\vtfloader.h">
+      <Filter>source\vtf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\vtf\fileformat.h">
+      <Filter>source\vtf</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

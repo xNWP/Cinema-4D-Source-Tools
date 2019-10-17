@@ -1,0 +1,1 @@
+maxon.IoDualInOutputStreamInterface	"net.maxon.interface.iodualinoutputstream"	C:\dev\Cinema-4D-Source-Tools\frameworks\core.framework\source\maxon\iostream_dualinoutput.h(21,7)	InOutputStreamInterface	GetInputStream,GetOutputStream,SetInputStream,SetOutputStream	

@@ -1,0 +1,2 @@
+maxon.StringEncodingInterface	"net.maxon.interface.stringencoding"	C:\dev\Cinema-4D-Source-Tools\frameworks\core.framework\source\maxon\stringencoding.h(16,7)	StreamConversionInterface		
+maxon.StringDecodingInterface	"net.maxon.interface.stringdecoding"	C:\dev\Cinema-4D-Source-Tools\frameworks\core.framework\source\maxon\stringencoding.h(26,7)	StreamConversionInterface		
