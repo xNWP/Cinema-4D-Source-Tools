@@ -7,11 +7,20 @@
     <Filter Include="generated\hxx">
       <UniqueIdentifier>{21B8889A-3443-779C-8ACC-618A6830A19B}</UniqueIdentifier>
     </Filter>
+    <Filter Include="res">
+      <UniqueIdentifier>{21B8889A-3443-779C-0000-00000001B8A0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="res\description">
+      <UniqueIdentifier>{21B8889A-3443-779C-9C54-D849A21EBAC0}</UniqueIdentifier>
+    </Filter>
     <Filter Include="source">
       <UniqueIdentifier>{21B8889A-3443-779C-0000-0000CA90681B}</UniqueIdentifier>
     </Filter>
+    <Filter Include="source\smd">
+      <UniqueIdentifier>{21B8889A-3443-779C-000B-267EBDC47209}</UniqueIdentifier>
+    </Filter>
     <Filter Include="source\vtf">
-      <UniqueIdentifier>{c52948fb-a0eb-486d-a198-c1dcc0bfbaac}</UniqueIdentifier>
+      <UniqueIdentifier>{21B8889A-3443-779C-000B-267EBDC47E27}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -24,15 +33,39 @@
     <ClCompile Include="..\source\main.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="..\source\smd\parser.cpp">
+      <Filter>source\smd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\smd\smdloader.cpp">
+      <Filter>source\smd</Filter>
+    </ClCompile>
     <ClCompile Include="..\source\vtf\vtfloader.cpp">
       <Filter>source\vtf</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\source\vtf\vtfloader.h">
-      <Filter>source\vtf</Filter>
+    <ClInclude Include="..\res\c4d_symbols.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="..\res\description\fsmdloader.h">
+      <Filter>res\description</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\c4dst_error.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\smd\format.h">
+      <Filter>source\smd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\smd\parser.h">
+      <Filter>source\smd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\smd\smdloader.h">
+      <Filter>source\smd</Filter>
     </ClInclude>
     <ClInclude Include="..\source\vtf\fileformat.h">
+      <Filter>source\vtf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\vtf\vtfloader.h">
       <Filter>source\vtf</Filter>
     </ClInclude>
   </ItemGroup>

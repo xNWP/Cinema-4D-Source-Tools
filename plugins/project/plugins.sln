@@ -6,6 +6,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "frameworks", "frameworks", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "modules", "modules", "{8800E4E7-1090-4283-0009-38CB8C5CDEA3}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "executables", "executables", "{21908FFC-1C95-4265-0009-38CB8C5CDEA3}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\frameworks\cinema.framework\project\typeviewer\msvc\c4dapi.natvis = ..\..\frameworks\cinema.framework\project\typeviewer\msvc\c4dapi.natvis
+		..\..\frameworks\core.framework\project\typeviewer\msvc\maxon.natvis = ..\..\frameworks\core.framework\project\typeviewer\msvc\maxon.natvis
+	EndProjectSection
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cinema.framework", "..\..\frameworks\cinema.framework\project\cinema.framework.vcxproj", "{69BF9B7D-7EB2-7FC5-0009-38CB8C5CDEA3}"
 	ProjectSection(ProjectDependencies) = postProject
 		{3A883A00-61CC-D50A-0009-38CB8C5CDEA3} = {3A883A00-61CC-D50A-0009-38CB8C5CDEA3}

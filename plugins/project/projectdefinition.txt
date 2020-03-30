@@ -2,3 +2,8 @@ Platform=Win64;OSX
 Type=Solution
 Solution=\
 	plugins/sourcetools;
+	
+// include natvis files in Visual Studio solution file
+AdditionalSolutionFiles=\
+..\..\frameworks\core.framework\project\typeviewer\msvc\maxon.natvis;\
+..\..\frameworks\cinema.framework\project\typeviewer\msvc\c4dapi.natvis

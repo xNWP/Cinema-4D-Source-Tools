@@ -1,2 +1,0 @@
-maxon.DataFormatBaseReaderInterface	"net.maxon.interface.dataformatbasereader"	C:\dev\Cinema-4D-Source-Tools\frameworks\core.framework\source\maxon\dataformat_base.h(25,7)	DataDictionaryObjectInterface	CloseInput,ReadDataEOS	
-maxon.DataFormatBaseWriterInterface	"net.maxon.interface.dataformatbasewriter"	C:\dev\Cinema-4D-Source-Tools\frameworks\core.framework\source\maxon\dataformat_base.h(82,7)	DataDictionaryObjectInterface	CloseOutput,Flush,WriteData	

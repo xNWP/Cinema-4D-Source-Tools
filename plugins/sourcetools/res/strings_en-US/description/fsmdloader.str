@@ -1,0 +1,9 @@
+STRINGTABLE Fsmdloader
+{
+    Fsmdloader "Source Studiomdl Data (SMD)";
+
+    S_SCALEORIENTATION      "Scale/Orientation";
+    SMD_LOADER_SCALE        "Scale";
+    SMD_LOADER_ROTATE       "Rotate";
+    SMD_LOADER_SWAPYZ       "Swap Y/Z";
+}

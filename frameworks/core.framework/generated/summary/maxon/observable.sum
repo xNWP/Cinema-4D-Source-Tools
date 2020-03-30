@@ -1,3 +1,0 @@
-maxon.FunctionBaseInterface	"net.maxon.interface.functionbase"	C:\dev\Cinema-4D-Source-Tools\frameworks\core.framework\source\maxon\observable.h(302,7)	ObjectInterface	Execute,GetObserver,GetObserverPointer,GetOwner,Init,Set	
-maxon.CombinerInterface	"net.maxon.interface.combiner"	C:\dev\Cinema-4D-Source-Tools\frameworks\core.framework\source\maxon\observable.h(351,7)	ObjectInterface	CombineResult,InitCombine	
-maxon.ObservableBaseInterface	"net.maxon.interface.observablebase"	C:\dev\Cinema-4D-Source-Tools\frameworks\core.framework\source\maxon\observable.h(420,7)	ObjectInterface	AddObserver,GetObservableId,GetObserverCount,GetOwner,Init,Notify,RemoveObserver,SetInverseNotification,_intDisconnectAll	

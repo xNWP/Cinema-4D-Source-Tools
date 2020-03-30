@@ -1,0 +1,9 @@
+#ifndef SOURCETOOLS_C4D_SYMBOLS_H__
+#define SOURCETOOLS_C4D_SYMBOLS_H__
+
+enum
+{
+	_FIRST_ELEMENT_ = 10000,
+};
+
+#endif // !SOURCETOOLS_C4D_SYMBOLS_H__

@@ -1,2 +1,0 @@
-maxon.SystemErrorInterface	"net.maxon.interface.systemerror"	C:\dev\Cinema-4D-Source-Tools\frameworks\core.framework\source\maxon\systemerror.h(31,7)	ErrorInterface		
-maxon.NSSystemErrorInterface	"net.maxon.interface.nsystemerror"	C:\dev\Cinema-4D-Source-Tools\frameworks\core.framework\source\maxon\systemerror.h(64,7)	ErrorInterface	GetNSError,SetNSError	

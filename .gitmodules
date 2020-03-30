@@ -1,0 +1,3 @@
+[submodule "plugins/sourcetools/dependencies/PEGTL"]
+	path = plugins/sourcetools/dependencies/PEGTL
+	url = https://github.com/taocpp/PEGTL

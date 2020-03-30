@@ -13,3 +13,7 @@ stylecheck.level=0
 
 // custom module id
 ModuleId=com.thatnwp.Cinema4DSourceTools
+
+Exclude=/dependencies/
+
+AdditionalIncludeDirectories=../dependencies/PEGTL/include

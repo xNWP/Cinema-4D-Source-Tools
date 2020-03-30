@@ -62,7 +62,7 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>../generated/hxx;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../dependencies/PEGTL/include;../generated/hxx;../res;../res/description;../source;../source/smd;../source/vtf;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>MAXON_MODULE_ID="com.thatnwp.Cinema4DSourceTools";PRIVATE_MODULE_com_thatnwp_Cinema4DSourceTools;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -78,7 +78,7 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>../generated/hxx;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../dependencies/PEGTL/include;../generated/hxx;../res;../res/description;../source;../source/smd;../source/vtf;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>MAXON_MODULE_ID="com.thatnwp.Cinema4DSourceTools";PRIVATE_MODULE_com_thatnwp_Cinema4DSourceTools;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -119,9 +119,17 @@
     <ClCompile Include="..\generated\hxx\interface_registration.cpp" />
     <ClCompile Include="..\generated\hxx\register.cpp" />
     <ClCompile Include="..\source\main.cpp" />
+    <ClCompile Include="..\source\smd\parser.cpp" />
+    <ClCompile Include="..\source\smd\smdloader.cpp" />
     <ClCompile Include="..\source\vtf\vtfloader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\res\c4d_symbols.h" />
+    <ClInclude Include="..\res\description\fsmdloader.h" />
+    <ClInclude Include="..\source\c4dst_error.h" />
+    <ClInclude Include="..\source\smd\format.h" />
+    <ClInclude Include="..\source\smd\parser.h" />
+    <ClInclude Include="..\source\smd\smdloader.h" />
     <ClInclude Include="..\source\vtf\fileformat.h" />
     <ClInclude Include="..\source\vtf\vtfloader.h" />
   </ItemGroup>
