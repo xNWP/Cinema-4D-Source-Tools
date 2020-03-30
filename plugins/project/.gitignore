@@ -1,4 +1,4 @@
 _obj
-.vs
-.sln
+*.vs
+*.sln
 plugins.xcodeproj
