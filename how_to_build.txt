@@ -8,7 +8,7 @@ We currently build against Cinema 4D R21.107
 
 3. Download the latest project tool from the Maxon developer website: https://developers.maxon.net
 
-4. Generate project files from a terminal with the following command: kernel_app_64bit.exe <path_to_c4dst>\Cinema-4D-Source-Tools
+4. Generate project files from a terminal with the following command: kernel_app_64bit.exe g_updateproject=<path_to_c4dst>\Cinema-4D-Source-Tools
 
 5. Open the generated solution file located at: plugins\project\plugins.sln
 
