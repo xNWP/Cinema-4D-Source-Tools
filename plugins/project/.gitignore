@@ -1,2 +1,4 @@
 _obj
 .vs
+.sln
+plugins.xcodeproj

@@ -2,3 +2,6 @@
 *.ilk
 *.user
 *.xdl64
+*.filters
+*.vcxproj
+*.props
