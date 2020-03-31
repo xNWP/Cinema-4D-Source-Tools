@@ -38,6 +38,9 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 		std::map<std::uint32_t, maxon::Matrix> GlobalMatricesOverTime;
 	};
 
+	/* Get Parameters */
+	Float ParamScale = node->GetData().GetFloat( SMD_LOADER_SCALE, 1.0f );
+
 	/* Create Skeleton */
 	using Map_BoneId_BoneMapData = std::map<std::int16_t, BoneMapData>;
 	Map_BoneId_BoneMapData BoneMap;
@@ -63,6 +66,10 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 	// for testing always true
 	maxon::Bool bIncludeAnimation = true;
 	Int32 fps = doc->GetFps();
+	BaseTime OriginalTime = doc->GetTime();
+
+	/* Transforms */
+	maxon::Matrix TransformMatrix = MatrixScale( Vector( 1.0f, 1.0f, -1.0f ) );
 
 	/* Set Initial Positions/Rotations On Skeleton */
 	for ( auto &frame : smd.SkeletonAnimation )
@@ -98,10 +105,8 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 			}
 
 			/* Do Transforms */
-			maxon::Matrix TransformMatrix = MatrixScale( Vector( 1.0f, 1.0f, -1.0f ) );
-
 			BoneMatrix = BoneMatrix * TransformMatrix;
-			BoneMatrix.off = TransformMatrix * BoneMatrix.off;
+			BoneMatrix.off = ParamScale * TransformMatrix * BoneMatrix.off;
 
 			/* Set Bind Pose */
 			if (frame.Time == 0) BoneMap[bone.Id].Object->SetMg( BoneMatrix );
@@ -182,6 +187,8 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 		doc->SetLoopMaxTime( BaseTime( (Float)smd.SkeletonAnimation.size(), fps ) );
 	}
 
+	doc->SetTime(OriginalTime);
+
 	/* Build Mesh */
 	Int32 PolyCount = (Int32)smd.Triangles.size();
 	if ( PolyCount != 0 )
@@ -198,7 +205,7 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 
 		for ( auto &triangle : smd.Triangles )
 		{
-			maxon::Vector A(
+			maxon::Vector C(
 				triangle.Vertices[0].Position.x,
 				triangle.Vertices[0].Position.y,
 				triangle.Vertices[0].Position.z );
@@ -206,10 +213,14 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 				triangle.Vertices[1].Position.x,
 				triangle.Vertices[1].Position.y,
 				triangle.Vertices[1].Position.z );
-			maxon::Vector C(
+			maxon::Vector A(
 				triangle.Vertices[2].Position.x,
 				triangle.Vertices[2].Position.y,
 				triangle.Vertices[2].Position.z );
+
+			C = ParamScale * TransformMatrix * C;
+			B = ParamScale * TransformMatrix * B;
+			A = ParamScale * TransformMatrix * A;
 
 			PointIndex.push_back( Modeler->AddPoint( SMDMesh, A ) );
 			PointIndex.push_back( Modeler->AddPoint( SMDMesh, B ) );
@@ -231,15 +242,15 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 		{
 			NormalStruct NStruct;
 
-			NStruct.a = maxon::Vector(
+			NStruct.c = TransformMatrix * maxon::Vector(
 				smd.Triangles[i].Vertices[0].Normals.x,
 				smd.Triangles[i].Vertices[0].Normals.y,
 				smd.Triangles[i].Vertices[0].Normals.z );
-			NStruct.b = maxon::Vector(
+			NStruct.b = TransformMatrix * maxon::Vector(
 				smd.Triangles[i].Vertices[1].Normals.x,
 				smd.Triangles[i].Vertices[1].Normals.y,
 				smd.Triangles[i].Vertices[1].Normals.z );
-			NStruct.c = maxon::Vector(
+			NStruct.a = TransformMatrix * maxon::Vector(
 				smd.Triangles[i].Vertices[2].Normals.x,
 				smd.Triangles[i].Vertices[2].Normals.y,
 				smd.Triangles[i].Vertices[2].Normals.z );
@@ -250,9 +261,7 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 		SMDMesh->Message( MSG_UPDATE );
 	}
 
-	/* the problem was that I was applying rotations and transformations on one bone,
-	then basing how the next transform would occur based on local coordinates translated to global,
-	the parenting caused some nastiness to occur. */
+	/* TODO: implement orientation param, swap y/z param. */
 
 	return FILEERROR::NONE;
 }
