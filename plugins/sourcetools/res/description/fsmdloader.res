@@ -26,5 +26,14 @@ CONTAINER Fsmdloader
 
             VECTOR SMD_LOADER_ROTATE { UNIT DEGREE; }
         }
+
+        GROUP
+        {
+            NAME S_IMPORT_OPTIONS;
+            DEFAULT 1;
+
+            BOOL SMD_LOADER_IMPORT_ANIMATION {}
+            BOOL SMD_LOADER_IMPORT_MESH {}
+        }
     }
 }

@@ -7,4 +7,7 @@ STRINGTABLE Fsmdloader
     S_SCALEORIENTATION      "Scale/Orientation";
     SMD_LOADER_SCALE        "Scale";
     SMD_LOADER_ROTATE       "Rotate";
+    SMD_LOADER_IMPORT_MESH  "Mesh";
+    SMD_LOADER_IMPORT_ANIMATION "Animation";
+    S_IMPORT_OPTIONS        "Import";
 }
