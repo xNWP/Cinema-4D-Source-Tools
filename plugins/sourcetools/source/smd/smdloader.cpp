@@ -40,10 +40,20 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 
 	/* Get Parameters */
 	Float ParamScale = node->GetData().GetFloat( SMD_LOADER_SCALE, 1.0f );
+	maxon::Vector ParamOrientation = node->GetData().GetVector( SMD_LOADER_ROTATE );
+	maxon::Bool ParamImportUnderNull = node->GetData().GetBool( SMD_LOADER_IMPORT_UNDER_NULL, false );
 
 	/* Create Skeleton */
 	using Map_BoneId_BoneMapData = std::map<std::int16_t, BoneMapData>;
 	Map_BoneId_BoneMapData BoneMap;
+
+	BaseObject* RootObject = nullptr;
+	if ( ParamImportUnderNull )
+	{
+		RootObject = BaseObject::Alloc( Onull );
+		RootObject->SetName( name.GetFileString().SubStr( 0, name.GetFileString().GetLength() - 4 ) );
+		doc->InsertObject( RootObject, nullptr, nullptr );
+	}
 
 	for ( auto &bone : smd.Bones )
 	{
@@ -55,7 +65,7 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 
 		if ( bone.ParentId == -1 )
 		{
-			doc->InsertObject( BoneMap[bone.Id].Object, nullptr, nullptr );
+			doc->InsertObject( BoneMap[bone.Id].Object, RootObject, nullptr );
 		}
 		else
 		{
@@ -69,7 +79,11 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 	BaseTime OriginalTime = doc->GetTime();
 
 	/* Transforms */
-	maxon::Matrix TransformMatrix = MatrixScale( Vector( 1.0f, 1.0f, -1.0f ) );
+	maxon::Matrix TransformMatrix =
+		MatrixScale( Vector( ParamScale, ParamScale, ParamScale ) )
+		* HPBToMatrix( ParamOrientation, ROTATIONORDER::HPB )
+		* MatrixScale( Vector( -1.0f, 1.0f, 1.0f ) )
+		* MatrixRotX( PI / 2 );
 
 	/* Set Initial Positions/Rotations On Skeleton */
 	for ( auto &frame : smd.SkeletonAnimation )
@@ -105,8 +119,7 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 			}
 
 			/* Do Transforms */
-			BoneMatrix = BoneMatrix * TransformMatrix;
-			BoneMatrix.off = ParamScale * TransformMatrix * BoneMatrix.off;
+			BoneMatrix = TransformMatrix * BoneMatrix;
 
 			/* Set Bind Pose */
 			if (frame.Time == 0) BoneMap[bone.Id].Object->SetMg( BoneMatrix );
@@ -196,7 +209,7 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 		PolygonObject *SMDMesh = PolygonObject::Alloc( 0, 0 );
 		SMDMesh->SetName( name.GetFileString().SubStr( 0, name.GetFileString().GetLength() - 4 ) );
 
-		doc->InsertObject( SMDMesh, nullptr, nullptr );
+		doc->InsertObject( SMDMesh, RootObject, nullptr );
 
 		AutoAlloc<Modeling> Modeler;
 		Modeler->InitObject( SMDMesh );
@@ -218,9 +231,9 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 				triangle.Vertices[2].Position.y,
 				triangle.Vertices[2].Position.z );
 
-			C = ParamScale * TransformMatrix * C;
-			B = ParamScale * TransformMatrix * B;
-			A = ParamScale * TransformMatrix * A;
+			C = TransformMatrix * C;
+			B = TransformMatrix * B;
+			A = TransformMatrix * A;
 
 			PointIndex.push_back( Modeler->AddPoint( SMDMesh, A ) );
 			PointIndex.push_back( Modeler->AddPoint( SMDMesh, B ) );
@@ -261,7 +274,7 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 		SMDMesh->Message( MSG_UPDATE );
 	}
 
-	/* TODO: implement orientation param, swap y/z param. */
+	// TODO: Animation Boolean, Weights, Materials, Profiling, Meta
 
 	return FILEERROR::NONE;
 }
@@ -272,7 +285,7 @@ Bool SMDLoaderData::Init( GeListNode *node )
 	BaseContainer *data = ( (BaseList2D *)node )->GetDataInstance();
 	data->SetFloat( SMD_LOADER_SCALE, 1.0f );
 	data->SetVector( SMD_LOADER_ROTATE, Vector( 0.0f, 0.0f, 0.0f ) );
-	data->SetBool( SMD_LOADER_SWAPYZ, false );
+	data->SetBool( SMD_LOADER_IMPORT_UNDER_NULL, false );
 
 	return true;
 }

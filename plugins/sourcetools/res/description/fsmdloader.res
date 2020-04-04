@@ -6,6 +6,14 @@ CONTAINER Fsmdloader
     {
         GROUP
         {
+            NAME S_GENERAL;
+            DEFAULT 1;
+
+            BOOL SMD_LOADER_IMPORT_UNDER_NULL {}
+        }
+
+        GROUP
+        {
             NAME S_SCALEORIENTATION;
             DEFAULT 1;
 
@@ -17,7 +25,6 @@ CONTAINER Fsmdloader
             }
 
             VECTOR SMD_LOADER_ROTATE { UNIT DEGREE; }
-            BOOL SMD_LOADER_SWAPYZ {}
         }
     }
 }

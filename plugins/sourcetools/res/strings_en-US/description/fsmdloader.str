@@ -2,8 +2,9 @@ STRINGTABLE Fsmdloader
 {
     Fsmdloader "Source Studiomdl Data (SMD)";
 
+    S_GENERAL               "General";
+    SMD_LOADER_IMPORT_UNDER_NULL    "Import as child of a Null";
     S_SCALEORIENTATION      "Scale/Orientation";
     SMD_LOADER_SCALE        "Scale";
     SMD_LOADER_ROTATE       "Rotate";
-    SMD_LOADER_SWAPYZ       "Swap Y/Z";
 }

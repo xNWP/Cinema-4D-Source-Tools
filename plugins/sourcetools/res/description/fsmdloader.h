@@ -8,7 +8,7 @@ enum
     Fsmdloader,
     SMD_LOADER_SCALE,
     SMD_LOADER_ROTATE,
-    SMD_LOADER_SWAPYZ
+    SMD_LOADER_IMPORT_UNDER_NULL,
 };
 
 #endif // !FSMDLOADER_H__
