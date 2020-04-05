@@ -1,8 +1,8 @@
 #include "smdloader.h"
-
 #include "fsmdloader.h"
-
 #include "parser.h"
+
+#include "c4dst_error.h"
 
 #include "c4d_baseobject.h"
 #include "c4d_basedocument.h"
@@ -13,6 +13,7 @@
 #include "c4d_basetag.h"
 #include "c4d_baseselect.h"
 #include "lib_ca.h"
+#include "ge_math.h"
 
 #include <map>
 
@@ -35,9 +36,6 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 	{
 		std::int16_t ParentId;
 		BaseObject *Object;
-
-		/* Maps Matrix Over Time */
-		std::map<std::uint32_t, maxon::Matrix> GlobalMatricesOverTime;
 	};
 
 	/* Get Parameters */
@@ -48,8 +46,7 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 	maxon::Bool ParamIncludeMesh = node->GetData().GetBool( SMD_LOADER_IMPORT_MESH, true );
 
 	/* Create Skeleton */
-	using Map_BoneId_BoneMapData = std::map<std::int16_t, BoneMapData>;
-	Map_BoneId_BoneMapData BoneMap;
+	std::map<std::int16_t, BoneMapData> BoneMap;
 
 	BaseObject* RootObject = nullptr;
 	if ( ParamImportUnderNull )
@@ -76,19 +73,21 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 			doc->InsertObject( BoneMap[bone.Id].Object, BoneMap[bone.ParentId].Object, nullptr );
 		}
 	}
-	
 
 	Int32 DocumentFramesPerSecond = doc->GetFps();
 	BaseTime OriginalTime = doc->GetTime();
 
 	/* Transforms */
-	maxon::Matrix TransformMatrix =
-		MatrixScale( Vector( ParamScale, ParamScale, ParamScale ) )
-		* HPBToMatrix( ParamOrientation, ROTATIONORDER::HPB )
+	maxon::Matrix TransformRotationMatrix = 
+		HPBToMatrix( ParamOrientation, ROTATIONORDER::HPB )
 		* MatrixScale( Vector( -1.0f, 1.0f, 1.0f ) )
 		* MatrixRotX( PI / 2 );
+	maxon::Matrix TransformMatrix =
+		MatrixScale( Vector( ParamScale, ParamScale, ParamScale ) )
+		* TransformRotationMatrix;
 
 	/* Set Initial Positions/Rotations On Skeleton */
+	std::map<std::int16_t, Vector> LastBoneRotationMap;
 	for ( auto &frame : smd.SkeletonAnimation )
 	{
 		if ( !ParamIncludeAnimation && frame.Time != 0 ) break;
@@ -97,35 +96,15 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 
 		for ( auto &bone : frame.Entries )
 		{
-			maxon::Matrix BoneMatrix = HPBToMatrix( maxon::Vector( bone.Rotation.x, bone.Rotation.y, bone.Rotation.z ), ROTATIONORDER::XYZLOCAL );
-			BoneMatrix = ~BoneMatrix;
+			maxon::Matrix BoneLocalMatrix = HPBToMatrix( maxon::Vector( bone.Rotation.x, bone.Rotation.y, bone.Rotation.z ), ROTATIONORDER::XYZLOCAL );
+			BoneLocalMatrix = ~BoneLocalMatrix;
+			BoneLocalMatrix.off = maxon::Vector64( bone.Position.x, bone.Position.y, bone.Position.z );
 
-			BoneMatrix.off = maxon::Vector64( bone.Position.x, bone.Position.y, bone.Position.z );
-			
-			if ( BoneMap[bone.Id].ParentId == -1 ) // root
-			{
-				BoneMap[bone.Id].GlobalMatricesOverTime[frame.Time] = BoneMatrix;
-			}
-			else
-			{
-				auto &ParentGlobalMatrices = BoneMap[BoneMap[bone.Id].ParentId].GlobalMatricesOverTime;
-				for ( auto it = ParentGlobalMatrices.rbegin(); it != ParentGlobalMatrices.rend(); ++it )
-				{
-					if ( it->first <= frame.Time )
-					{
-						// Found parent matrix at same or closest time
-						BoneMatrix = it->second * BoneMatrix;
-						BoneMap[bone.Id].GlobalMatricesOverTime[frame.Time] = BoneMatrix;
-						break;
-					}
-				}
-			}
+			// Do Transform
+			if ( BoneMap[bone.Id].ParentId == -1 )
+				BoneLocalMatrix = TransformMatrix * BoneLocalMatrix;
 
-			/* Do Transforms */
-			BoneMatrix = TransformMatrix * BoneMatrix;
-
-			/* Set Bind Pose */
-			if (frame.Time == 0) BoneMap[bone.Id].Object->SetMg( BoneMatrix );
+			if (frame.Time == 0) BoneMap[bone.Id].Object->SetMl( BoneLocalMatrix );
 
 			if ( ParamIncludeAnimation && smd.SkeletonAnimation.size() > 1 )
 			{
@@ -137,22 +116,22 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 				if ( frame.Time == 0 )
 				{
 					XTrack = CTrack::Alloc( BoneMap[bone.Id].Object,
-											DescID( DescLevel( ID_BASEOBJECT_GLOBAL_POSITION, DTYPE_VECTOR, 0 ),
+											DescID( DescLevel( ID_BASEOBJECT_REL_POSITION, DTYPE_VECTOR, 0 ),
 													DescLevel( VECTOR_X, DTYPE_REAL, 0 ) ) );
 					YTrack = CTrack::Alloc( BoneMap[bone.Id].Object,
-											DescID( DescLevel( ID_BASEOBJECT_GLOBAL_POSITION, DTYPE_VECTOR, 0 ),
+											DescID( DescLevel( ID_BASEOBJECT_REL_POSITION, DTYPE_VECTOR, 0 ),
 													DescLevel( VECTOR_Y, DTYPE_REAL, 0 ) ) );
 					ZTrack = CTrack::Alloc( BoneMap[bone.Id].Object,
-											DescID( DescLevel( ID_BASEOBJECT_GLOBAL_POSITION, DTYPE_VECTOR, 0 ),
+											DescID( DescLevel( ID_BASEOBJECT_REL_POSITION, DTYPE_VECTOR, 0 ),
 													DescLevel( VECTOR_Z, DTYPE_REAL, 0 ) ) );
 					XRTrack = CTrack::Alloc( BoneMap[bone.Id].Object,
-											DescID( DescLevel( ID_BASEOBJECT_GLOBAL_ROTATION, DTYPE_VECTOR, 0 ),
+											DescID( DescLevel( ID_BASEOBJECT_REL_ROTATION, DTYPE_VECTOR, 0 ),
 													DescLevel( VECTOR_X, DTYPE_REAL, 0 ) ) );
 					YRTrack = CTrack::Alloc( BoneMap[bone.Id].Object,
-											DescID( DescLevel( ID_BASEOBJECT_GLOBAL_ROTATION, DTYPE_VECTOR, 0 ),
+											DescID( DescLevel( ID_BASEOBJECT_REL_ROTATION, DTYPE_VECTOR, 0 ),
 													DescLevel( VECTOR_Y, DTYPE_REAL, 0 ) ) );
 					ZRTrack = CTrack::Alloc( BoneMap[bone.Id].Object,
-											DescID( DescLevel( ID_BASEOBJECT_GLOBAL_ROTATION, DTYPE_VECTOR, 0 ),
+											DescID( DescLevel( ID_BASEOBJECT_REL_ROTATION, DTYPE_VECTOR, 0 ),
 													DescLevel( VECTOR_Z, DTYPE_REAL, 0 ) ) );
 
 					BoneMap[bone.Id].Object->InsertTrackSorted( XTrack );
@@ -165,8 +144,8 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 					goto end_find_tracks;
 				}
 
-				BoneMap[bone.Id].Object->GetVectorTracks( DescID( DescLevel( ID_BASEOBJECT_GLOBAL_POSITION, DTYPE_VECTOR, 0 ) ), XTrack, YTrack, ZTrack );
-				BoneMap[bone.Id].Object->GetVectorTracks( DescID( DescLevel( ID_BASEOBJECT_GLOBAL_ROTATION, DTYPE_VECTOR, 0 ) ), XRTrack, YRTrack, ZRTrack );
+				BoneMap[bone.Id].Object->GetVectorTracks( DescID( DescLevel( ID_BASEOBJECT_REL_POSITION, DTYPE_VECTOR, 0 ) ), XTrack, YTrack, ZTrack );
+				BoneMap[bone.Id].Object->GetVectorTracks( DescID( DescLevel( ID_BASEOBJECT_REL_ROTATION, DTYPE_VECTOR, 0 ) ), XRTrack, YRTrack, ZRTrack );
 
 			end_find_tracks:;
 
@@ -178,13 +157,46 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 				ZRCurve = ZRTrack->GetCurve();
 
 				CKey *XKey = XCurve->AddKey( BaseTime( frame.Time, DocumentFramesPerSecond ) );
-				XKey->SetValue( XCurve, BoneMatrix.off.x );
+				XKey->SetValue( XCurve, BoneLocalMatrix.off.x );
 				CKey *YKey = YCurve->AddKey( BaseTime( frame.Time, DocumentFramesPerSecond ) );
-				YKey->SetValue( YCurve, BoneMatrix.off.y );
+				YKey->SetValue( YCurve, BoneLocalMatrix.off.y );
 				CKey *ZKey = ZCurve->AddKey( BaseTime( frame.Time, DocumentFramesPerSecond ) );
-				ZKey->SetValue( ZCurve, BoneMatrix.off.z );
+				ZKey->SetValue( ZCurve, BoneLocalMatrix.off.z );
 
-				maxon::Vector RotationVector = MatrixToHPB( BoneMatrix, ROTATIONORDER::HPB );
+				maxon::Vector RotationVector = MatrixToHPB( BoneLocalMatrix, ROTATIONORDER::HPB );
+
+				// Ensure we take the shortest route
+				auto LastRotationIterator = LastBoneRotationMap.find( bone.Id );
+				if ( LastRotationIterator != LastBoneRotationMap.end() )
+				{
+					Vector LastRotation = LastRotationIterator->second;
+
+					while ( Abs( RotationVector.x - LastRotation.x ) > PI )
+					{
+						if ( RotationVector.x >= LastRotation.x )
+							RotationVector.x -= 2 * PI;
+						else
+							RotationVector.x += 2 * PI;
+					}
+
+					while ( Abs( RotationVector.y - LastRotation.y ) > PI )
+					{
+						if ( RotationVector.y >= LastRotation.y )
+							RotationVector.y -= 2 * PI;
+						else
+							RotationVector.y += 2 * PI;
+					}
+
+					while ( Abs( RotationVector.z - LastRotation.z ) > PI )
+					{
+						if ( RotationVector.z >= LastRotation.z )
+							RotationVector.z -= 2 * PI;
+						else
+							RotationVector.z += 2 * PI;
+					}
+				}
+
+				LastBoneRotationMap[bone.Id] = RotationVector;
 
 				CKey *XRKey = XRCurve->AddKey( BaseTime( frame.Time, DocumentFramesPerSecond ) );
 				XRKey->SetValue( XRCurve, RotationVector.x );
@@ -264,23 +276,21 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 			{
 				NormalStruct VertexNormals;
 
-				VertexNormals.c = TransformMatrix * maxon::Vector(
+				VertexNormals.c = TransformRotationMatrix * maxon::Vector(
 					smd.Triangles[i].Vertices[0].Normals.x,
 					smd.Triangles[i].Vertices[0].Normals.y,
 					smd.Triangles[i].Vertices[0].Normals.z );
-				VertexNormals.b = TransformMatrix * maxon::Vector(
+				VertexNormals.b = TransformRotationMatrix * maxon::Vector(
 					smd.Triangles[i].Vertices[1].Normals.x,
 					smd.Triangles[i].Vertices[1].Normals.y,
 					smd.Triangles[i].Vertices[1].Normals.z );
-				VertexNormals.a = TransformMatrix * maxon::Vector(
+				VertexNormals.a = TransformRotationMatrix * maxon::Vector(
 					smd.Triangles[i].Vertices[2].Normals.x,
 					smd.Triangles[i].Vertices[2].Normals.y,
 					smd.Triangles[i].Vertices[2].Normals.z );
 
 				NormalTag::Set( HandleNormals, i, VertexNormals );
 			}
-
-			SMDMesh->Message( MSG_UPDATE );
 
 			/* Selection Tags */
 			BaseSelect* Selector = SMDMesh->GetPolygonS();
@@ -346,7 +356,7 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 		}
 	}
 
-	// TODO: Materials, Profiling, Meta, Shortest Route with Euler, Quaternion Rotation
+	// TODO: Materials, Profiling, Meta, Quaternion Rotation
 
 	return FILEERROR::NONE;
 }
