@@ -34,6 +34,7 @@ CONTAINER Fsmdloader
 
             BOOL SMD_LOADER_IMPORT_ANIMATION {}
             BOOL SMD_LOADER_IMPORT_MESH {}
+            BOOL SMD_LOADER_IMPORT_WEIGHTS {}
         }
     }
 }

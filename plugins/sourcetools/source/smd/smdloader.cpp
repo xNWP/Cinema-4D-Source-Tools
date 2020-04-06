@@ -16,6 +16,16 @@
 #include "ge_math.h"
 
 #include <map>
+#include <unordered_map>
+
+template <>
+struct std::hash<maxon::Vector>
+{
+	std::size_t operator()( const maxon::Vector& vec ) const
+	{
+		return vec.GetHashCode();
+	}
+};
 
 Bool SMDLoaderData::Identify( BaseSceneLoader* node, const Filename& name, UChar* probe, Int32 size )
 {
@@ -44,6 +54,7 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 	maxon::Bool ParamImportUnderNull = node->GetData().GetBool( SMD_LOADER_IMPORT_UNDER_NULL, false );
 	maxon::Bool ParamIncludeAnimation = node->GetData().GetBool( SMD_LOADER_IMPORT_ANIMATION, true );
 	maxon::Bool ParamIncludeMesh = node->GetData().GetBool( SMD_LOADER_IMPORT_MESH, true );
+	maxon::Bool ParamIncludeWeights = node->GetData().GetBool( SMD_LOADER_IMPORT_WEIGHTS, true );
 
 	/* Create Skeleton */
 	std::map<std::int16_t, BoneMapData> BoneMap;
@@ -229,8 +240,9 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 			doc->InsertObject( SMDMesh, RootObject, nullptr );
 
 			AutoAlloc<Modeling> Modeler;
-			Modeler->InitObject( SMDMesh );
+			Modeler->InitObject( SMDMesh );			
 
+			std::unordered_map<maxon::Vector, std::vector<Int32>> PointMap;
 			std::vector<Int32> PointIndex;
 			std::map<std::string, std::vector<Int32>> SelectionMap;
 			Int32 PolygonIterator = 0;
@@ -255,13 +267,26 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 				A = TransformMatrix * A;
 
 				PointIndex.push_back( Modeler->AddPoint( SMDMesh, A ) );
+				PointMap[A].push_back( PointIndex.back() );
 				PointIndex.push_back( Modeler->AddPoint( SMDMesh, B ) );
+				PointMap[B].push_back( PointIndex.back() );
 				PointIndex.push_back( Modeler->AddPoint( SMDMesh, C ) );
+				PointMap[C].push_back( PointIndex.back() );
 
 				Int32* pAdr = &PointIndex[PointIndex.size() - 3];
 				Modeler->CreateNgon( SMDMesh, pAdr, 3 );
 
 				SelectionMap[triangle.Material].push_back( PolygonIterator++ );
+			}
+
+			/* Weld Identical Points */
+			for ( auto& Point : PointMap )
+			{
+				auto FirstIndex = Point.second.begin();
+				for ( auto OtherIndex = FirstIndex + 1; OtherIndex != Point.second.end(); OtherIndex++ )
+				{
+					Modeler->WeldPoints( SMDMesh, *OtherIndex, *FirstIndex );
+				}
 			}
 
 			Modeler->Commit( SMDMesh );
@@ -325,33 +350,36 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 			}
 
 			/* Weights */
-			CAWeightTag* WeightTag = CAWeightTag::Alloc();
-			SMDMesh->InsertTag( WeightTag );
-			BaseObject* SkinObject = BaseObject::Alloc( Oskin );
-			doc->InsertObject( SkinObject, SMDMesh, nullptr );
-
-			for ( auto& Bone : BoneMap )
-				WeightTag->AddJoint( Bone.second.Object );
-
-			PolyIndex = 0;
-			for ( const auto& Poly : smd.Triangles )
+			if ( ParamIncludeWeights )
 			{
-				// C
-				Int32 PointIndex = PolyIndex * 3;
-				for ( auto& w : Poly.Vertices[2].WeightMapEntries )
-					WeightTag->SetWeight( w.BoneId, PointIndex, w.Weight );
+				CAWeightTag* WeightTag = CAWeightTag::Alloc();
+				SMDMesh->InsertTag( WeightTag );
+				BaseObject* SkinObject = BaseObject::Alloc( Oskin );
+				doc->InsertObject( SkinObject, SMDMesh, nullptr );
 
-				// B
-				++PointIndex;
-				for ( auto& w : Poly.Vertices[1].WeightMapEntries )
-					WeightTag->SetWeight( w.BoneId, PointIndex, w.Weight );
+				for ( auto& Bone : BoneMap )
+					WeightTag->AddJoint( Bone.second.Object );
 
-				// C
-				++PointIndex;
-				for ( auto& w : Poly.Vertices[0].WeightMapEntries )
-					WeightTag->SetWeight( w.BoneId, PointIndex, w.Weight );
+				PolyIndex = 0;
+				for ( const auto& Poly : smd.Triangles )
+				{
+					// C
+					Int32 PointIndex = PolyIndex * 3;
+					for ( auto& w : Poly.Vertices[2].WeightMapEntries )
+						WeightTag->SetWeight( w.BoneId, PointIndex, w.Weight );
 
-				++PolyIndex;
+					// B
+					++PointIndex;
+					for ( auto& w : Poly.Vertices[1].WeightMapEntries )
+						WeightTag->SetWeight( w.BoneId, PointIndex, w.Weight );
+
+					// C
+					++PointIndex;
+					for ( auto& w : Poly.Vertices[0].WeightMapEntries )
+						WeightTag->SetWeight( w.BoneId, PointIndex, w.Weight );
+
+					++PolyIndex;
+				}
 			}
 		}
 	}

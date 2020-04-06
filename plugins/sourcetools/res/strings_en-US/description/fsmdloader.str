@@ -10,4 +10,5 @@ STRINGTABLE Fsmdloader
     SMD_LOADER_IMPORT_MESH  "Mesh";
     SMD_LOADER_IMPORT_ANIMATION "Animation";
     S_IMPORT_OPTIONS        "Import";
+    SMD_LOADER_IMPORT_WEIGHTS   "Weights";
 }
