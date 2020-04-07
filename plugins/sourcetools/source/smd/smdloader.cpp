@@ -103,8 +103,6 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 	{
 		if ( !ParamIncludeAnimation && frame.Time != 0 ) break;
 
-		doc->SetTime( BaseTime( frame.Time, DocumentFramesPerSecond ) );
-
 		for ( auto &bone : frame.Entries )
 		{
 			maxon::Matrix BoneLocalMatrix = HPBToMatrix( maxon::Vector( bone.Rotation.x, bone.Rotation.y, bone.Rotation.z ), ROTATIONORDER::XYZLOCAL );
@@ -119,31 +117,31 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 
 			if ( ParamIncludeAnimation && smd.SkeletonAnimation.size() > 1 )
 			{
-				CTrack *XTrack, *YTrack, *ZTrack,
-					*XRTrack, *YRTrack, *ZRTrack;
-				CCurve *XCurve, *YCurve, *ZCurve,
-					*XRCurve, *YRCurve, *ZRCurve;
+				CTrack* XTrack, * YTrack, * ZTrack,
+					* XRTrack, * YRTrack, * ZRTrack;
+				CCurve* XCurve, * YCurve, * ZCurve,
+					* XRCurve, * YRCurve, * ZRCurve;
 
 				if ( frame.Time == 0 )
 				{
 					XTrack = CTrack::Alloc( BoneMap[bone.Id].Object,
 											DescID( DescLevel( ID_BASEOBJECT_REL_POSITION, DTYPE_VECTOR, 0 ),
-													DescLevel( VECTOR_X, DTYPE_REAL, 0 ) ) );
+											DescLevel( VECTOR_X, DTYPE_REAL, 0 ) ) );
 					YTrack = CTrack::Alloc( BoneMap[bone.Id].Object,
 											DescID( DescLevel( ID_BASEOBJECT_REL_POSITION, DTYPE_VECTOR, 0 ),
-													DescLevel( VECTOR_Y, DTYPE_REAL, 0 ) ) );
+											DescLevel( VECTOR_Y, DTYPE_REAL, 0 ) ) );
 					ZTrack = CTrack::Alloc( BoneMap[bone.Id].Object,
 											DescID( DescLevel( ID_BASEOBJECT_REL_POSITION, DTYPE_VECTOR, 0 ),
-													DescLevel( VECTOR_Z, DTYPE_REAL, 0 ) ) );
+											DescLevel( VECTOR_Z, DTYPE_REAL, 0 ) ) );
 					XRTrack = CTrack::Alloc( BoneMap[bone.Id].Object,
-											DescID( DescLevel( ID_BASEOBJECT_REL_ROTATION, DTYPE_VECTOR, 0 ),
-													DescLevel( VECTOR_X, DTYPE_REAL, 0 ) ) );
+											 DescID( DescLevel( ID_BASEOBJECT_REL_ROTATION, DTYPE_VECTOR, 0 ),
+											 DescLevel( VECTOR_X, DTYPE_REAL, 0 ) ) );
 					YRTrack = CTrack::Alloc( BoneMap[bone.Id].Object,
-											DescID( DescLevel( ID_BASEOBJECT_REL_ROTATION, DTYPE_VECTOR, 0 ),
-													DescLevel( VECTOR_Y, DTYPE_REAL, 0 ) ) );
+											 DescID( DescLevel( ID_BASEOBJECT_REL_ROTATION, DTYPE_VECTOR, 0 ),
+											 DescLevel( VECTOR_Y, DTYPE_REAL, 0 ) ) );
 					ZRTrack = CTrack::Alloc( BoneMap[bone.Id].Object,
-											DescID( DescLevel( ID_BASEOBJECT_REL_ROTATION, DTYPE_VECTOR, 0 ),
-													DescLevel( VECTOR_Z, DTYPE_REAL, 0 ) ) );
+											 DescID( DescLevel( ID_BASEOBJECT_REL_ROTATION, DTYPE_VECTOR, 0 ),
+											 DescLevel( VECTOR_Z, DTYPE_REAL, 0 ) ) );
 
 					BoneMap[bone.Id].Object->InsertTrackSorted( XTrack );
 					BoneMap[bone.Id].Object->InsertTrackSorted( YTrack );
@@ -167,11 +165,11 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 				YRCurve = YRTrack->GetCurve();
 				ZRCurve = ZRTrack->GetCurve();
 
-				CKey *XKey = XCurve->AddKey( BaseTime( frame.Time, DocumentFramesPerSecond ) );
+				CKey* XKey = XCurve->AddKey( BaseTime( frame.Time, DocumentFramesPerSecond ) );
 				XKey->SetValue( XCurve, BoneLocalMatrix.off.x );
-				CKey *YKey = YCurve->AddKey( BaseTime( frame.Time, DocumentFramesPerSecond ) );
+				CKey* YKey = YCurve->AddKey( BaseTime( frame.Time, DocumentFramesPerSecond ) );
 				YKey->SetValue( YCurve, BoneLocalMatrix.off.y );
-				CKey *ZKey = ZCurve->AddKey( BaseTime( frame.Time, DocumentFramesPerSecond ) );
+				CKey* ZKey = ZCurve->AddKey( BaseTime( frame.Time, DocumentFramesPerSecond ) );
 				ZKey->SetValue( ZCurve, BoneLocalMatrix.off.z );
 
 				maxon::Vector RotationVector = MatrixToHPB( BoneLocalMatrix, ROTATIONORDER::HPB );
@@ -209,11 +207,11 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 
 				LastBoneRotationMap[bone.Id] = RotationVector;
 
-				CKey *XRKey = XRCurve->AddKey( BaseTime( frame.Time, DocumentFramesPerSecond ) );
+				CKey* XRKey = XRCurve->AddKey( BaseTime( frame.Time, DocumentFramesPerSecond ) );
 				XRKey->SetValue( XRCurve, RotationVector.x );
-				CKey *YRKey = YRCurve->AddKey( BaseTime( frame.Time, DocumentFramesPerSecond ) );
+				CKey* YRKey = YRCurve->AddKey( BaseTime( frame.Time, DocumentFramesPerSecond ) );
 				YRKey->SetValue( YRCurve, RotationVector.y );
-				CKey *ZRKey = ZRCurve->AddKey( BaseTime( frame.Time, DocumentFramesPerSecond ) );
+				CKey* ZRKey = ZRCurve->AddKey( BaseTime( frame.Time, DocumentFramesPerSecond ) );
 				ZRKey->SetValue( ZRCurve, RotationVector.z );
 			}
 		}
@@ -222,11 +220,9 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 	/* Set start/end time accordingly */
 	if ( !( filterflags & SCENEFILTER::MERGESCENE ) && smd.SkeletonAnimation.size() > 1 && ParamIncludeAnimation )
 	{
-		doc->SetMaxTime( BaseTime( (Float)smd.SkeletonAnimation.size(), DocumentFramesPerSecond ) );
-		doc->SetLoopMaxTime( BaseTime( (Float)smd.SkeletonAnimation.size(), DocumentFramesPerSecond ) );
+		doc->SetMaxTime( BaseTime( (Float)smd.SkeletonAnimation.size() - 1, DocumentFramesPerSecond ) );
+		doc->SetLoopMaxTime( BaseTime( (Float)smd.SkeletonAnimation.size() - 1, DocumentFramesPerSecond ) );
 	}
-
-	doc->SetTime( OriginalTime );
 
 	/* Build Mesh */
 	if ( ParamIncludeMesh )
@@ -384,7 +380,7 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 		}
 	}
 
-	// TODO: Materials, Profiling, Meta, Quaternion Rotation
+	// TODO: Profiling, Meta
 
 	return FILEERROR::NONE;
 }
@@ -398,6 +394,7 @@ Bool SMDLoaderData::Init( GeListNode *node )
 	data->SetBool( SMD_LOADER_IMPORT_UNDER_NULL, false );
 	data->SetBool( SMD_LOADER_IMPORT_ANIMATION, true );
 	data->SetBool( SMD_LOADER_IMPORT_MESH, true );
+	data->SetBool( SMD_LOADER_IMPORT_WEIGHTS, true );
 
 	return true;
 }
