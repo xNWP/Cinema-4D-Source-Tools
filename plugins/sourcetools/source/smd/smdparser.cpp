@@ -8,7 +8,7 @@
 //==============================================================================
 // TODO: Log meta (crowbar version)
 
-#include "parser.h"
+#include "smdparser.h"
 
 #include "tao/pegtl.hpp"
 

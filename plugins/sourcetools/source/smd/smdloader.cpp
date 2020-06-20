@@ -1,6 +1,6 @@
 #include "smdloader.h"
 #include "fsmdloader.h"
-#include "parser.h"
+#include "smdparser.h"
 
 #include "c4dst_error.h"
 
