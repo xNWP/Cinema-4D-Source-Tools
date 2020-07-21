@@ -12,17 +12,32 @@
 
 #include "vtf/vtfloader.h"
 #include "smd/smdloader.h"
+#include "qc/qcloader.h"
+
 #include "c4dst_error.h"
 
 Bool PluginStart()
 {
 	// VTF Loader
-	if (!VTFLoaderData::RegisterPlugin())
+	if ( !VTFLoaderData::RegisterPlugin() )
+	{
+		LogError( "Failed to register VTF loader." );
 		return false;
+	}
 
 	// SMD Loader
-	if (!SMDLoaderData::RegisterPlugin())
+	if ( !SMDLoaderData::RegisterPlugin() )
+	{
+		LogError( "Failed to register SMD loader." );
 		return false;
+	}
+	
+	// QC Loader
+	if ( !QCLoaderData::RegisterPlugin() )
+	{
+		LogError( "Failed to register QC loader." );
+		return false;
+	}
 
 	return true;
 }

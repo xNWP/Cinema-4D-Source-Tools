@@ -559,12 +559,17 @@ maxon::Bool ParseSMD( const Filename &file, StudiomdlData &smd)
 		LogErrorWhat( e );
 		return false;
 	}
+	catch ( tao::pegtl::input_error& e )
+	{
+		LogErrorWhat( e );
+		return false;
+	}
 
 	/* check for errors */
 
 	if ( !bOk )
 	{
-		LogError( "Exception free error in PEGTL." );
+		LogError( "Exception free error in SMD PEGTL Parser." );
 		return false;
 	}
 

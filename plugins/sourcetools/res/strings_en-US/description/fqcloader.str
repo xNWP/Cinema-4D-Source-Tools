@@ -1,0 +1,17 @@
+STRINGTABLE Fqcloader
+{
+    Fqcloader   "Source QuakeC (QC)";
+
+    S_GENERAL   "General";
+    QC_LOADER_IMPORT_UNDER_NULL "Import as child of a Null";
+    S_SCALEORIENTATION  "Scale/Orientation";
+    QC_LOADER_SCALE     "Scale";
+    QC_LOADER_ROTATE    "Rotate";
+    S_IMPORT_OPTIONS    "Import";
+
+    QC_LOADER_IMPORT_SKELETON   "Skeleton";
+    QC_LOADER_IMPORT_MESH       "Mesh";
+    QC_LOADER_IMPORT_WEIGHTS    "Weights";
+    QC_LOADER_IMPORT_MATERIALS  "Materials";
+    QC_LOADER_MATERIAL_PATH     "Root Material Directory";
+}

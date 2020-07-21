@@ -1,5 +1,8 @@
+#include "qcparser.h"
+
 #include "qcformat.h"
 #include "tao/pegtl.hpp"
+#include "c4dst_error.h"
 
 namespace qc_grammar
 {
@@ -288,14 +291,28 @@ namespace qc_grammar
 	};
 }
 
-int main()
+maxon::Bool ParseQC( const Filename& file, QuakeCFormat& qc )
 {
-	tao::pegtl::file_input<> fin( "C:\\Users\\Aorus-Mini\\Desktop\\cs_dev\\qctest.qc" );
-	QuakeCFormat qc;
+	tao::pegtl::file_input infile( file.GetString().GetCStringCopy() );
 
+	maxon::Bool bOk;
+	try
+	{
+		bOk = tao::pegtl::parse<qc_grammar::qc_file, qc_grammar::action>( infile, qc );
+	}
+	catch ( tao::pegtl::parse_error& e )
+	{
+		LogErrorWhat( e );
+		return false;
+	}
 
-	tao::pegtl::parse< qc_grammar::qc_file, qc_grammar::action >( fin, qc );
-	auto test = ( ( QuakeCFormat::ModelPropertyEyeball* )(( ( qc.Models.end() - 1 )->Properties.end() - 1 )->get() ))->Name;
+	/* Check for errors */
 
-	return 0;
+	if ( !bOk )
+	{
+		LogError( "Exception free error in QC PEGTL Parser." );
+		return false;
+	}
+
+	return true;
 }
