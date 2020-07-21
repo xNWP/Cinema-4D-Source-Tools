@@ -43,19 +43,26 @@ FILEERROR SMDLoaderData::Load( BaseSceneLoader* node, const Filename& name, Base
 		return FILEERROR::INVALID;
 	}
 
+	auto GetParam = [&node]( Int32 id )->GeData
+	{
+		static GeData Data;
+		node->GetParameter( id, Data, DESCFLAGS_GET::NONE );
+		return Data;
+	};
+
 	maxon::String SmdName = name.GetFileString().SubStr( 0, name.GetFileString().GetLength() - 4 );
 
 	/* Get Parameters */
 	Settings config;
 
-	config.Scale = node->GetData().GetFloat( SMD_LOADER_SCALE, 1.0f );
-	config.Orientation = node->GetData().GetVector( SMD_LOADER_ROTATE );
-	config.IncludeAnimation = node->GetData().GetBool( SMD_LOADER_IMPORT_ANIMATION, true );
-	config.IncludeMesh = node->GetData().GetBool( SMD_LOADER_IMPORT_MESH, true );
-	config.IncludeWeights = node->GetData().GetBool( SMD_LOADER_IMPORT_WEIGHTS, true );
-	config.IncludeSkeleton = node->GetData().GetBool( SMD_LOADER_IMPORT_SKELETON, true );
+	config.Scale = GetParam( SMD_LOADER_SCALE ).GetFloat();
+	config.Orientation = GetParam( SMD_LOADER_ROTATE ).GetVector();
+	config.IncludeSkeleton = GetParam( SMD_LOADER_IMPORT_SKELETON ).GetBool();
+	config.IncludeAnimation = GetParam( SMD_LOADER_IMPORT_ANIMATION ).GetBool();
+	config.IncludeMesh = GetParam( SMD_LOADER_IMPORT_MESH ).GetBool();
+	config.IncludeWeights = GetParam( SMD_LOADER_IMPORT_WEIGHTS ).GetBool();
 
-	if ( node->GetData().GetBool( SMD_LOADER_IMPORT_UNDER_NULL, false ) )
+	if ( GetParam( SMD_LOADER_IMPORT_UNDER_NULL ).GetBool() )
 	{
 		config.MeshRootObject = BaseObject::Alloc( Onull );
 		config.MeshRootObject->SetName( SmdName );
@@ -420,6 +427,91 @@ Bool SMDLoaderData::Init( GeListNode *node )
 	data->SetBool( SMD_LOADER_IMPORT_SKELETON, true );
 
 	return true;
+}
+
+Bool SMDLoaderData::GetDEnabling( GeListNode* node, const DescID& id, const GeData& data, DESCFLAGS_ENABLE flags, const BaseContainer* itemdesc )
+{
+	if ( node == nullptr )
+		return false;
+
+
+	auto GetParam = [&node]( Int32 id )->GeData
+	{
+		static GeData Data;
+		node->GetParameter( id, Data, DESCFLAGS_GET::NONE );
+		return Data;
+	};
+
+	switch ( id[0].id )
+	{
+		case SMD_LOADER_IMPORT_ANIMATION:
+		{
+			if ( !GetParam( SMD_LOADER_IMPORT_SKELETON ).GetBool() )
+				return false;
+
+			break;
+		}
+
+		case SMD_LOADER_IMPORT_WEIGHTS:
+		{
+			if ( !(
+				GetParam( SMD_LOADER_IMPORT_MESH ).GetBool() &&
+				GetParam( SMD_LOADER_IMPORT_SKELETON ).GetBool()
+				) )
+				return false;
+		}
+	}
+
+	return true;
+}
+
+Bool SMDLoaderData::GetDParameter( GeListNode* node, const DescID& id, GeData& t_data, DESCFLAGS_GET& flags )
+{
+	if ( node == nullptr )
+		return false;
+
+	auto GetParam = [&node]( Int32 id )->GeData
+	{
+		static GeData Data;
+		node->GetParameter( id, Data, DESCFLAGS_GET::NONE );
+		return Data;
+	};
+
+	auto SetFalse = [&t_data, &flags]( void ) -> void
+	{
+		t_data.SetInt32( 0 );
+		flags |= DESCFLAGS_GET::PARAM_GET;
+	};
+
+	switch ( id[0].id )
+	{
+		case SMD_LOADER_IMPORT_ANIMATION:
+		{
+			if ( !GetParam( SMD_LOADER_IMPORT_SKELETON ).GetBool() )
+			{
+				SetFalse();
+				return true;
+			}
+
+			break;
+		}
+
+		case SMD_LOADER_IMPORT_WEIGHTS:
+		{
+			if ( !(
+				GetParam( SMD_LOADER_IMPORT_MESH ).GetBool() &&
+				GetParam( SMD_LOADER_IMPORT_SKELETON ).GetBool()
+				) )
+			{
+				SetFalse();
+				return true;
+			}
+
+			break;
+		}
+	}
+
+	return SceneLoaderData::GetDParameter( node, id, t_data, flags );
 }
 
 NodeData* SMDLoaderData::Create()

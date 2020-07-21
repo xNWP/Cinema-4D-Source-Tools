@@ -211,6 +211,8 @@ Bool QCLoaderData::GetDParameter( GeListNode* node, const DescID& id, GeData& t_
 				SetFalse();
 				return true;
 			}
+
+			break;
 		}
 	}
 

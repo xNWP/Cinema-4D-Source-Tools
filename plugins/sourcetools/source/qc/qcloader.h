@@ -4,7 +4,7 @@
 #include <c4d_filterdata.h>
 #include "qcformat.h"
 
-#define ID_QCLOADER 1000001 // TODO: Temp value, replace with real id
+#define ID_QCLOADER 1055516
 
 class QCLoaderData : public SceneLoaderData
 {
