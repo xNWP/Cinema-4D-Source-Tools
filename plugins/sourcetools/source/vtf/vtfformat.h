@@ -1,16 +1,6 @@
-//============ Copyright © 2020 Brett Anthony. All rights reserved. ============
-///
-/// This work is licensed under the terms of the MIT license.
-/// For a copy, see <https://opensource.org/licenses/MIT>.
-//==============================================================================
-/// @file fileformat.h
-/// @brief various headers for the valve texture format.
-//==============================================================================
+#pragma once
 
-#ifndef VTF_FILEFORMAT_H__
-#define VTF_FILEFORMAT_H__
-
-#include "c4d.h"
+#include "maxon/integer.h"
 
 enum class VTF_IMAGEFORMAT : UInt32
 {
@@ -116,5 +106,3 @@ struct vtf_header
 	UChar __padding2[3];
 	UInt32 numResources;
 };
-
-#endif

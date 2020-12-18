@@ -2,66 +2,15 @@
 
 #include "qcformat.h"
 #include "tao/pegtl.hpp"
-#include "c4dst_error.h"
+#include "error.h"
+#include "sharedgrammar.h"
+
+#include "benchmark.h"
 
 namespace qc_grammar
 {
 	using namespace tao;
-
-	/* Junk */
-
-	struct double_quote
-		: pegtl::one<'"'>
-	{};
-
-	struct whitespace
-		: pegtl::plus<pegtl::space>
-	{};
-
-	/* Primitives */
-
-	struct identifier_ext
-		: pegtl::plus <
-		pegtl::sor<pegtl::identifier_other,
-		pegtl::one<'-', '.'>>>
-	{};
-
-	struct filepath
-		: pegtl::plus <
-		pegtl::sor<pegtl::identifier_other,
-		pegtl::one<'-', '.', '/', '\\'>>>
-	{};
-
-	struct integer
-		: pegtl::plus<pegtl::digit>
-	{};
-
-	struct floatingpoint
-		: pegtl::seq <
-		pegtl::opt<pegtl::one<'+', '-'>>,
-		integer,
-		pegtl::opt<pegtl::seq<
-		pegtl::one<'.'>, integer>>>
-	{};
-
-	template <typename object>
-	struct opt_quotes_wrapped
-		: pegtl::seq <
-		pegtl::opt<double_quote>,
-		object,
-		pegtl::opt<double_quote>>
-	{};
-
-	template <typename class_header, typename ...class_attributes>
-	struct template_opt_class
-		: pegtl::seq <
-		class_header,
-		pegtl::opt <
-		whitespace,
-		pegtl::one<'{'>,
-		pegtl::until<pegtl::one<'}'>,
-		pegtl::sor < class_attributes..., whitespace, pegtl::any >>>>
-	{};
+	using namespace shared_grammar;
 
 	/* File Objects */
 
@@ -174,7 +123,7 @@ namespace qc_grammar
 	{};
 
 	struct BodyGroupMeshName
-		: identifier_ext
+		: filepath
 	{};
 
 	struct BodyGroupEntry
@@ -192,6 +141,45 @@ namespace qc_grammar
 		: template_opt_class<BodyGroupHeader, BodyGroupEntry, BodyGroupBlank>
 	{};
 
+	struct cdmaterials_value : filepath
+	{};
+
+	struct cdmaterials : template_keyvalue_pair<pegtl::istring<
+		'$', 'c', 'd', 'm', 'a', 't', 'e', 'r', 'i', 'a', 'l', 's'>,
+		cdmaterials_value>
+	{};
+
+	struct IkName : identifier_ext
+	{};
+
+	struct IkEndBone : identifier_ext
+	{};
+
+	struct IkChain
+		: pegtl::seq<
+		opt_quotes_wrapped<pegtl::istring<'$', 'i', 'k', 'c', 'h', 'a', 'i', 'n'>>,
+		whitespace,
+		opt_quotes_wrapped<IkName>,
+		whitespace,
+		opt_quotes_wrapped<IkEndBone>,
+		pegtl::until<pegtl::eol, pegtl::any>>
+	{};
+
+	struct CollisionMeshName : filepath
+	{};
+
+	struct CollisionPhysics
+		: pegtl::seq<pegtl::sor <
+		opt_quotes_wrapped<pegtl::istring<'$', 'c', 'o', 'l', 'l', 'i', 's', 'i', 'o', 'n', 'j', 'o', 'i', 'n', 't', 's'>>,
+		opt_quotes_wrapped<pegtl::istring<'$', 'c', 'o', 'l', 'l', 'i', 's', 'i', 'o', 'n', 'm', 'o', 'd', 'e', 'l'>>>,
+		whitespace,
+		opt_quotes_wrapped<CollisionMeshName>>
+	{};
+
+	struct CollisionPhysicsClass
+		: template_opt_class<CollisionPhysics, pegtl::any>
+	{};
+
 	struct qc_file
 		: pegtl::until<pegtl::eof,
 		pegtl::sor<
@@ -199,7 +187,12 @@ namespace qc_grammar
 		BodyClass,
 		ModelClass,
 		BodyGroupClass,
+		cdmaterials,
+		IkChain,
+		CollisionPhysicsClass,
 
+		comments,
+		whitespace_linefeeds,
 		pegtl::any>>
 	{};
 
@@ -216,7 +209,7 @@ namespace qc_grammar
 		template <typename Input>
 		static void apply( const Input& In, QuakeCFormat& qc )
 		{
-			qc.BodyMeshes.emplace_back( QuakeCFormat::Mesh( In.string() ) );
+			qc.BodyMeshes.emplace_back( QuakeCTypes::Mesh( In.string().c_str() ) );
 		}
 	};
 
@@ -226,7 +219,7 @@ namespace qc_grammar
 		template <typename Input>
 		static void apply( const Input& In, QuakeCFormat& qc )
 		{
-			( qc.BodyMeshes.end() - 1 )->Filepath = In.string();
+			( qc.BodyMeshes.end() - 1 )->Filepath = In.string().c_str();
 		}
 	};
 
@@ -236,7 +229,7 @@ namespace qc_grammar
 		template <typename Input>
 		static void apply( const Input& In, QuakeCFormat& qc )
 		{
-			qc.BodyGroups.emplace_back( QuakeCFormat::BodyGroup( In.string() ) );
+			qc.BodyGroups.emplace_back( QuakeCTypes::BodyGroup( In.string().c_str() ) );
 		}
 	};
 
@@ -246,7 +239,7 @@ namespace qc_grammar
 		template <typename Input>
 		static void apply( const Input& In, QuakeCFormat& qc )
 		{
-			( qc.BodyGroups.end() - 1 )->Meshes.emplace_back( In.string() );
+			( qc.BodyGroups.end() - 1 )->Meshes.emplace_back( In.string().c_str() );
 		}
 	};
 
@@ -266,7 +259,7 @@ namespace qc_grammar
 		template <typename Input>
 		static void apply( const Input& In, QuakeCFormat& qc )
 		{
-			qc.Models.emplace_back( QuakeCFormat::Model( In.string() ) );
+			qc.Models.emplace_back( QuakeCTypes::Model( In.string().c_str() ) );
 		}
 	};
 
@@ -276,7 +269,7 @@ namespace qc_grammar
 		template <typename Input>
 		static void apply( const Input& In, QuakeCFormat& qc )
 		{
-			( qc.Models.end() - 1 )->Filepath = In.string();
+			( qc.Models.end() - 1 )->Filepath = In.string().c_str();
 		}
 	};
 
@@ -286,13 +279,55 @@ namespace qc_grammar
 		template <typename Input>
 		static void apply( const Input& In, QuakeCFormat& qc )
 		{
-			( qc.Models.end() - 1 )->Properties.push_back( std::make_unique<QuakeCFormat::ModelPropertyEyeball>( In.string() ) );
+			( qc.Models.end() - 1 )->Properties.push_back( std::make_shared<QuakeCModelProperties::ModelPropertyEyeball>( In.string().c_str() ) );
+		}
+	};
+
+	template<>
+	struct action<cdmaterials_value>
+	{
+		template<typename Input>
+		static void apply( const Input& In, QuakeCFormat& qc )
+		{
+			qc.cdmaterials.push_back( String(In.string().c_str()) );
+		}
+	};
+
+	template<>
+	struct action<IkName>
+	{
+		template <typename Input>
+		static void apply( const Input& In, QuakeCFormat& qc )
+		{
+			qc.IkRules.emplace_back( QuakeCTypes::IkRule( In.string().c_str() ) );
+		}
+	};
+
+	template<>
+	struct action<IkEndBone>
+	{
+		template <typename Input>
+		static void apply( const Input& In, QuakeCFormat& qc )
+		{
+			( qc.IkRules.end() - 1 )->EndBone = String( In.string().c_str() );
+		}
+	};
+
+	template<>
+	struct action<CollisionMeshName>
+	{
+		template <typename Input>
+		static void apply(const Input& In, QuakeCFormat& qc)
+		{
+			qc.PhysicsMesh = QuakeCTypes::Mesh("physics");
+			qc.PhysicsMesh.Filepath = In.string().c_str();
 		}
 	};
 }
 
 maxon::Bool ParseQC( const Filename& file, QuakeCFormat& qc )
 {
+	IF_PROFILING(Benchmark ParseQCBench("ParseQC"));
 	tao::pegtl::file_input infile( file.GetString().GetCStringCopy() );
 
 	maxon::Bool bOk;

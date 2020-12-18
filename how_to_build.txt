@@ -12,6 +12,8 @@ We currently build against Cinema 4D R21.107
 
 5. Open the generated solution file located at: plugins\project\plugins.sln
 
+5a. If you are asked to upgrade the project, you should be fine upgrading the SDK, however do not upgrade the build tools.
+
 6. Build the sourcetools project as per usual.
 
 == Debugging Setup (optional) ==
@@ -19,3 +21,6 @@ We currently build against Cinema 4D R21.107
 7. Select your Cinema 4D executable as the debugging command.
 
 8. Add the following command parameters to automate loading of the plugin: g_additionalModulePath=$(ProjectDir)..\..
+
+== Profiling Setup (optional) ==
+9. Define the preprocessor macro 'ST_PROFILING' on the sourcetools project to have benchmarking data printed to the c4d console.

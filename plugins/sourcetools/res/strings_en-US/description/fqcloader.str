@@ -12,6 +12,15 @@ STRINGTABLE Fqcloader
     QC_LOADER_IMPORT_SKELETON   "Skeleton";
     QC_LOADER_IMPORT_MESH       "Mesh";
     QC_LOADER_IMPORT_WEIGHTS    "Weights";
-    QC_LOADER_IMPORT_MATERIALS  "Materials";
+    S_MATERIALS                 "Materials";
     QC_LOADER_MATERIAL_PATH     "Root Material Directory";
+    QC_LOADER_SOURCETYPE        "Material Source";
+    SOURCETYPE_NONE             "None";
+    SOURCETYPE_VMF_VTF          "VMF + VTF";
+    SOURCETYPE_VMF_TGA          "VMF + TGA";
+    SOURCETYPE_VMF_OTHER        "VMF + Other";
+    QC_MATERIAL_EXTENSION       "Image File Extension";
+    QC_LOADER_IMPORT_ANIMATION  "Animation";
+    QC_LOADER_IMPORT_IK         "IK Tags";
+    QC_LOADER_IMPORT_PHYSICS    "Physics/Collision Mesh";
 }

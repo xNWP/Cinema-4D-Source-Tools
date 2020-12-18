@@ -1,5 +1,4 @@
-#ifndef QC_LOADER_H__
-#define QC_LOADER_H__
+#pragma once
 
 #include <c4d_filterdata.h>
 #include "qcformat.h"
@@ -19,5 +18,3 @@ public:
 
 	static Bool RegisterPlugin();
 };
-
-#endif // !QC_LOADER_H__

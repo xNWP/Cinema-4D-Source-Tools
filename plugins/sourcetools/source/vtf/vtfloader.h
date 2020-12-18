@@ -1,14 +1,4 @@
-//============ Copyright © 2020 Brett Anthony. All rights reserved. ============
-///
-/// This work is licensed under the terms of the MIT license.
-/// For a copy, see <https://opensource.org/licenses/MIT>.
-//==============================================================================
-/// @file vtfloader.h
-/// @brief declares the vtf loading plugin.
-//==============================================================================
-
-#ifndef VTF_LOADER_H__
-#define VTF_LOADER_H__
+#pragma once
 
 #include "c4d_filterdata.h"
 
@@ -22,5 +12,3 @@ public:
 
 	static Bool RegisterPlugin();
 };
-
-#endif

@@ -1,11 +1,9 @@
-#ifndef SMD_LOADER_H__
-#define SMD_LOADER_H__
+#pragma once
 
-#include <c4d_filterdata.h>
+#include "c4d_filterdata.h"
 #include "smdformat.h"
 
 #include <map>
-#include <memory>
 
 #define ID_SMDLOADER		1054419
 
@@ -30,24 +28,24 @@ public:
 	{
 		Float Scale = 1.0f;
 		maxon::Vector Orientation;
-		BaseObject* MeshRootObject = nullptr;
-		BaseObject* SkeletonRootObject = nullptr;
-		std::shared_ptr<std::map<std::int16_t, BoneMapData>> Skeleton = nullptr;
+		std::map<std::int16_t, BoneMapData> Skeleton;
 		maxon::Bool IncludeAnimation;
 		maxon::Bool IncludeMesh;
 		maxon::Bool IncludeWeights;
 		maxon::Bool IncludeSkeleton;
+		maxon::Bool IncludeUVW;
+		maxon::Bool IncludePolySelections;
+		maxon::Bool IncludeNormals;
+		BaseDocument* doc;
 	};
 
 	struct SMDObject
 	{
 		PolygonObject* Mesh;
-		std::shared_ptr<std::map<std::int16_t, BoneMapData>> Skeleton;
+		std::map<std::int16_t, BoneMapData> Skeleton;
 	};
 	
-	static SMDObject CreateSMD( const StudiomdlData& smd, const maxon::String& name, Settings config, BaseDocument* doc);
+	static SMDObject CreateSMD( const StudiomdlData& smd, const Settings& config );
 
 	static Bool RegisterPlugin();
 };
-
-#endif // !SMD_LOADER_H__

@@ -1,63 +1,63 @@
-#ifndef SMD_FORMAT_H__
-#define SMD_FORMAT_H__
+#pragma once
 
-#include <cstdint>
-#include <string>
+#include <maxon/string.h>
+#include <maxon/integer.h>
 #include <vector>
 
-struct StudiomdlData
+namespace SMDTypes
 {
 	struct Bone
 	{
-		std::int16_t Id;
-		std::string Name;
-		std::int16_t ParentId;
+		Int16 Id;
+		String Name;
+		Int16 ParentId;
 	};
 
 	struct Point3f
 	{
-		float x, y, z;
+		Float32 x, y, z;
 	};
 
 	struct SkeletonAnimationEntry
 	{
-		std::int16_t Id;
+		UInt16 Id;
 		Point3f Position;
 		Point3f Rotation;
 	};
 
 	struct SkeletonAnimationFrame
 	{
-		std::uint32_t Time;
+		UInt32 Time;
 		std::vector<SkeletonAnimationEntry> Entries;
 	};
 
 	struct WeightmapEntry
 	{
-		std::int16_t BoneId;
-		float Weight;
+		Int16 BoneId;
+		Float32 Weight;
 	};
 
 	struct Vertex
 	{
-		std::int16_t ParentBone;
+		UInt16 ParentBone;
 		Point3f Position;
 		Point3f Normals;
-		float u;
-		float v;
+		Float32 u;
+		Float32 v;
 		std::vector<WeightmapEntry> WeightMapEntries;
 	};
 
 	struct Triangle
 	{
-		std::string Material;
+		String Material;
 		Vertex Vertices[3];
 	};
+}
 
-	std::uint8_t Version;
-	std::vector<Bone> Bones;
-	std::vector<SkeletonAnimationFrame> SkeletonAnimation;
-	std::vector<Triangle> Triangles;
+struct StudiomdlData
+{
+	UChar Version;
+	std::vector<SMDTypes::Bone> Bones;
+	std::vector<SMDTypes::SkeletonAnimationFrame> SkeletonAnimation;
+	std::vector<SMDTypes::Triangle> Triangles;
 };
-
-#endif // !SMD_FORMAT_H__

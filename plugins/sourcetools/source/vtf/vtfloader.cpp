@@ -1,17 +1,9 @@
-//============ Copyright © 2020 Brett Anthony. All rights reserved. ============
-///
-/// This work is licensed under the terms of the MIT license.
-/// For a copy, see <https://opensource.org/licenses/MIT>.
-//==============================================================================
-/// @file vtfloader.cpp
-/// @brief implements the vtf loading plugin.
-//==============================================================================
-
 #include "vtfloader.h"
 
-#include "fileformat.h"
+#include "vtfformat.h"
 
 #include <vector>
+#include <c4d.h>
 
 // LUT's for quick conversions
 static constexpr UChar LUT4[] = { 0, 17, 34, 51, 68, 85, 102, 119, 136, 153, 170, 187, 204, 221, 238, 255 };

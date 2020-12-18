@@ -1,0 +1,9 @@
+STRINGTABLE
+{
+    S_BUILDINGFILE              "Building #";
+    S_PARSINGFILE               "Parsing #";
+    S_BUILDINGFILE_SUB          "# - Building #";
+    S_PARSINGFILE_SUB           "# - Parsing #";
+    S_INVALID_MATERIAL_PATH     "Root material path must be a valid directory.";
+    S_PARSE_ERROR               "Error parsing file #";
+}

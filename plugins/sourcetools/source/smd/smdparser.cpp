@@ -1,20 +1,12 @@
-//============ Copyright © 2020 Brett Anthony. All rights reserved. ============
-///
-/// This work is licensed under the terms of the MIT license.
-/// For a copy, see <https://opensource.org/licenses/MIT>.
-//==============================================================================
-/// @file parser.cpp
-/// @brief Defines the PEGTL parser for SMD files.
-//==============================================================================
-// TODO: Log meta (crowbar version)
-
 #include "smdparser.h"
 
 #include "tao/pegtl.hpp"
-
-#include "c4dst_error.h"
+#include "error.h"
+#include "sharedgrammar.h"
 
 #include <unordered_map>
+
+#include "benchmark.h"
 
 class symbol_map
 {
@@ -32,46 +24,7 @@ public:
 namespace smd_grammar
 {
 	using namespace tao;
-
-	/* Primitives */
-	
-	struct integer
-		: pegtl::seq<
-		pegtl::opt< pegtl::one< '+', '-' > >,
-		pegtl::plus< pegtl::digit > >
-	{};
-
-	struct floating_point
-		: pegtl::seq <
-		pegtl::opt< pegtl::one< '+', '-' > >,
-		pegtl::plus< pegtl::digit >,
-		pegtl::opt<
-		pegtl::seq<
-		pegtl::one< '.' >,
-		pegtl::plus< pegtl::digit > > > >
-	{};
-
-	/* Junk */
-
-	struct line_comment
-		: pegtl::seq<
-		pegtl::string< '/', '/' >,
-		pegtl::until< pegtl::eolf > >
-	{};
-
-	struct multiline_comment
-		: pegtl::seq<
-		pegtl::string< '/', '*' >,
-		pegtl::until< pegtl::string< '*', '/' > > >
-	{};
-
-	struct comments
-		: pegtl::sor< line_comment, multiline_comment >
-	{};
-
-	struct whitespace
-		: pegtl::plus< pegtl::space >
-	{};
+	using namespace shared_grammar;
 
 	/* File Objects */
 
@@ -89,10 +42,7 @@ namespace smd_grammar
 	{};
 
 	struct node_name : 
-		pegtl::plus<
-		pegtl::sor<
-		pegtl::identifier_other,
-		pegtl::one< '-', '.' > > >
+		identifier_ext
 	{};
 
 	struct node_parentid : integer
@@ -102,9 +52,7 @@ namespace smd_grammar
 		: pegtl::seq<
 		node_id,
 		whitespace,
-		pegtl::one< '"' >,
-		pegtl::until< pegtl::one< '"' >,
-		node_name >,
+		opt_quotes_wrapped<node_name>,
 		whitespace,
 		node_parentid,
 		pegtl::until< pegtl::eolf > >
@@ -112,8 +60,8 @@ namespace smd_grammar
 
 	struct nodes
 		: pegtl::seq<
-		pegtl::string< 'n', 'o', 'd', 'e', 's' >,
-		pegtl::until< pegtl::string< 'e', 'n', 'd' >,
+		pegtl::istring< 'n', 'o', 'd', 'e', 's' >,
+		pegtl::until< pegtl::istring< 'e', 'n', 'd' >,
 		pegtl::sor< node_entry,  pegtl::any > > >
 	{};
 
@@ -123,18 +71,18 @@ namespace smd_grammar
 	struct skeleton_id : integer
 	{};
 
-	struct skeleton_pos_x : floating_point
+	struct skeleton_pos_x : floatingpoint
 	{};
-	struct skeleton_pos_y : floating_point
+	struct skeleton_pos_y : floatingpoint
 	{};
-	struct skeleton_pos_z : floating_point
+	struct skeleton_pos_z : floatingpoint
 	{};
 
-	struct skeleton_rot_x : floating_point
+	struct skeleton_rot_x : floatingpoint
 	{};
-	struct skeleton_rot_y : floating_point
+	struct skeleton_rot_y : floatingpoint
 	{};
-	struct skeleton_rot_z : floating_point
+	struct skeleton_rot_z : floatingpoint
 	{};
 
 	struct skeleton_entry
@@ -160,7 +108,7 @@ namespace smd_grammar
 	{};
 
 	struct triangles_material
-		: pegtl::identifier
+		: filepath
 	{};
 
 	struct triangles_vertex_parent_bone
@@ -168,35 +116,35 @@ namespace smd_grammar
 	{};
 
 	struct triangles_vertex_pos_x
-		: floating_point
+		: floatingpoint
 	{};
 
 	struct triangles_vertex_pos_y
-		: floating_point
+		: floatingpoint
 	{};
 
 	struct triangles_vertex_pos_z
-		: floating_point
+		: floatingpoint
 	{};
 
 	struct triangles_vertex_norm_x
-		: floating_point
+		: floatingpoint
 	{};
 
 	struct triangles_vertex_norm_y
-		: floating_point
+		: floatingpoint
 	{};
 
 	struct triangles_vertex_norm_z
-		: floating_point
+		: floatingpoint
 	{};
 
 	struct triangles_vertex_u
-		: floating_point
+		: floatingpoint
 	{};
 
 	struct triangles_vertex_v
-		: floating_point
+		: floatingpoint
 	{};
 
 	struct triangles_vertex_bone_id
@@ -204,7 +152,7 @@ namespace smd_grammar
 	{};
 
 	struct triangles_vertex_bone_weight
-		: floating_point
+		: floatingpoint
 	{};
 
 	struct triangles_vertex
@@ -236,7 +184,7 @@ namespace smd_grammar
 
 	struct triangle_entry
 		: pegtl::seq<
-		triangles_material,
+		opt_quotes_wrapped<triangles_material>,
 		pegtl::until< pegtl::sor< pegtl::at< pegtl::identifier >, pegtl::string< 'e', 'n', 'd' > >,
 		pegtl::sor< triangles_vertex, pegtl::any > > >
 	{};
@@ -273,7 +221,7 @@ namespace smd_grammar
 		template< typename Input >
 		static void apply(const Input& in, StudiomdlData& s, symbol_map& smap)
 		{
-			s.Version = std::uint8_t( std::stoi( in.string() ) );
+			s.Version = UChar( std::stoi( in.string() ) );
 		}
 	};
 
@@ -283,8 +231,8 @@ namespace smd_grammar
 		template< typename Input >
 		static void apply(const Input& in, StudiomdlData& s, symbol_map &smap )
 		{
-			StudiomdlData::Bone b;
-			b.Id = std::uint16_t( std::stoi( in.string() ) );
+			SMDTypes::Bone b;
+			b.Id = UInt16( std::stoi( in.string() ) );
 			s.Bones.push_back(std::move(b));
 		}
 	};
@@ -295,7 +243,7 @@ namespace smd_grammar
 		template< typename Input >
 		static void apply(const Input& in, StudiomdlData& s, symbol_map &smap )
 		{
-			(s.Bones.end() - 1)->Name = std::string(in.string());
+			(s.Bones.end() - 1)->Name = String(in.string().c_str());
 		}
 	};
 
@@ -305,7 +253,7 @@ namespace smd_grammar
 		template< typename Input >
 		static void apply(const Input& in, StudiomdlData& s, symbol_map &smap )
 		{
-			(s.Bones.end() - 1)->ParentId = std::uint16_t( std::stoi( in.string() ) );
+			(s.Bones.end() - 1)->ParentId = UInt16( std::stoi( in.string() ) );
 		}
 	};
 
@@ -315,8 +263,8 @@ namespace smd_grammar
 		template< typename Input >
 		static void apply(const Input& in, StudiomdlData& s, symbol_map &smap )
 		{
-			StudiomdlData::SkeletonAnimationFrame f;
-			f.Time = std::stoi(in.string());
+			SMDTypes::SkeletonAnimationFrame f;
+			f.Time = UInt32(std::stoi(in.string()));
 			s.SkeletonAnimation.push_back(std::move(f));
 		}
 	};
@@ -327,8 +275,8 @@ namespace smd_grammar
 		template< typename Input >
 		static void apply(const Input& in, StudiomdlData& s, symbol_map &smap )
 		{
-			StudiomdlData::SkeletonAnimationEntry e;
-			e.Id = std::uint16_t( std::stoi( in.string() ) );
+			SMDTypes::SkeletonAnimationEntry e;
+			e.Id = UInt16( std::stoi( in.string() ) );
 			(s.SkeletonAnimation.end() - 1)->Entries.push_back(std::move(e));
 		}
 	};
@@ -340,7 +288,7 @@ namespace smd_grammar
 		static void apply(const Input& in, StudiomdlData& s, symbol_map &smap )
 		{
 			((s.SkeletonAnimation.end() - 1)->Entries.end() - 1)->
-				Position.x = std::stof(in.string());
+				Position.x = Float32(std::stof(in.string()));
 		}
 	};
 
@@ -351,7 +299,7 @@ namespace smd_grammar
 		static void apply(const Input& in, StudiomdlData& s, symbol_map &smap )
 		{
 			((s.SkeletonAnimation.end() - 1)->Entries.end() - 1)->
-				Position.y = std::stof(in.string());
+				Position.y = Float32(std::stof(in.string()));
 		}
 	};
 
@@ -362,7 +310,7 @@ namespace smd_grammar
 		static void apply(const Input& in, StudiomdlData& s, symbol_map &smap )
 		{
 			((s.SkeletonAnimation.end() - 1)->Entries.end() - 1)->
-				Position.z = std::stof(in.string());
+				Position.z = Float32(std::stof(in.string()));
 		}
 	};
 
@@ -373,7 +321,7 @@ namespace smd_grammar
 		static void apply(const Input& in, StudiomdlData& s, symbol_map &smap )
 		{
 			((s.SkeletonAnimation.end() - 1)->Entries.end() - 1)->
-				Rotation.x = std::stof(in.string());
+				Rotation.x = Float32(std::stof(in.string()));
 		}
 	};
 
@@ -384,7 +332,7 @@ namespace smd_grammar
 		static void apply(const Input& in, StudiomdlData& s, symbol_map &smap )
 		{
 			((s.SkeletonAnimation.end() - 1)->Entries.end() - 1)->
-				Rotation.y = std::stof(in.string());
+				Rotation.y = Float32(std::stof(in.string()));
 		}
 	};
 
@@ -395,7 +343,7 @@ namespace smd_grammar
 		static void apply(const Input& in, StudiomdlData& s, symbol_map &smap )
 		{
 			((s.SkeletonAnimation.end() - 1)->Entries.end() - 1)->
-				Rotation.z = std::stof(in.string());
+				Rotation.z = Float32(std::stof(in.string()));
 		}
 	};
 
@@ -405,9 +353,9 @@ namespace smd_grammar
 		template< typename Input >
 		static void apply(const Input& in, StudiomdlData& s, symbol_map &smap )
 		{
-			StudiomdlData::Triangle t;
-			t.Material = in.string();
-			s.Triangles.push_back(std::move(t));
+			SMDTypes::Triangle t;
+			t.Material = String(in.string().c_str());
+			s.Triangles.emplace_back(std::move(t));
 
 			// set/reset vertex index
 			smap.u8()["triangles_vertex_index"] = 0;
@@ -420,8 +368,8 @@ namespace smd_grammar
 		template< typename Input >
 		static void apply(const Input& in, StudiomdlData& s, symbol_map &smap )
 		{
-			StudiomdlData::Vertex v;
-			v.ParentBone = std::uint16_t( std::stoi( in.string() ) );
+			SMDTypes::Vertex v;
+			v.ParentBone = UInt16( std::stoi( in.string() ) );
 			(s.Triangles.end() - 1)->Vertices[smap.u8()["triangles_vertex_index"]] = std::move(v);
 		}
 	};
@@ -432,7 +380,7 @@ namespace smd_grammar
 		template< typename Input >
 		static void apply(const Input& in, StudiomdlData& s, symbol_map &smap )
 		{
-			(s.Triangles.end() - 1)->Vertices[smap.u8()["triangles_vertex_index"]].Position.x = std::stof(in.string());
+			(s.Triangles.end() - 1)->Vertices[smap.u8()["triangles_vertex_index"]].Position.x = Float32(std::stof(in.string()));
 		}
 	};
 
@@ -442,7 +390,7 @@ namespace smd_grammar
 		template< typename Input >
 		static void apply(const Input& in, StudiomdlData& s, symbol_map &smap )
 		{
-			(s.Triangles.end() - 1)->Vertices[smap.u8()["triangles_vertex_index"]].Position.y = std::stof(in.string());
+			(s.Triangles.end() - 1)->Vertices[smap.u8()["triangles_vertex_index"]].Position.y = Float32(std::stof(in.string()));
 		}
 	};
 
@@ -452,7 +400,7 @@ namespace smd_grammar
 		template< typename Input >
 		static void apply(const Input& in, StudiomdlData& s, symbol_map &smap )
 		{
-			(s.Triangles.end() - 1)->Vertices[smap.u8()["triangles_vertex_index"]].Position.z = std::stof(in.string());
+			(s.Triangles.end() - 1)->Vertices[smap.u8()["triangles_vertex_index"]].Position.z = Float32(std::stof(in.string()));
 		}
 	};
 
@@ -462,7 +410,7 @@ namespace smd_grammar
 		template< typename Input >
 		static void apply(const Input& in, StudiomdlData& s, symbol_map &smap )
 		{
-			(s.Triangles.end() - 1)->Vertices[smap.u8()["triangles_vertex_index"]].Normals.x = std::stof(in.string());
+			(s.Triangles.end() - 1)->Vertices[smap.u8()["triangles_vertex_index"]].Normals.x = Float32(std::stof(in.string()));
 		}
 	};
 
@@ -472,7 +420,7 @@ namespace smd_grammar
 		template< typename Input >
 		static void apply(const Input& in, StudiomdlData& s, symbol_map &smap )
 		{
-			(s.Triangles.end() - 1)->Vertices[smap.u8()["triangles_vertex_index"]].Normals.y = std::stof(in.string());
+			(s.Triangles.end() - 1)->Vertices[smap.u8()["triangles_vertex_index"]].Normals.y = Float32(std::stof(in.string()));
 		}
 	};
 
@@ -482,7 +430,7 @@ namespace smd_grammar
 		template< typename Input >
 		static void apply(const Input& in, StudiomdlData& s, symbol_map &smap )
 		{
-			(s.Triangles.end() - 1)->Vertices[smap.u8()["triangles_vertex_index"]].Normals.z = std::stof(in.string());
+			(s.Triangles.end() - 1)->Vertices[smap.u8()["triangles_vertex_index"]].Normals.z = Float32(std::stof(in.string()));
 		}
 	};
 
@@ -492,7 +440,7 @@ namespace smd_grammar
 		template< typename Input >
 		static void apply(const Input& in, StudiomdlData& s, symbol_map &smap )
 		{
-			(s.Triangles.end() - 1)->Vertices[smap.u8()["triangles_vertex_index"]].u = std::stof(in.string());
+			(s.Triangles.end() - 1)->Vertices[smap.u8()["triangles_vertex_index"]].u = Float32(std::stof(in.string()));
 		}
 	};
 
@@ -502,7 +450,7 @@ namespace smd_grammar
 		template< typename Input >
 		static void apply(const Input& in, StudiomdlData& s, symbol_map &smap )
 		{
-			(s.Triangles.end() - 1)->Vertices[smap.u8()["triangles_vertex_index"]].v = std::stof(in.string());
+			(s.Triangles.end() - 1)->Vertices[smap.u8()["triangles_vertex_index"]].v = Float32(std::stof(in.string()));
 		}
 	};
 
@@ -512,7 +460,7 @@ namespace smd_grammar
 		template< typename Input >
 		static void apply(const Input& in, StudiomdlData& s, symbol_map& smap)
 		{
-			StudiomdlData::WeightmapEntry w;
+			SMDTypes::WeightmapEntry w;
 			w.BoneId = std::uint16_t( std::stoi( in.string() ) );
 			(s.Triangles.end() - 1)->Vertices[smap.u8()["triangles_vertex_index"]]
 				.WeightMapEntries.push_back(std::move(w));
@@ -526,7 +474,7 @@ namespace smd_grammar
 		static void apply(const Input& in, StudiomdlData& s, symbol_map& smap)
 		{
 			((s.Triangles.end() - 1)->Vertices[smap.u8()["triangles_vertex_index"]]
-				.WeightMapEntries.end() - 1)->Weight = std::stof(in.string());
+				.WeightMapEntries.end() - 1)->Weight = Float32(std::stof(in.string()));
 		}
 	};
 
@@ -545,6 +493,7 @@ namespace smd_grammar
 
 maxon::Bool ParseSMD( const Filename &file, StudiomdlData &smd)
 {
+	IF_PROFILING(Benchmark ParseSMDBench("ParseSMD"));
 	tao::pegtl::file_input infile( file.GetString().GetCStringCopy() );
 	symbol_map symbolmap;
 
@@ -593,7 +542,7 @@ maxon::Bool ParseSMD( const Filename &file, StudiomdlData &smd)
 
 	if ( smd.SkeletonAnimation[0].Entries.size() != smd.Bones.size() )
 	{
-		LogError( "SMD frame 0 missing bones." );
+		LogError( "SMD frame[0] #bones != #bones." );
 		return false;
 	}
 
