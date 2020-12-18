@@ -1,28 +1,15 @@
 #pragma once
 
-#include <unordered_map>
 #include <any>
+#include <unordered_map>
 
-namespace VMTTypes
-{
-	enum class ShaderType
-	{
-		UNKNOWN,
-		LIGHTMAPPEDGENERIC,
-		CHARACTER
-	};
+namespace VMTTypes {
+enum class ShaderType { UNKNOWN, LIGHTMAPPEDGENERIC, CHARACTER };
 
-	enum class ParameterType
-	{
-		BASETEXTURE,
-		BUMPMAP,
-		SSBUMP,
-		TRANSLUCENT
-	};
-}
+enum class ParameterType { BASETEXTURE, BUMPMAP, SSBUMP, TRANSLUCENT };
+} // namespace VMTTypes
 
-struct ValveMaterialType
-{
-	VMTTypes::ShaderType Shader;
-	std::unordered_map<VMTTypes::ParameterType, std::any> Parameters;
+struct ValveMaterialType {
+  VMTTypes::ShaderType Shader;
+  std::unordered_map<VMTTypes::ParameterType, std::any> Parameters;
 };
