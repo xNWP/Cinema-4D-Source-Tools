@@ -10,20 +10,20 @@ namespace QuakeCTypes
 	struct Mesh
 	{
 		Mesh() = default;
-		Mesh( String name ) : Name( name ) {}
+		Mesh(String name) : Name(name) {}
 		String Name;
 		String Filepath;
 	};
 
 	struct Model : public Mesh
 	{
-		Model( String name ) : Mesh( name ) {}
+		Model(String name) : Mesh(name) {}
 		std::vector<std::shared_ptr<QuakeCModelProperties::ModelProperty>> Properties;
 	};
 
 	struct BodyGroup
 	{
-		BodyGroup( String name ) : Name( name ), Blank( false ) {}
+		BodyGroup(String name) : Name(name), Blank(false) {}
 		String Name;
 		std::vector<String> Meshes;
 		bool Blank = false;
@@ -31,7 +31,7 @@ namespace QuakeCTypes
 
 	struct IkRule
 	{
-		IkRule( String name ) : Name( name ) {}
+		IkRule(String name) : Name(name) {}
 		String Name;
 		String EndBone;
 	};

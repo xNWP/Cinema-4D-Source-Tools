@@ -6,14 +6,14 @@
 #include "error.h"
 
 // case insensitive string compare
-static bool istrcmp( const std::string& str1, const std::string& str2 )
+static bool istrcmp(const std::string& str1, const std::string& str2)
 {
 	using namespace std;
-	if ( str1.length() != str2.length() )
+	if (str1.length() != str2.length())
 		return false;
 
-	for ( std::uint8_t i = 0; i < str1.length(); ++i )
-		if ( tolower( str1[i] ) != tolower( str2[i] ) )
+	for (std::uint8_t i = 0; i < str1.length(); ++i)
+		if (tolower(str1[i]) != tolower(str2[i]))
 			return false;
 
 	return true;
@@ -76,35 +76,35 @@ namespace vmt_grammar
 	{};
 
 	struct vmt_file
-		: pegtl::until< pegtl::eof,
+		: pegtl::until<pegtl::eof,
 		pegtl::sor<
 
 		comments,
 		shader,
 
-		pegtl::any > >
+		pegtl::any>>
 	{};
 
 	/* Actions */
 	template <typename Rule>
 	struct action
-		: pegtl::nothing< Rule >
+		: pegtl::nothing<Rule>
 	{};
 
 	template<>
 	struct action<shadertype>
 	{
-		template<typename Input>
-		static void apply( const Input& in, ValveMaterialType& vmt )
+		template <typename Input>
+		static void apply(const Input& in, ValveMaterialType& vmt)
 		{
-			if ( istrcmp( in.string(), "character" ) )
+			if (istrcmp(in.string(), "character"))
 				vmt.Shader = VMTTypes::ShaderType::CHARACTER;
-			else if ( istrcmp( in.string(), "lightmappedgeneric" ) )
+			else if (istrcmp(in.string(), "lightmappedgeneric"))
 				vmt.Shader = VMTTypes::ShaderType::LIGHTMAPPEDGENERIC;
 			else
 			{
 				maxon::String err = "Unknwon shader type: "_s + in.string().c_str();
-				LogError( err );
+				LogError(err);
 				vmt.Shader = VMTTypes::ShaderType::UNKNOWN;
 			}
 		}
@@ -113,90 +113,90 @@ namespace vmt_grammar
 	template<>
 	struct action<basetexture_value>
 	{
-		template<typename Input>
-		static void apply( const Input& in, ValveMaterialType& vmt )
+		template <typename Input>
+		static void apply(const Input& in, ValveMaterialType& vmt)
 		{
-			if ( vmt.Parameters.find(VMTTypes::ParameterType::BASETEXTURE ) != std::end( vmt.Parameters ) )
+			if (vmt.Parameters.find(VMTTypes::ParameterType::BASETEXTURE) != std::end(vmt.Parameters))
 			{
-				LogError( "BaseTexture redefinition." );
+				LogError("BaseTexture redefinition.");
 				return;
 			}
 
-			vmt.Parameters[VMTTypes::ParameterType::BASETEXTURE] = String( in.string().c_str() );
+			vmt.Parameters[VMTTypes::ParameterType::BASETEXTURE] = String(in.string().c_str());
 		}
 	};
 
 	template<>
 	struct action<bumpmap_value>
 	{
-		template<typename Input>
-		static void apply( const Input& in, ValveMaterialType& vmt )
+		template <typename Input>
+		static void apply(const Input& in, ValveMaterialType& vmt)
 		{
-			if ( vmt.Parameters.find(VMTTypes::ParameterType::BUMPMAP ) != std::end( vmt.Parameters ) )
+			if (vmt.Parameters.find(VMTTypes::ParameterType::BUMPMAP) != std::end(vmt.Parameters))
 			{
-				LogError( "BumpMap redefinition." );
+				LogError("BumpMap redefinition.");
 				return;
 			}
 
-			vmt.Parameters[VMTTypes::ParameterType::BUMPMAP] = String( in.string().c_str() );
+			vmt.Parameters[VMTTypes::ParameterType::BUMPMAP] = String(in.string().c_str());
 		}
 	};
 
 	template<>
 	struct action<ssbump_value>
 	{
-		template<typename Input>
-		static void apply( const Input& in, ValveMaterialType& vmt )
+		template <typename Input>
+		static void apply(const Input& in, ValveMaterialType& vmt)
 		{
-			if ( vmt.Parameters.find(VMTTypes::ParameterType::SSBUMP ) != std::end( vmt.Parameters ) )
+			if (vmt.Parameters.find(VMTTypes::ParameterType::SSBUMP) != std::end(vmt.Parameters))
 			{
-				LogError( "ssbump redefinition." );
+				LogError("ssbump redefinition.");
 				return;
 			}
 
-			vmt.Parameters[VMTTypes::ParameterType::SSBUMP] = bool( std::stoi( in.string() ) );
+			vmt.Parameters[VMTTypes::ParameterType::SSBUMP] = bool(std::stoi(in.string()));
 		}
 	};
 
 	template<>
 	struct action<translucent_value>
 	{
-		template<typename Input>
-		static void apply( const Input& in, ValveMaterialType& vmt )
+		template <typename Input>
+		static void apply(const Input& in, ValveMaterialType& vmt)
 		{
-			if ( vmt.Parameters.find(VMTTypes::ParameterType::TRANSLUCENT ) != std::end( vmt.Parameters ) )
+			if (vmt.Parameters.find(VMTTypes::ParameterType::TRANSLUCENT) != std::end(vmt.Parameters))
 			{
-				LogError( "translucent redefinition." );
+				LogError("translucent redefinition.");
 				return;
 			}
 
-			vmt.Parameters[VMTTypes::ParameterType::TRANSLUCENT] = bool( std::stoi( in.string() ) );
+			vmt.Parameters[VMTTypes::ParameterType::TRANSLUCENT] = bool(std::stoi(in.string()));
 		}
 	};
 }
 
-maxon::Bool ParseVMT( const Filename& file, ValveMaterialType& vmt )
+maxon::Bool ParseVMT(const Filename& file, ValveMaterialType& vmt)
 {
-	tao::pegtl::file_input infile( file.GetString().GetCStringCopy() );
+	tao::pegtl::file_input infile(file.GetString().GetCStringCopy());
 
 	maxon::Bool bOk;
 	try
 	{
-		bOk = tao::pegtl::parse<vmt_grammar::vmt_file, vmt_grammar::action>( infile, vmt );
+		bOk = tao::pegtl::parse<vmt_grammar::vmt_file, vmt_grammar::action>(infile, vmt);
 	}
-	catch ( tao::pegtl::parse_error& e )
+	catch (tao::pegtl::parse_error& e)
 	{
-		LogErrorWhat( e );
+		LogErrorWhat(e);
 		return false;
 	}
-	catch ( tao::pegtl::input_error& e )
+	catch (tao::pegtl::input_error& e)
 	{
-		LogErrorWhat( e );
+		LogErrorWhat(e);
 		return false;
 	}
 
 	/* check for errors */
-	if ( !bOk )
+	if (!bOk)
 	{
 		return false;
 	}

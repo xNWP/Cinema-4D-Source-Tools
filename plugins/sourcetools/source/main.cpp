@@ -15,30 +15,30 @@
 Bool PluginStart()
 {
 	// VTF Loader
-	if ( !VTFLoaderData::RegisterPlugin() )
+	if (!VTFLoaderData::RegisterPlugin())
 	{
-		LogError( "Failed to register VTF loader." );
+		LogError("Failed to register VTF loader.");
 		return false;
 	}
 
 	// SMD Loader
-	if ( !SMDLoaderData::RegisterPlugin() )
+	if (!SMDLoaderData::RegisterPlugin())
 	{
-		LogError( "Failed to register SMD loader." );
+		LogError("Failed to register SMD loader.");
 		return false;
 	}
 	
 	// QC Loader
-	if ( !QCLoaderData::RegisterPlugin() )
+	if (!QCLoaderData::RegisterPlugin())
 	{
-		LogError( "Failed to register QC loader." );
+		LogError("Failed to register QC loader.");
 		return false;
 	}
 
 	// VMT Loader
-	if ( !VMTLoaderData::RegisterPlugin() )
+	if (!VMTLoaderData::RegisterPlugin())
 	{
-		LogError( "Failed to register VMT loader." );
+		LogError("Failed to register VMT loader.");
 		return false;
 	}
 
@@ -63,13 +63,13 @@ void PluginEnd()
 
 Bool PluginMessage(Int32 id, void *data)
 {
-	switch ( id )
+	switch (id)
 	{
 		case C4DPL_INIT_SYS:
 		{
-			if ( g_resource.Init() == false )
+			if (g_resource.Init() == false)
 			{
-				LogError( "Failed to load resources." );
+				LogError("Failed to load resources.");
 				return false;
 			}
 		}

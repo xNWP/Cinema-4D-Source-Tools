@@ -17,10 +17,10 @@ public:
 		maxon::String BitmapExtension = "vtf"_s;
 	};
 
-	Bool Identify( BaseSceneLoader* node, const Filename& name, UChar* probe, Int32 size ) override;
-	FILEERROR Load( BaseSceneLoader* node, const Filename& name, BaseDocument* doc, SCENEFILTER filterflags, maxon::String* error, BaseThread* bt ) override;
+	Bool Identify(BaseSceneLoader* node, const Filename& name, UChar* probe, Int32 size) override;
+	FILEERROR Load(BaseSceneLoader* node, const Filename& name, BaseDocument* doc, SCENEFILTER filterflags, maxon::String* error, BaseThread* bt) override;
 
-	static Material* CreateVMT( const ValveMaterialType& vmt, const Settings& config );
+	static Material* CreateVMT(const ValveMaterialType& vmt, const Settings& config);
 
 	static Bool RegisterPlugin();
 };

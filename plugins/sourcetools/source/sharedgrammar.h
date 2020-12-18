@@ -78,22 +78,22 @@ namespace shared_grammar
 		pegtl::opt <
 		pegtl::one<'{'>,
 		pegtl::until<pegtl::one<'}'>,
-		pegtl::sor < class_attributes..., whitespace_linefeeds, pegtl::any >>>>
+		pegtl::sor <class_attributes..., whitespace_linefeeds, pegtl::any>>>>
 	{};
 
     struct line_comment
 		: pegtl::seq<
-		pegtl::string< '/', '/' >,
-		pegtl::until< pegtl::eolf > >
+		pegtl::string<'/', '/'>,
+		pegtl::until<pegtl::eolf>>
 	{};
 
 	struct multiline_comment
 		: pegtl::seq<
-		pegtl::string< '/', '*' >,
-		pegtl::until< pegtl::string< '*', '/' > > >
+		pegtl::string<'/', '*'>,
+		pegtl::until<pegtl::string<'*', '/'>>>
 	{};
 
 	struct comments
-		: pegtl::sor< line_comment, multiline_comment >
+		: pegtl::sor<line_comment, multiline_comment>
 	{};
 }

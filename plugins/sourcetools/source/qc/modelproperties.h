@@ -21,8 +21,8 @@ namespace QuakeCModelProperties
 
 	struct ModelPropertyEyeball : public ModelProperty
 	{
-		ModelPropertyEyeball( String name )
-			: Name( name ), EyeballCenter(), YawOffset( 0.0f ) { }
+		ModelPropertyEyeball(String name)
+			: Name(name), EyeballCenter(), YawOffset(0.0f) { }
 
 		PropertyTypes GetType() override { return PropertyTypes::EyeBall; }
 

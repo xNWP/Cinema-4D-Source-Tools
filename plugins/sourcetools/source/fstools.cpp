@@ -1,34 +1,34 @@
 #include "fstools.h"
 
-bool ResolveLocalFilepath( Filename& fp, const std::vector<Filename>& searchdirectories, const Bool& isdir )
+bool ResolveLocalFilepath(Filename& fp, const std::vector<Filename>& searchdirectories, const Bool& isdir)
 {
 	Filename Match;
 	maxon::String strFp = fp.GetString();
 
 	// direct match
-	for ( const auto& dir : searchdirectories )
+	for (const auto& dir : searchdirectories)
 	{
 		maxon::String strMatch = dir.GetString();
-		if ( !( strMatch.EndsWith( '/' ) || strMatch.EndsWith( '\\' ) ) )
+		if (!(strMatch.EndsWith('/') || strMatch.EndsWith('\\')))
 		{
-			strMatch.AppendChar( '/' ).GetValue();
+			strMatch.AppendChar('/').GetValue();
 		}
 
-		if ( strFp.StartsWith( '.' ) )
+		if (strFp.StartsWith('.'))
 		{
-			strFp.Erase( 0, 1 ).GetValue();
+			strFp.Erase(0, 1).GetValue();
 		}
 
-		if ( strFp.StartsWith( '/' ) || strFp.StartsWith( '\\' ) )
+		if (strFp.StartsWith('/') || strFp.StartsWith('\\'))
 		{
-			strFp.Erase( 0, 1 ).GetValue();
+			strFp.Erase(0, 1).GetValue();
 		}
 
 		strMatch += strFp;
-		strMatch.Replace( '\\', '/' ).GetValue();
+		strMatch.Replace('\\', '/').GetValue();
 		Match = strMatch;
 
-		if ( GeFExist( Match, isdir ) )
+		if (GeFExist(Match, isdir))
 		{
 			fp = Match;
 			return true;
@@ -36,9 +36,9 @@ bool ResolveLocalFilepath( Filename& fp, const std::vector<Filename>& searchdire
 	}
 
 	// soft match
-	for ( const auto& dir : searchdirectories )
+	for (const auto& dir : searchdirectories)
 	{
-		if ( GeSearchFile( dir, fp, &Match ) )
+		if (GeSearchFile(dir, fp, &Match))
 		{
 			fp = Match;
 			return true;

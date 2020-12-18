@@ -204,92 +204,92 @@ namespace qc_grammar
 	{};
 
 	template<>
-	struct action< BodyMeshName >
+	struct action<BodyMeshName>
 	{
 		template <typename Input>
-		static void apply( const Input& In, QuakeCFormat& qc )
+		static void apply(const Input& In, QuakeCFormat& qc)
 		{
-			qc.BodyMeshes.emplace_back( QuakeCTypes::Mesh( In.string().c_str() ) );
+			qc.BodyMeshes.emplace_back(QuakeCTypes::Mesh(In.string().c_str()));
 		}
 	};
 
 	template <>
-	struct action< BodyMeshFilepath >
+	struct action<BodyMeshFilepath>
 	{
 		template <typename Input>
-		static void apply( const Input& In, QuakeCFormat& qc )
+		static void apply(const Input& In, QuakeCFormat& qc)
 		{
-			( qc.BodyMeshes.end() - 1 )->Filepath = In.string().c_str();
+			(qc.BodyMeshes.end() - 1)->Filepath = In.string().c_str();
 		}
 	};
 
 	template<>
-	struct action< BodyGroupName >
+	struct action<BodyGroupName>
 	{
 		template <typename Input>
-		static void apply( const Input& In, QuakeCFormat& qc )
+		static void apply(const Input& In, QuakeCFormat& qc)
 		{
-			qc.BodyGroups.emplace_back( QuakeCTypes::BodyGroup( In.string().c_str() ) );
+			qc.BodyGroups.emplace_back(QuakeCTypes::BodyGroup(In.string().c_str()));
 		}
 	};
 
 	template<>
-	struct action< BodyGroupMeshName >
+	struct action<BodyGroupMeshName>
 	{
 		template <typename Input>
-		static void apply( const Input& In, QuakeCFormat& qc )
+		static void apply(const Input& In, QuakeCFormat& qc)
 		{
-			( qc.BodyGroups.end() - 1 )->Meshes.emplace_back( In.string().c_str() );
+			(qc.BodyGroups.end() - 1)->Meshes.emplace_back(In.string().c_str());
 		}
 	};
 
 	template<>
-	struct action< BodyGroupBlank >
+	struct action<BodyGroupBlank>
 	{
 		template <typename Input>
-		static void apply( const Input& In, QuakeCFormat& qc )
+		static void apply(const Input& In, QuakeCFormat& qc)
 		{
-			( qc.BodyGroups.end() - 1 )->Blank = true;
+			(qc.BodyGroups.end() - 1)->Blank = true;
 		}
 	};
 
 	template<>
-	struct action< ModelMeshName >
+	struct action<ModelMeshName>
 	{
 		template <typename Input>
-		static void apply( const Input& In, QuakeCFormat& qc )
+		static void apply(const Input& In, QuakeCFormat& qc)
 		{
-			qc.Models.emplace_back( QuakeCTypes::Model( In.string().c_str() ) );
+			qc.Models.emplace_back(QuakeCTypes::Model(In.string().c_str()));
 		}
 	};
 
 	template <>
-	struct action< ModelMeshFilepath >
+	struct action<ModelMeshFilepath>
 	{
 		template <typename Input>
-		static void apply( const Input& In, QuakeCFormat& qc )
+		static void apply(const Input& In, QuakeCFormat& qc)
 		{
-			( qc.Models.end() - 1 )->Filepath = In.string().c_str();
+			(qc.Models.end() - 1)->Filepath = In.string().c_str();
 		}
 	};
 
 	template<>
-	struct action< ModelPropertyEyeballName >
+	struct action<ModelPropertyEyeballName>
 	{
 		template <typename Input>
-		static void apply( const Input& In, QuakeCFormat& qc )
+		static void apply(const Input& In, QuakeCFormat& qc)
 		{
-			( qc.Models.end() - 1 )->Properties.push_back( std::make_shared<QuakeCModelProperties::ModelPropertyEyeball>( In.string().c_str() ) );
+			(qc.Models.end() - 1)->Properties.push_back(std::make_shared<QuakeCModelProperties::ModelPropertyEyeball>(In.string().c_str()));
 		}
 	};
 
 	template<>
 	struct action<cdmaterials_value>
 	{
-		template<typename Input>
-		static void apply( const Input& In, QuakeCFormat& qc )
+		template <typename Input>
+		static void apply(const Input& In, QuakeCFormat& qc)
 		{
-			qc.cdmaterials.push_back( String(In.string().c_str()) );
+			qc.cdmaterials.push_back(String(In.string().c_str()));
 		}
 	};
 
@@ -297,9 +297,9 @@ namespace qc_grammar
 	struct action<IkName>
 	{
 		template <typename Input>
-		static void apply( const Input& In, QuakeCFormat& qc )
+		static void apply(const Input& In, QuakeCFormat& qc)
 		{
-			qc.IkRules.emplace_back( QuakeCTypes::IkRule( In.string().c_str() ) );
+			qc.IkRules.emplace_back(QuakeCTypes::IkRule(In.string().c_str()));
 		}
 	};
 
@@ -307,9 +307,9 @@ namespace qc_grammar
 	struct action<IkEndBone>
 	{
 		template <typename Input>
-		static void apply( const Input& In, QuakeCFormat& qc )
+		static void apply(const Input& In, QuakeCFormat& qc)
 		{
-			( qc.IkRules.end() - 1 )->EndBone = String( In.string().c_str() );
+			(qc.IkRules.end() - 1)->EndBone = String(In.string().c_str());
 		}
 	};
 
@@ -325,7 +325,7 @@ namespace qc_grammar
 	};
 }
 
-maxon::Bool ParseQC( const Filename& file, QuakeCFormat& qc )
+maxon::Bool ParseQC(const Filename& file, QuakeCFormat& qc)
 {
 	IF_PROFILING(Benchmark ParseQCBench("ParseQC"));
 	tao::pegtl::file_input infile( file.GetString().GetCStringCopy() );
@@ -333,19 +333,19 @@ maxon::Bool ParseQC( const Filename& file, QuakeCFormat& qc )
 	maxon::Bool bOk;
 	try
 	{
-		bOk = tao::pegtl::parse<qc_grammar::qc_file, qc_grammar::action>( infile, qc );
+		bOk = tao::pegtl::parse<qc_grammar::qc_file, qc_grammar::action>(infile, qc);
 	}
-	catch ( tao::pegtl::parse_error& e )
+	catch (tao::pegtl::parse_error& e)
 	{
-		LogErrorWhat( e );
+		LogErrorWhat(e);
 		return false;
 	}
 
 	/* Check for errors */
 
-	if ( !bOk )
+	if (!bOk)
 	{
-		LogError( "Exception free error in QC PEGTL Parser." );
+		LogError("Exception free error in QC PEGTL Parser.");
 		return false;
 	}
 
