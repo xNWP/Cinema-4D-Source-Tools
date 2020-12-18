@@ -4,4 +4,4 @@
 #include "maxon/integer.h"
 #include "smdformat.h"
 
-maxon::Bool ParseSMD(const Filename &file, StudiomdlData &smd);
+maxon::Bool ParseSMD( const Filename &file, StudiomdlData &smd );

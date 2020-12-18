@@ -4,4 +4,4 @@
 #include "maxon/integer.h"
 #include "vmtformat.h"
 
-maxon::Bool ParseVMT(const Filename &file, ValveMaterialType &vmt);
+maxon::Bool ParseVMT( const Filename& file, ValveMaterialType& vmt );
