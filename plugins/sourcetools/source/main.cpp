@@ -5,6 +5,7 @@
 #include "smd/smdloader.h"
 #include "qc/qcloader.h"
 #include "vmt/vmtloader.h"
+#include "camio/camioloader.h"
 
 #include "error.h"
 
@@ -14,31 +15,40 @@
 
 Bool PluginStart()
 {
+	using namespace st;
+
 	// VTF Loader
-	if (!VTFLoaderData::RegisterPlugin())
+	if (!vtf::LoaderData::RegisterPlugin())
 	{
 		LogError("Failed to register VTF loader.");
 		return false;
 	}
 
 	// SMD Loader
-	if (!SMDLoaderData::RegisterPlugin())
+	if (!smd::LoaderData::RegisterPlugin())
 	{
 		LogError("Failed to register SMD loader.");
 		return false;
 	}
 	
 	// QC Loader
-	if (!QCLoaderData::RegisterPlugin())
+	if (!qc::LoaderData::RegisterPlugin())
 	{
 		LogError("Failed to register QC loader.");
 		return false;
 	}
 
 	// VMT Loader
-	if (!VMTLoaderData::RegisterPlugin())
+	if (!vmt::LoaderData::RegisterPlugin())
 	{
 		LogError("Failed to register VMT loader.");
+		return false;
+	}
+
+	// CamIO Loader
+	if (!camio::LoaderData::RegisterPlugin())
+	{
+		LogError("Failed to register CamIO Loader.");
 		return false;
 	}
 

@@ -9,17 +9,20 @@
 #define IF_PROFILING(CODE)
 #endif
 
-class Benchmark
+namespace st
 {
-	std::chrono::time_point<std::chrono::high_resolution_clock> _start;
-	String _name;
-	bool _stopped = false;
+	class Benchmark
+	{
+		std::chrono::time_point<std::chrono::high_resolution_clock> _start;
+		String _name;
+		bool _stopped = false;
 
-	Benchmark() = default;
+		Benchmark() = default;
 
-public:
-	Benchmark(const String& name);
-	~Benchmark();
+	public:
+		Benchmark(const String& name);
+		~Benchmark();
 
-	void StopBenchmark();
-};
+		void StopBenchmark();
+	};
+}

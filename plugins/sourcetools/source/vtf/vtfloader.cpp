@@ -5,233 +5,235 @@
 #include <vector>
 #include <c4d.h>
 
-// LUT's for quick conversions
-static constexpr UChar LUT4[] = { 0, 17, 34, 51, 68, 85, 102, 119, 136, 153, 170, 187, 204, 221, 238, 255 };
-static constexpr UChar LUT5[] = { 0, 8, 16, 25, 33, 41, 49, 58, 66, 74, 82, 90, 99, 107, 115, 123, 132,
-					 140, 148, 156, 165, 173, 181, 189, 197, 206, 214, 222, 230, 239, 247, 255 };
-static constexpr UChar LUT6[] = { 0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 45, 49, 53, 57, 61, 65, 69, 73,
-				 77, 81, 85, 89, 93, 97, 101, 105, 109, 113, 117, 121, 125, 130, 134, 138,
-				 142, 146, 150, 154, 158, 162, 166, 170, 174, 178, 182, 186, 190, 194, 198,
-				 202, 206, 210, 215, 219, 223, 227, 231, 235, 239, 243, 247, 251, 255 };
-
-struct PIX565
+namespace st::vtf
 {
-	UInt16 z : 5;
-	UInt16 y : 6;
-	UInt16 x : 5;
-};
+	// LUT's for quick conversions
+	static constexpr UChar LUT4[] = { 0, 17, 34, 51, 68, 85, 102, 119, 136, 153, 170, 187, 204, 221, 238, 255 };
+	static constexpr UChar LUT5[] = { 0, 8, 16, 25, 33, 41, 49, 58, 66, 74, 82, 90, 99, 107, 115, 123, 132,
+						 140, 148, 156, 165, 173, 181, 189, 197, 206, 214, 222, 230, 239, 247, 255 };
+	static constexpr UChar LUT6[] = { 0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 45, 49, 53, 57, 61, 65, 69, 73,
+					 77, 81, 85, 89, 93, 97, 101, 105, 109, 113, 117, 121, 125, 130, 134, 138,
+					 142, 146, 150, 154, 158, 162, 166, 170, 174, 178, 182, 186, 190, 194, 198,
+					 202, 206, 210, 215, 219, 223, 227, 231, 235, 239, 243, 247, 251, 255 };
 
-struct PIX5551
-{
-	UInt16 w : 5;
-	UInt16 x : 5;
-	UInt16 y : 5;
-	UInt16 z : 1;
-};
-
-struct PIX4444
-{
-	UInt16 w : 4;
-	UInt16 x : 4;
-	UInt16 y : 4;
-	UInt16 z : 4;
-};
-
-class RGB888
-{
-public:
-	UChar R;
-	UChar G;
-	UChar B;
-
-	RGB888() : R(0), G(0), B(0) { }
-	RGB888(const PIX565& pix)
+	struct PIX565
 	{
-		R = LUT5[pix.x];
-		G = LUT6[pix.y];
-		B = LUT5[pix.z];
+		UInt16 z : 5;
+		UInt16 y : 6;
+		UInt16 x : 5;
+	};
+
+	struct PIX5551
+	{
+		UInt16 w : 5;
+		UInt16 x : 5;
+		UInt16 y : 5;
+		UInt16 z : 1;
+	};
+
+	struct PIX4444
+	{
+		UInt16 w : 4;
+		UInt16 x : 4;
+		UInt16 y : 4;
+		UInt16 z : 4;
+	};
+
+	class RGB888
+	{
+	public:
+		UChar R;
+		UChar G;
+		UChar B;
+
+		RGB888() : R(0), G(0), B(0) { }
+		RGB888(const PIX565& pix)
+		{
+			R = LUT5[pix.x];
+			G = LUT6[pix.y];
+			B = LUT5[pix.z];
+		}
+
+		RGB888(UChar _R, UChar _G, UChar _B) : R(_R), G(_G), B(_B) { }
+
+		RGB888 operator*(const Float32& rhs) const
+		{
+			RGB888 rval = *this;
+			rval.R = UChar(Round(Float32(R) * rhs));
+			rval.G = UChar(Round(Float32(G) * rhs));
+			rval.B = UChar(Round(Float32(B) * rhs));
+			return rval;
+		}
+
+		RGB888& operator*=(const Float32& rhs)
+		{
+			this->R = UChar(Round(Float32(this->R) * rhs));
+			this->G = UChar(Round(Float32(this->G) * rhs));
+			this->B = UChar(Round(Float32(this->B) * rhs));
+			return *this;
+		}
+
+		RGB888 operator+(const RGB888& rhs) const
+		{
+			RGB888 rval = *this;
+			rval.R += rhs.R;
+			rval.G += rhs.G;
+			rval.B += rhs.B;
+			return rval;
+		}
+	};
+
+	template <typename T>
+	T Lerp(const T& start, const T& end, const Float32& t)
+	{
+		Float32 tLocal;
+		if (t < 0)
+			tLocal = 0;
+		else if (t > 1)
+			tLocal = 1;
+		else
+			tLocal = t;
+
+		T startLocal = T(start * (1 - t));
+		T endLocal = T(end * t);
+
+		return startLocal + endLocal;
 	}
 
-	RGB888(UChar _R, UChar _G, UChar _B) : R(_R), G(_G), B(_B) { }
-
-	RGB888 operator*(const Float32& rhs) const
+	UChar Lerp(const UChar& start, const UChar& end, const Float32 t)
 	{
-		RGB888 rval = *this;
-		rval.R = UChar(Round(Float32(R) * rhs));
-		rval.G = UChar(Round(Float32(G) * rhs));
-		rval.B = UChar(Round(Float32(B) * rhs));
+		Float32 tLocal;
+		if (t < 0)
+			tLocal = 0;
+		else if (t > 1)
+			tLocal = 1;
+		else
+			tLocal = t;
+
+		Float32 startLocal = Float32(start) * (1.0f - t);
+		Float32 endLocal = Float32(end) * t;
+
+		return UChar(Round(startLocal + endLocal));
+	}
+
+	std::vector<UChar> ExtractTexelEntries(const UInt32& TexelMap)
+	{
+		std::vector<UChar> rval;
+		rval.resize(16);
+
+		rval[0] = UChar((TexelMap & 0x00000003));
+		rval[1] = UChar((TexelMap & 0x0000000C) >> 2);
+		rval[2] = UChar((TexelMap & 0x00000030) >> 4);
+		rval[3] = UChar((TexelMap & 0x000000C0) >> 6);
+		rval[4] = UChar((TexelMap & 0x00000300) >> 8);
+		rval[5] = UChar((TexelMap & 0x00000C00) >> 10);
+		rval[6] = UChar((TexelMap & 0x00003000) >> 12);
+		rval[7] = UChar((TexelMap & 0x0000C000) >> 14);
+		rval[8] = UChar((TexelMap & 0x00030000) >> 16);
+		rval[9] = UChar((TexelMap & 0x000C0000) >> 18);
+		rval[10] = UChar((TexelMap & 0x00300000) >> 20);
+		rval[11] = UChar((TexelMap & 0x00C00000) >> 22);
+		rval[12] = UChar((TexelMap & 0x03000000) >> 24);
+		rval[13] = UChar((TexelMap & 0x0C000000) >> 26);
+		rval[14] = UChar((TexelMap & 0x30000000) >> 28);
+		rval[15] = UChar((TexelMap & 0xC0000000) >> 30);
+
 		return rval;
 	}
 
-	RGB888& operator*=(const Float32& rhs)
+	std::vector<UChar> ExtractAlphaEntriesDXT3(const UInt64& TexelMap)
 	{
-		this->R = UChar(Round(Float32(this->R) * rhs));
-		this->G = UChar(Round(Float32(this->G) * rhs));
-		this->B = UChar(Round(Float32(this->B) * rhs));
-		return *this;
-	}
+		std::vector<UChar> rval;
+		rval.resize(16);
 
-	RGB888 operator+(const RGB888& rhs) const
-	{
-		RGB888 rval = *this;
-		rval.R += rhs.R;
-		rval.G += rhs.G;
-		rval.B += rhs.B;
+		rval[0] = LUT4[TexelMap & 0x000000000000000F];
+		rval[1] = LUT4[(TexelMap & 0x00000000000000F0) >> 4];
+		rval[2] = LUT4[(TexelMap & 0x0000000000000F00) >> 8];
+		rval[3] = LUT4[(TexelMap & 0x000000000000F000) >> 12];
+		rval[4] = LUT4[(TexelMap & 0x00000000000F0000) >> 16];
+		rval[5] = LUT4[(TexelMap & 0x0000000000F00000) >> 20];
+		rval[6] = LUT4[(TexelMap & 0x000000000F000000) >> 24];
+		rval[7] = LUT4[(TexelMap & 0x00000000F0000000) >> 28];
+		rval[8] = LUT4[(TexelMap & 0x0000000F00000000) >> 32];
+		rval[9] = LUT4[(TexelMap & 0x000000F000000000) >> 36];
+		rval[10] = LUT4[(TexelMap & 0x00000F0000000000) >> 40];
+		rval[11] = LUT4[(TexelMap & 0x0000F00000000000) >> 44];
+		rval[12] = LUT4[(TexelMap & 0x000F000000000000) >> 48];
+		rval[13] = LUT4[(TexelMap & 0x00F0000000000000) >> 52];
+		rval[14] = LUT4[(TexelMap & 0x0F00000000000000) >> 56];
+		rval[15] = LUT4[(TexelMap & 0xF000000000000000) >> 60];
+
 		return rval;
 	}
-};
 
-template <typename T>
-T Lerp(const T& start, const T& end, const Float32& t)
-{
-	Float32 tLocal;
-	if (t < 0)
-		tLocal = 0;
-	else if (t > 1)
-		tLocal = 1;
-	else
-		tLocal = t;
-
-	T startLocal = T(start * (1 - t));
-	T endLocal = T(end * t);
-
-	return startLocal + endLocal;
-}
-
-UChar Lerp(const UChar& start, const UChar& end, const Float32 t)
-{
-	Float32 tLocal;
-	if (t < 0)
-		tLocal = 0;
-	else if (t > 1)
-		tLocal = 1;
-	else
-		tLocal = t;
-
-	Float32 startLocal = Float32(start) * (1.0f - t);
-	Float32 endLocal = Float32(end) * t;
-
-	return UChar(Round(startLocal + endLocal));
-}
-
-std::vector<UChar> ExtractTexelEntries(const UInt32& TexelMap)
-{
-	std::vector<UChar> rval;
-	rval.resize(16);
-
-	rval[0]		= UChar((TexelMap & 0x00000003));
-	rval[1]		= UChar((TexelMap & 0x0000000C) >> 2);
-	rval[2]		= UChar((TexelMap & 0x00000030) >> 4);
-	rval[3]		= UChar((TexelMap & 0x000000C0) >> 6);
-	rval[4]		= UChar((TexelMap & 0x00000300) >> 8);
-	rval[5]		= UChar((TexelMap & 0x00000C00) >> 10);
-	rval[6]		= UChar((TexelMap & 0x00003000) >> 12);
-	rval[7]		= UChar((TexelMap & 0x0000C000) >> 14);
-	rval[8]		= UChar((TexelMap & 0x00030000) >> 16);
-	rval[9]		= UChar((TexelMap & 0x000C0000) >> 18);
-	rval[10]	= UChar((TexelMap & 0x00300000) >> 20);
-	rval[11]	= UChar((TexelMap & 0x00C00000) >> 22);
-	rval[12]	= UChar((TexelMap & 0x03000000) >> 24);
-	rval[13]	= UChar((TexelMap & 0x0C000000) >> 26);
-	rval[14]	= UChar((TexelMap & 0x30000000) >> 28);
-	rval[15]	= UChar((TexelMap & 0xC0000000) >> 30);
-
-	return rval;
-}
-
-std::vector<UChar> ExtractAlphaEntriesDXT3(const UInt64& TexelMap)
-{
-	std::vector<UChar> rval;
-	rval.resize(16);
-
-	rval[0]		= LUT4[TexelMap & 0x000000000000000F];
-	rval[1]		= LUT4[(TexelMap & 0x00000000000000F0) >> 4];
-	rval[2]		= LUT4[(TexelMap & 0x0000000000000F00) >> 8];
-	rval[3]		= LUT4[(TexelMap & 0x000000000000F000) >> 12];
-	rval[4]		= LUT4[(TexelMap & 0x00000000000F0000) >> 16];
-	rval[5]		= LUT4[(TexelMap & 0x0000000000F00000) >> 20];
-	rval[6]		= LUT4[(TexelMap & 0x000000000F000000) >> 24];
-	rval[7]		= LUT4[(TexelMap & 0x00000000F0000000) >> 28];
-	rval[8]		= LUT4[(TexelMap & 0x0000000F00000000) >> 32];
-	rval[9]		= LUT4[(TexelMap & 0x000000F000000000) >> 36];
-	rval[10]	= LUT4[(TexelMap & 0x00000F0000000000) >> 40];
-	rval[11]	= LUT4[(TexelMap & 0x0000F00000000000) >> 44];
-	rval[12]	= LUT4[(TexelMap & 0x000F000000000000) >> 48];
-	rval[13]	= LUT4[(TexelMap & 0x00F0000000000000) >> 52];
-	rval[14]	= LUT4[(TexelMap & 0x0F00000000000000) >> 56];
-	rval[15]	= LUT4[(TexelMap & 0xF000000000000000) >> 60];
-
-	return rval;
-}
-
-std::vector<UChar> ExtractAlphaEntriesDXT5(const UInt64& TexelMap)
-{
-	UChar MapCodes[16];
-	UChar Alphas[8];
-	std::vector<UChar> rval;
-	rval.resize(16);
-
-	Alphas[0]		= UChar( TexelMap &	0x00000000000000FF);
-	Alphas[1]		= UChar((TexelMap &	0x000000000000FF00) >> 8);
-
-	MapCodes[0]		= UChar((TexelMap &	0x0000000000070000) >> 16);
-	MapCodes[1]		= UChar((TexelMap &	0x0000000000380000) >> 19);
-	MapCodes[2]		= UChar((TexelMap &	0x0000000001C00000) >> 22);
-	MapCodes[3]		= UChar((TexelMap &	0x000000000E000000) >> 25);
-	MapCodes[4]		= UChar((TexelMap &	0x0000000070000000) >> 28);
-	MapCodes[5]		= UChar((TexelMap &	0x0000000380000000) >> 31);
-	MapCodes[6]		= UChar((TexelMap &	0x0000001C00000000) >> 34);
-	MapCodes[7]		= UChar((TexelMap &	0x000000E000000000) >> 37);
-	MapCodes[8]		= UChar((TexelMap &	0x0000070000000000) >> 40);
-	MapCodes[9]		= UChar((TexelMap &	0x0000380000000000) >> 43);
-	MapCodes[10]	= UChar((TexelMap & 0x0001C00000000000) >> 46);
-	MapCodes[11]	= UChar((TexelMap & 0x000E000000000000) >> 49);
-	MapCodes[12]	= UChar((TexelMap & 0x0070000000000000) >> 52);
-	MapCodes[13]	= UChar((TexelMap & 0x0380000000000000) >> 55);
-	MapCodes[14]	= UChar((TexelMap & 0x1C00000000000000) >> 58);
-	MapCodes[15]	= UChar((TexelMap & 0xE000000000000000) >> 61);
-
-	if (Alphas[0] > Alphas[1])
+	std::vector<UChar> ExtractAlphaEntriesDXT5(const UInt64& TexelMap)
 	{
-		Alphas[2] = Lerp(Alphas[0], Alphas[1], 1.0f / 7.0f);
-		Alphas[3] = Lerp(Alphas[0], Alphas[1], 2.0f / 7.0f);
-		Alphas[4] = Lerp(Alphas[0], Alphas[1], 3.0f / 7.0f);
-		Alphas[5] = Lerp(Alphas[0], Alphas[1], 4.0f / 7.0f);
-		Alphas[6] = Lerp(Alphas[0], Alphas[1], 5.0f / 7.0f);
-		Alphas[7] = Lerp(Alphas[0], Alphas[1], 6.0f / 7.0f);
-	}
-	else
-	{
-		Alphas[2] = Lerp(Alphas[0], Alphas[1], 1.0f / 5.0f);
-		Alphas[3] = Lerp(Alphas[0], Alphas[1], 2.0f / 5.0f);
-		Alphas[4] = Lerp(Alphas[0], Alphas[1], 3.0f / 5.0f);
-		Alphas[5] = Lerp(Alphas[0], Alphas[1], 4.0f / 5.0f);
-		Alphas[6] = 0x00;
-		Alphas[7] = 0xFF;
+		UChar MapCodes[16];
+		UChar Alphas[8];
+		std::vector<UChar> rval;
+		rval.resize(16);
+
+		Alphas[0] = UChar(TexelMap & 0x00000000000000FF);
+		Alphas[1] = UChar((TexelMap & 0x000000000000FF00) >> 8);
+
+		MapCodes[0] = UChar((TexelMap & 0x0000000000070000) >> 16);
+		MapCodes[1] = UChar((TexelMap & 0x0000000000380000) >> 19);
+		MapCodes[2] = UChar((TexelMap & 0x0000000001C00000) >> 22);
+		MapCodes[3] = UChar((TexelMap & 0x000000000E000000) >> 25);
+		MapCodes[4] = UChar((TexelMap & 0x0000000070000000) >> 28);
+		MapCodes[5] = UChar((TexelMap & 0x0000000380000000) >> 31);
+		MapCodes[6] = UChar((TexelMap & 0x0000001C00000000) >> 34);
+		MapCodes[7] = UChar((TexelMap & 0x000000E000000000) >> 37);
+		MapCodes[8] = UChar((TexelMap & 0x0000070000000000) >> 40);
+		MapCodes[9] = UChar((TexelMap & 0x0000380000000000) >> 43);
+		MapCodes[10] = UChar((TexelMap & 0x0001C00000000000) >> 46);
+		MapCodes[11] = UChar((TexelMap & 0x000E000000000000) >> 49);
+		MapCodes[12] = UChar((TexelMap & 0x0070000000000000) >> 52);
+		MapCodes[13] = UChar((TexelMap & 0x0380000000000000) >> 55);
+		MapCodes[14] = UChar((TexelMap & 0x1C00000000000000) >> 58);
+		MapCodes[15] = UChar((TexelMap & 0xE000000000000000) >> 61);
+
+		if (Alphas[0] > Alphas[1])
+		{
+			Alphas[2] = Lerp(Alphas[0], Alphas[1], 1.0f / 7.0f);
+			Alphas[3] = Lerp(Alphas[0], Alphas[1], 2.0f / 7.0f);
+			Alphas[4] = Lerp(Alphas[0], Alphas[1], 3.0f / 7.0f);
+			Alphas[5] = Lerp(Alphas[0], Alphas[1], 4.0f / 7.0f);
+			Alphas[6] = Lerp(Alphas[0], Alphas[1], 5.0f / 7.0f);
+			Alphas[7] = Lerp(Alphas[0], Alphas[1], 6.0f / 7.0f);
+		}
+		else
+		{
+			Alphas[2] = Lerp(Alphas[0], Alphas[1], 1.0f / 5.0f);
+			Alphas[3] = Lerp(Alphas[0], Alphas[1], 2.0f / 5.0f);
+			Alphas[4] = Lerp(Alphas[0], Alphas[1], 3.0f / 5.0f);
+			Alphas[5] = Lerp(Alphas[0], Alphas[1], 4.0f / 5.0f);
+			Alphas[6] = 0x00;
+			Alphas[7] = 0xFF;
+		}
+
+		UChar it = 0;
+		for (auto& i : MapCodes)
+			rval[it++] = Alphas[i];
+
+		return rval;
 	}
 
-	UChar it = 0;
-	for (auto& i : MapCodes)
-		rval[it++] = Alphas[i];
+	Bool LoaderData::Identify(const Filename& name, UChar* probe, Int32 size)
+	{
+		if (!probe || size < 4)
+			return false;
 
-	return rval;
-}
+		const char* sig = "VTF";
 
-Bool VTFLoaderData::Identify(const Filename& name, UChar* probe, Int32 size)
-{
-	if (!probe || size < 4)
+		if (!strcmp((const char*)probe, sig))
+			return true;
+
 		return false;
+	}
 
-	const char* sig = "VTF";
-
-	if (!strcmp((const char*)probe, sig))
-		return true;
-
-	return false;
-}
-
-IMAGERESULT VTFLoaderData::Load(const Filename& name, BaseBitmap* bm, Int32 frame)
-{
+	IMAGERESULT LoaderData::Load(const Filename& name, BaseBitmap* bm, Int32 frame)
+	{
 	AutoAlloc<BaseFile> file;
 	if (!file)
 		return IMAGERESULT::OUTOFMEMORY;
@@ -240,13 +242,13 @@ IMAGERESULT VTFLoaderData::Load(const Filename& name, BaseBitmap* bm, Int32 fram
 		return IMAGERESULT::FILEERROR;
 
 	// read header
-	vtf_header header;
-	file->ReadBytes(&header, sizeof(vtf_header), true);
+	Types::Header header;
+	file->ReadBytes(&header, sizeof(Types::Header), true);
 
 	// check for non-supported formats
 	if (header.version[0] > 7 || header.version[1] > 5)
 		return IMAGERESULT::WRONGTYPE;
-	if ((UInt32)header.flags & (UInt32)VTF_IMAGEFLAGS::TEXTUREFLAGS_ENVMAP)
+	if ((UInt32)header.flags & (UInt32)Types::IMAGEFLAGS::TEXTUREFLAGS_ENVMAP)
 		return IMAGERESULT::WRONGTYPE;
 	if (header.version[1] >= 2 && header.depth > 1)
 		return IMAGERESULT::WRONGTYPE;
@@ -267,11 +269,11 @@ IMAGERESULT VTFLoaderData::Load(const Filename& name, BaseBitmap* bm, Int32 fram
 		header.frames = 1;
 
 	// finally load the image doing any conversions as needed
-	if (header.highResImageFormat == VTF_IMAGEFORMAT::IMAGE_FORMAT_NONE)
+	if (header.highResImageFormat == Types::IMAGEFORMAT::IMAGE_FORMAT_NONE)
 	{
 		return IMAGERESULT::WRONGTYPE;
 	}
-	else if (header.highResImageFormat == VTF_IMAGEFORMAT::IMAGE_FORMAT_RGBA8888)
+	else if (header.highResImageFormat == Types::IMAGEFORMAT::IMAGE_FORMAT_RGBA8888)
 	{
 		if (bm->Init(header.width, header.height, 24) != IMAGERESULT::OK)
 			return IMAGERESULT::MISC_ERROR;
@@ -330,7 +332,7 @@ IMAGERESULT VTFLoaderData::Load(const Filename& name, BaseBitmap* bm, Int32 fram
 
 		return ok ? IMAGERESULT::OK : IMAGERESULT::MISC_ERROR;
 	}
-	else if (header.highResImageFormat == VTF_IMAGEFORMAT::IMAGE_FORMAT_ABGR8888)
+	else if (header.highResImageFormat == Types::IMAGEFORMAT::IMAGE_FORMAT_ABGR8888)
 	{
 		if (bm->Init(header.width, header.height, 24) != IMAGERESULT::OK)
 			return IMAGERESULT::MISC_ERROR;
@@ -389,8 +391,8 @@ IMAGERESULT VTFLoaderData::Load(const Filename& name, BaseBitmap* bm, Int32 fram
 
 		return ok ? IMAGERESULT::OK : IMAGERESULT::MISC_ERROR;
 	}
-	else if (header.highResImageFormat == VTF_IMAGEFORMAT::IMAGE_FORMAT_RGB888 ||
-	header.highResImageFormat == VTF_IMAGEFORMAT::IMAGE_FORMAT_RGB888_BLUESCREEN)
+	else if (header.highResImageFormat == Types::IMAGEFORMAT::IMAGE_FORMAT_RGB888 ||
+	header.highResImageFormat == Types::IMAGEFORMAT::IMAGE_FORMAT_RGB888_BLUESCREEN)
 	{
 		if (bm->Init(header.width, header.height, 24) != IMAGERESULT::OK)
 			return IMAGERESULT::MISC_ERROR;
@@ -423,8 +425,8 @@ IMAGERESULT VTFLoaderData::Load(const Filename& name, BaseBitmap* bm, Int32 fram
 
 		return ok ? IMAGERESULT::OK : IMAGERESULT::MISC_ERROR;
 	}
-	else if (header.highResImageFormat == VTF_IMAGEFORMAT::IMAGE_FORMAT_BGR888 ||
-	header.highResImageFormat == VTF_IMAGEFORMAT::IMAGE_FORMAT_BGR888_BLUESCREEN)
+	else if (header.highResImageFormat == Types::IMAGEFORMAT::IMAGE_FORMAT_BGR888 ||
+	header.highResImageFormat == Types::IMAGEFORMAT::IMAGE_FORMAT_BGR888_BLUESCREEN)
 	{
 		if (bm->Init(header.width, header.height, 24) != IMAGERESULT::OK)
 			return IMAGERESULT::MISC_ERROR;
@@ -465,7 +467,7 @@ IMAGERESULT VTFLoaderData::Load(const Filename& name, BaseBitmap* bm, Int32 fram
 
 		return ok ? IMAGERESULT::OK : IMAGERESULT::MISC_ERROR;
 	}
-	else if (header.highResImageFormat == VTF_IMAGEFORMAT::IMAGE_FORMAT_RGB565)
+	else if (header.highResImageFormat == Types::IMAGEFORMAT::IMAGE_FORMAT_RGB565)
 	{
 		if (bm->Init(header.width, header.height, 24) != IMAGERESULT::OK)
 			return IMAGERESULT::MISC_ERROR;
@@ -516,7 +518,7 @@ IMAGERESULT VTFLoaderData::Load(const Filename& name, BaseBitmap* bm, Int32 fram
 
 		return ok ? IMAGERESULT::OK : IMAGERESULT::MISC_ERROR;
 	}
-	else if (header.highResImageFormat == VTF_IMAGEFORMAT::IMAGE_FORMAT_I8)
+	else if (header.highResImageFormat == Types::IMAGEFORMAT::IMAGE_FORMAT_I8)
 	{
 		if (bm->Init(header.width, header.height, 8, INITBITMAPFLAGS::GRAYSCALE) != IMAGERESULT::OK)
 			return IMAGERESULT::MISC_ERROR;
@@ -549,7 +551,7 @@ IMAGERESULT VTFLoaderData::Load(const Filename& name, BaseBitmap* bm, Int32 fram
 
 		return ok ? IMAGERESULT::OK : IMAGERESULT::MISC_ERROR;
 	}
-	else if (header.highResImageFormat == VTF_IMAGEFORMAT::IMAGE_FORMAT_IA88)
+	else if (header.highResImageFormat == Types::IMAGEFORMAT::IMAGE_FORMAT_IA88)
 	{
 		if (bm->Init(header.width, header.height, 8, INITBITMAPFLAGS::GRAYSCALE) != IMAGERESULT::OK)
 			return IMAGERESULT::MISC_ERROR;
@@ -612,11 +614,11 @@ IMAGERESULT VTFLoaderData::Load(const Filename& name, BaseBitmap* bm, Int32 fram
 
 		return ok ? IMAGERESULT::OK : IMAGERESULT::MISC_ERROR;
 	}
-	else if (header.highResImageFormat == VTF_IMAGEFORMAT::IMAGE_FORMAT_P8)
+	else if (header.highResImageFormat == Types::IMAGEFORMAT::IMAGE_FORMAT_P8)
 	{
 		return IMAGERESULT::WRONGTYPE;
 	}
-	else if (header.highResImageFormat == VTF_IMAGEFORMAT::IMAGE_FORMAT_A8)
+	else if (header.highResImageFormat == Types::IMAGEFORMAT::IMAGE_FORMAT_A8)
 	{
 		if (bm->Init(header.width, header.height, 8, INITBITMAPFLAGS::GRAYSCALE) != IMAGERESULT::OK)
 			return IMAGERESULT::MISC_ERROR;
@@ -665,7 +667,7 @@ IMAGERESULT VTFLoaderData::Load(const Filename& name, BaseBitmap* bm, Int32 fram
 
 		return ok ? IMAGERESULT::OK : IMAGERESULT::MISC_ERROR;
 	}
-	else if (header.highResImageFormat == VTF_IMAGEFORMAT::IMAGE_FORMAT_ARGB8888)
+	else if (header.highResImageFormat == Types::IMAGEFORMAT::IMAGE_FORMAT_ARGB8888)
 	{
 		if (bm->Init(header.width, header.height, 24) != IMAGERESULT::OK)
 			return IMAGERESULT::MISC_ERROR;
@@ -724,7 +726,7 @@ IMAGERESULT VTFLoaderData::Load(const Filename& name, BaseBitmap* bm, Int32 fram
 
 		return ok ? IMAGERESULT::OK : IMAGERESULT::MISC_ERROR;
 	}
-	else if (header.highResImageFormat == VTF_IMAGEFORMAT::IMAGE_FORMAT_BGRA8888)
+	else if (header.highResImageFormat == Types::IMAGEFORMAT::IMAGE_FORMAT_BGRA8888)
 	{
 		if (bm->Init(header.width, header.height, 24) != IMAGERESULT::OK)
 			return IMAGERESULT::MISC_ERROR;
@@ -782,7 +784,7 @@ IMAGERESULT VTFLoaderData::Load(const Filename& name, BaseBitmap* bm, Int32 fram
 
 		return ok ? IMAGERESULT::OK : IMAGERESULT::MISC_ERROR;
 	}
-	else if (header.highResImageFormat == VTF_IMAGEFORMAT::IMAGE_FORMAT_DXT1)
+	else if (header.highResImageFormat == Types::IMAGEFORMAT::IMAGE_FORMAT_DXT1)
 	{
 		if (bm->Init(header.width, header.height, 24) != IMAGERESULT::OK)
 			return IMAGERESULT::MISC_ERROR;
@@ -842,7 +844,7 @@ IMAGERESULT VTFLoaderData::Load(const Filename& name, BaseBitmap* bm, Int32 fram
 
 		return ok ? IMAGERESULT::OK : IMAGERESULT::MISC_ERROR;
 	}
-	else if (header.highResImageFormat == VTF_IMAGEFORMAT::IMAGE_FORMAT_DXT3)
+	else if (header.highResImageFormat == Types::IMAGEFORMAT::IMAGE_FORMAT_DXT3)
 	{
 		if (bm->Init(header.width, header.height, 24) != IMAGERESULT::OK)
 			return IMAGERESULT::MISC_ERROR;
@@ -915,7 +917,7 @@ IMAGERESULT VTFLoaderData::Load(const Filename& name, BaseBitmap* bm, Int32 fram
 
 		return ok ? IMAGERESULT::OK : IMAGERESULT::MISC_ERROR;
 	}
-	else if (header.highResImageFormat == VTF_IMAGEFORMAT::IMAGE_FORMAT_DXT5)
+	else if (header.highResImageFormat == Types::IMAGEFORMAT::IMAGE_FORMAT_DXT5)
 	{
 		if (bm->Init(header.width, header.height, 24) != IMAGERESULT::OK)
 			return IMAGERESULT::MISC_ERROR;
@@ -988,7 +990,7 @@ IMAGERESULT VTFLoaderData::Load(const Filename& name, BaseBitmap* bm, Int32 fram
 
 		return ok ? IMAGERESULT::OK : IMAGERESULT::MISC_ERROR;
 	}
-	else if (header.highResImageFormat == VTF_IMAGEFORMAT::IMAGE_FORMAT_BGRX8888)
+	else if (header.highResImageFormat == Types::IMAGEFORMAT::IMAGE_FORMAT_BGRX8888)
 	{
 		if (bm->Init(header.width, header.height, 24) != IMAGERESULT::OK)
 			return IMAGERESULT::MISC_ERROR;
@@ -1046,7 +1048,7 @@ IMAGERESULT VTFLoaderData::Load(const Filename& name, BaseBitmap* bm, Int32 fram
 
 		return ok ? IMAGERESULT::OK : IMAGERESULT::MISC_ERROR;
 	}
-	else if (header.highResImageFormat == VTF_IMAGEFORMAT::IMAGE_FORMAT_BGR565)
+	else if (header.highResImageFormat == Types::IMAGEFORMAT::IMAGE_FORMAT_BGR565)
 	{
 		if (bm->Init(header.width, header.height, 24) != IMAGERESULT::OK)
 			return IMAGERESULT::MISC_ERROR;
@@ -1097,7 +1099,7 @@ IMAGERESULT VTFLoaderData::Load(const Filename& name, BaseBitmap* bm, Int32 fram
 
 		return ok ? IMAGERESULT::OK : IMAGERESULT::MISC_ERROR;
 	}
-	else if (header.highResImageFormat == VTF_IMAGEFORMAT::IMAGE_FORMAT_BGRX5551)
+	else if (header.highResImageFormat == Types::IMAGEFORMAT::IMAGE_FORMAT_BGRX5551)
 	{
 		if (bm->Init(header.width, header.height, 24) != IMAGERESULT::OK)
 			return IMAGERESULT::MISC_ERROR;
@@ -1156,7 +1158,7 @@ IMAGERESULT VTFLoaderData::Load(const Filename& name, BaseBitmap* bm, Int32 fram
 
 		return ok ? IMAGERESULT::OK : IMAGERESULT::MISC_ERROR;
 	}
-	else if (header.highResImageFormat == VTF_IMAGEFORMAT::IMAGE_FORMAT_BGRA4444)
+	else if (header.highResImageFormat == Types::IMAGEFORMAT::IMAGE_FORMAT_BGRA4444)
 	{
 		if (bm->Init(header.width, header.height, 32) != IMAGERESULT::OK)
 			return IMAGERESULT::MISC_ERROR;
@@ -1215,7 +1217,7 @@ IMAGERESULT VTFLoaderData::Load(const Filename& name, BaseBitmap* bm, Int32 fram
 
 		return ok ? IMAGERESULT::OK : IMAGERESULT::MISC_ERROR;
 	}
-	else if (header.highResImageFormat == VTF_IMAGEFORMAT::IMAGE_FORMAT_DXT1_ONEBITALPHA)
+	else if (header.highResImageFormat == Types::IMAGEFORMAT::IMAGE_FORMAT_DXT1_ONEBITALPHA)
 	{
 		if (bm->Init(header.width, header.height, 32) != IMAGERESULT::OK)
 			return IMAGERESULT::MISC_ERROR;
@@ -1298,7 +1300,7 @@ IMAGERESULT VTFLoaderData::Load(const Filename& name, BaseBitmap* bm, Int32 fram
 
 		return ok ? IMAGERESULT::OK : IMAGERESULT::MISC_ERROR;
 	}
-	else if (header.highResImageFormat == VTF_IMAGEFORMAT::IMAGE_FORMAT_BGRA5551)
+	else if (header.highResImageFormat == Types::IMAGEFORMAT::IMAGE_FORMAT_BGRA5551)
 	{
 		if (bm->Init(header.width, header.height, 24) != IMAGERESULT::OK)
 			return IMAGERESULT::MISC_ERROR;
@@ -1357,7 +1359,7 @@ IMAGERESULT VTFLoaderData::Load(const Filename& name, BaseBitmap* bm, Int32 fram
 
 		return ok ? IMAGERESULT::OK : IMAGERESULT::MISC_ERROR;
 	}
-	else if (header.highResImageFormat == VTF_IMAGEFORMAT::IMAGE_FORMAT_UV88)
+	else if (header.highResImageFormat == Types::IMAGEFORMAT::IMAGE_FORMAT_UV88)
 	{
 		if (bm->Init(header.width, header.height, 24) != IMAGERESULT::OK)
 			return IMAGERESULT::MISC_ERROR;
@@ -1407,7 +1409,7 @@ IMAGERESULT VTFLoaderData::Load(const Filename& name, BaseBitmap* bm, Int32 fram
 
 		return ok ? IMAGERESULT::OK : IMAGERESULT::MISC_ERROR;
 	}
-	else if (header.highResImageFormat == VTF_IMAGEFORMAT::IMAGE_FORMAT_UVWQ8888)
+	else if (header.highResImageFormat == Types::IMAGEFORMAT::IMAGE_FORMAT_UVWQ8888)
 	{
 		if (bm->Init(header.width, header.height, 24) != IMAGERESULT::OK)
 			return IMAGERESULT::MISC_ERROR;
@@ -1465,15 +1467,15 @@ IMAGERESULT VTFLoaderData::Load(const Filename& name, BaseBitmap* bm, Int32 fram
 
 		return ok ? IMAGERESULT::OK : IMAGERESULT::MISC_ERROR;
 	}
-	else if (header.highResImageFormat == VTF_IMAGEFORMAT::IMAGE_FORMAT_RGBA16161616F)
+	else if (header.highResImageFormat == Types::IMAGEFORMAT::IMAGE_FORMAT_RGBA16161616F)
 	{
 		return IMAGERESULT::WRONGTYPE;
 	}
-	else if (header.highResImageFormat == VTF_IMAGEFORMAT::IMAGE_FORMAT_RGBA16161616)
+	else if (header.highResImageFormat == Types::IMAGEFORMAT::IMAGE_FORMAT_RGBA16161616)
 	{
 		return IMAGERESULT::WRONGTYPE;
 	}
-	else if (header.highResImageFormat == VTF_IMAGEFORMAT::IMAGE_FORMAT_UVLX8888)
+	else if (header.highResImageFormat == Types::IMAGEFORMAT::IMAGE_FORMAT_UVLX8888)
 	{
 		if (bm->Init(header.width, header.height, 24) != IMAGERESULT::OK)
 			return IMAGERESULT::MISC_ERROR;
@@ -1533,12 +1535,13 @@ IMAGERESULT VTFLoaderData::Load(const Filename& name, BaseBitmap* bm, Int32 fram
 	}
 
 	return IMAGERESULT::MISC_ERROR;
-}
-
-Bool VTFLoaderData::RegisterPlugin()
-{
-	if (!RegisterBitmapLoaderPlugin(ID_VTFLOADER, "Valve Texture Format Loader"_s, 0, NewObjClear(VTFLoaderData)))
+	}
+	
+	Bool LoaderData::RegisterPlugin()
+	{
+	if (!RegisterBitmapLoaderPlugin(ID_VTFLOADER, "Valve Texture Format Loader"_s, 0, NewObjClear(LoaderData)))
 		return false;
 
 	return true;
+	}
 }

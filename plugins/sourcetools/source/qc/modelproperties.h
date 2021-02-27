@@ -2,7 +2,7 @@
 
 #include <c4d_string.h>
 
-namespace QuakeCModelProperties
+namespace st::qc::ModelProperties
 {
 	enum class PropertyTypes
 	{

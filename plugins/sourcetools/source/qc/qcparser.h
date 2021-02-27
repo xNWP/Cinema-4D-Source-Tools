@@ -4,4 +4,7 @@
 #include "maxon/integer.h"
 #include "qcformat.h"
 
-maxon::Bool ParseQC(const Filename& file, QuakeCFormat& qc);
+namespace st::qc
+{
+	maxon::Bool ParseQC(const Filename& file, QuakeCFormat& qc);
+}

@@ -2,7 +2,7 @@
 
 #include "tao/pegtl.hpp"
 
-namespace shared_grammar
+namespace st::shared_grammar
 {
     using namespace tao;
 

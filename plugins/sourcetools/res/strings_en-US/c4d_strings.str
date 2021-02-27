@@ -6,4 +6,5 @@ STRINGTABLE
     S_PARSINGFILE_SUB           "# - Parsing #";
     S_INVALID_MATERIAL_PATH     "Root material path must be a valid directory.";
     S_PARSE_ERROR               "Error parsing file #";
+    S_CAMIO_BAD_VERSION         "CamIO version # not supported. Max supported version is #.";
 }

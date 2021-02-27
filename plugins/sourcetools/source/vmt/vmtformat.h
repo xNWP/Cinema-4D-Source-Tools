@@ -3,26 +3,29 @@
 #include <unordered_map>
 #include <any>
 
-namespace VMTTypes
+namespace st::vmt
 {
-	enum class ShaderType
+	namespace Types
 	{
-		UNKNOWN,
-		LIGHTMAPPEDGENERIC,
-		CHARACTER
-	};
+		enum class ShaderType
+		{
+			UNKNOWN,
+			LIGHTMAPPEDGENERIC,
+			CHARACTER
+		};
 
-	enum class ParameterType
+		enum class ParameterType
+		{
+			BASETEXTURE,
+			BUMPMAP,
+			SSBUMP,
+			TRANSLUCENT
+		};
+	}
+
+	struct ValveMaterialType
 	{
-		BASETEXTURE,
-		BUMPMAP,
-		SSBUMP,
-		TRANSLUCENT
+		Types::ShaderType Shader;
+		std::unordered_map<Types::ParameterType, std::any> Parameters;
 	};
 }
-
-struct ValveMaterialType
-{
-	VMTTypes::ShaderType Shader;
-	std::unordered_map<VMTTypes::ParameterType, std::any> Parameters;
-};
