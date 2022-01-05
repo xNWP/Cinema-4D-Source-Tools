@@ -4,15 +4,15 @@ We currently build against Cinema 4D R21.107
 
 1. Make sure you've cloned the repository with --recurse-submodules to include needed submodules.
 
-2. Extract the frameworks folder from the sdk.zip file in your Cinema 4D directory (default is: C:\Program Files\Maxon Cinema 4D R21) to the root of the C4DST directory. (Don't extract folders from frameworks, just have the entire frameworks folder in the root of C4DST.)
+2. Extract the frameworks folder from the sdk.zip file in your Cinema 4D directory (default is: C:\Program Files\Maxon Cinema 4D R<version>) to the root of the C4DST directory. (Don't extract folders from frameworks, just have the entire frameworks folder in the root of C4DST.)
 
-3. Download the latest project tool from the Maxon developer website: https://developers.maxon.net
+3. Download the project tool associated with your Cinema 4D version from the Maxon developer website: https://developers.maxon.net
 
-4. Generate project files from a terminal with the following command: kernel_app_64bit.exe g_updateproject=<path_to_c4dst>\Cinema-4D-Source-Tools
+4. Generate project files from a terminal with the following command: kernel_app_64bit.exe g_updateproject=<path_to_c4dst>\Cinema-4D-Source-Tools (path must be absolute, not relative)
 
 5. Open the generated solution file located at: plugins\project\plugins.sln
 
-5a. If you are asked to upgrade the project, you should be fine upgrading the SDK, however do not upgrade the build tools.
+5a. If you are asked to upgrade the project, don't. You may need to install additional Windows SDK's or Visual C++ build tools to compile the project.
 
 6. Build the sourcetools project as per usual.
 
