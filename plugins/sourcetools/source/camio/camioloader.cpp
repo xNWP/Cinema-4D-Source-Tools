@@ -2,6 +2,7 @@
 
 #include "camioparser.h"
 #include "error.h"
+#include "utility.h"
 
 #include "c4d_symbols.h"
 #include "c4d_resource.h"
@@ -91,7 +92,29 @@ namespace st::camio
 		yRCurve = yRTrack->GetCurve();
 		zRCurve = zRTrack->GetCurve();
 
-		// TODO: not done :-)
+		/* Iterate through each time-step and add a keyframe */
+		{
+			const Float startTime = camFile.Frames[0].time;
+			auto CreateKeyWithValue =
+				[startTime](CCurve* c, Float t, Float v)
+			{
+				auto k = c->AddKey(BaseTime(t - startTime));
+				k->SetValue(c, v);
+			};
+
+			for (const auto& frame : camFile.Frames)
+			{
+				Matrix
+
+				CreateKeyWithValue(xCurve, frame.time, frame.xPosition);
+				CreateKeyWithValue(yCurve, frame.time, frame.zPosition);
+				CreateKeyWithValue(zCurve, frame.time, frame.yPosition);
+				CreateKeyWithValue(xRCurve, frame.time, DegToRad(frame.zRotation - PI/2));
+				CreateKeyWithValue(yRCurve, frame.time, DegToRad(-frame.yRotation));
+				CreateKeyWithValue(zRCurve, frame.time, DegToRad(frame.xRotation));
+				// TODO: Add fov, shortest path, coordinate system stuffs
+			}
+		}
 
 		return FILEERROR::NONE;
 	}
