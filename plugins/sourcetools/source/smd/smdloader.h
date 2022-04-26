@@ -43,7 +43,7 @@ namespace st::smd
 
 		struct SMDObject
 		{
-			PolygonObject* Mesh;
+			PolygonObject* Mesh = nullptr;
 			std::map<std::int16_t, BoneMapData> Skeleton;
 		};
 
