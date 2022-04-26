@@ -104,7 +104,8 @@ namespace st::camio
 
 			for (const auto& frame : camFile.Frames)
 			{
-				Matrix
+				//Matrix
+				// no idea if this works, abandoned code TODO: verify this solution? lol
 
 				CreateKeyWithValue(xCurve, frame.time, frame.xPosition);
 				CreateKeyWithValue(yCurve, frame.time, frame.zPosition);

@@ -20,6 +20,8 @@
 
 #include "benchmark.h"
 
+#include <cmath> // std::floor
+
 namespace st::smd
 {
 	Bool LoaderData::Identify(BaseSceneLoader* node, const Filename& name, UChar* probe, Int32 size)
