@@ -10,7 +10,7 @@
 #include "error.h"
 
 #define SOURCETOOLS_VERSION_MAJOR 0
-#define SOURCETOOLS_VERSION_MINOR 90
+#define SOURCETOOLS_VERSION_MINOR 91
 #define SOURCETOOLS_VERSION_TAG "dev"
 
 Bool PluginStart()

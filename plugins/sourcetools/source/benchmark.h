@@ -14,15 +14,21 @@ namespace st
 	class Benchmark
 	{
 		std::chrono::time_point<std::chrono::high_resolution_clock> _start;
+		std::chrono::duration<double> _elapsedTime;
 		String _name;
-		bool _stopped = false;
+		Bool _stopped;
+		Bool _printOnDestruct;
 
 		Benchmark() = default;
 
 	public:
-		Benchmark(const String& name);
+		Benchmark(const String& name, Bool printOnDestruct = true, Bool startImmediately = true);
 		~Benchmark();
 
 		void StopBenchmark();
+		void StartBenchmark();
+		Float64 GetElapsedSeconds() const;
+		String GetElapsedTimeFormatted() const;
+		Bool IsRunning() const;
 	};
 }
