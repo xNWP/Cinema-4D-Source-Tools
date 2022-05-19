@@ -9,6 +9,7 @@ namespace st
 		_name = name;
 		_printOnDestruct = printOnDestruct;
 		_stopped = true;
+		_elapsedTime = 0.0;
 		if (startImmediately) StartBenchmark();
 	}
 
@@ -24,24 +25,25 @@ namespace st
 	{
 		if (_stopped) return;
 		_stopped = true;
-		_elapsedTime += std::chrono::high_resolution_clock::now() - _start;
+		std::chrono::duration<double> tp = std::chrono::steady_clock::now() - _start;
+		_elapsedTime += Float64(tp.count());
 	}
 
 	void Benchmark::StartBenchmark()
 	{
 		if (!_stopped) return;
 		_stopped = false;
-		_start = std::chrono::high_resolution_clock::now();
+		_start = std::chrono::steady_clock::now();
 	}
 
 	Float64 Benchmark::GetElapsedSeconds() const
 	{
-		std::chrono::duration<double> duration;
-		if (!_stopped)
-			duration = std::chrono::high_resolution_clock::now() - _start + _elapsedTime;
-		else
-			duration = _elapsedTime;
-		return Float64(duration.count());
+		if (!_stopped) {
+			std::chrono::duration<double> tp = std::chrono::steady_clock::now() - _start;
+			return _elapsedTime + Float64(tp.count());
+		} else {
+			return _elapsedTime;
+		}
 	}
 
 	String Benchmark::GetElapsedTimeFormatted() const

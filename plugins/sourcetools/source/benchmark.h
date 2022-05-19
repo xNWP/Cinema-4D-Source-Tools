@@ -13,8 +13,8 @@ namespace st
 {
 	class Benchmark
 	{
-		std::chrono::time_point<std::chrono::high_resolution_clock> _start;
-		std::chrono::duration<double> _elapsedTime;
+		std::chrono::time_point<std::chrono::steady_clock> _start;
+		Float64 _elapsedTime;
 		String _name;
 		Bool _stopped;
 		Bool _printOnDestruct;
