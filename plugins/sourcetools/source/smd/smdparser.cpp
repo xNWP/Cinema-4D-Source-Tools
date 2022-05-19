@@ -8,6 +8,9 @@
 
 #include "benchmark.h"
 
+// DEBUG STUFFS
+//#define ST_DEBUG_PARSESMD_DUPVERT_DIFFDATA
+
 namespace st::smd
 {
 	// TODO: There should be a way to do this without relying on a symbol map
@@ -177,19 +180,19 @@ namespace st::smd
 			triangles_vertex_u,
 			whitespace,
 			triangles_vertex_v,
-			pegtl::if_then_else<
-			pegtl::seq<whitespace, integer>, // if weightmap links
-			pegtl::until<pegtl::eolf, pegtl::sor<
-			pegtl::seq<triangles_vertex_bone_id, whitespace, triangles_vertex_bone_weight>, pegtl::any>>,
-			// else
-			pegtl::until<pegtl::eolf>> >
+			pegtl::opt<whitespace, integer, whitespace,
+			pegtl::until<pegtl::eol,
+			pegtl::sor<
+			pegtl::seq<triangles_vertex_bone_id, whitespace, triangles_vertex_bone_weight>,
+			pegtl::any>>>>
 		{};
 
 		struct triangle_entry
 			: pegtl::seq<
-			opt_quotes_wrapped<triangles_material>,
-			pegtl::until<pegtl::sor<pegtl::at<pegtl::identifier>, pegtl::string<'e', 'n', 'd'>>,
-			pegtl::sor<triangles_vertex, pegtl::any>>>
+			opt_quotes_wrapped<triangles_material>, whitespace_linefeeds,
+			triangles_vertex, pegtl::opt<whitespace_linefeeds>,
+			triangles_vertex, pegtl::opt<whitespace_linefeeds>, 
+			triangles_vertex, pegtl::opt<whitespace_linefeeds>>
 		{};
 
 		struct triangles
@@ -202,7 +205,6 @@ namespace st::smd
 		struct smd_file
 			: pegtl::until<pegtl::eof,
 			pegtl::sor<
-
 			comments,
 			version,
 			nodes,
@@ -537,17 +539,92 @@ namespace st::smd
 			return false;
 		}
 
-		if (smd.SkeletonAnimation.size() < 1)
+		if (smd.SkeletonAnimation.empty())
 		{
-			LogError("SMD missing first frame of animation.");
+			LogError("SMD missing skeleton pose.");
 			return false;
 		}
 
 		if (smd.SkeletonAnimation[0].Entries.size() != smd.Bones.size())
 		{
-			LogError("SMD frame[0] #bones != #bones.");
+			LogError("SMD skeleton pose is incompatible with bone definition.");
 			return false;
 		}
+
+		/* DEBUG CODE: used to check for duplicate vertices with differing weightmaps. */
+#ifdef	ST_DEBUG_PARSESMD_DUPVERT_DIFFDATA
+		{
+			IF_PROFILING(Benchmark ParseSMDDebugBench("ParseSMD-DebugDupVertsDiffData-Bench"));
+			std::vector<std::vector<smd::Types::Vertex>> Vertices;
+			for (const auto& tri : smd.Triangles) {
+				for (const auto& vert : tri.Vertices) {
+					bool bFound = false;
+					for (auto it = std::rbegin(Vertices); it != std::rend(Vertices); it++) {
+						if (vert.Position.Distance((*it)[0].Position) < 0.01f) {
+							it->push_back(vert);
+							bFound = true;
+							break;
+						}
+					}
+
+					if (!bFound) Vertices.push_back({ vert });
+				}
+			}
+
+			Int32 weightDiff = 0;
+			Int32 normalsDiff = 0;
+			Int32 parentBoneDiff = 0;
+			Int32 groupIt = 0;
+			for (const auto& verts : Vertices) {
+				if (verts.size() > 1) {
+					auto cmpVert = verts[0];
+					for (const auto& otherVert : verts) {
+						Bool bDiff = false;
+						
+						if (otherVert.WeightMapEntries != cmpVert.WeightMapEntries) {
+							bDiff = true; weightDiff++;
+						}
+
+						if (otherVert.Normals.Distance(cmpVert.Normals) > 0.01f) {
+							bDiff = true; normalsDiff++;
+						}
+
+						if (otherVert.ParentBone != cmpVert.ParentBone) {
+							bDiff = true; parentBoneDiff++;
+						}
+
+						if (bDiff) {
+							String vertListStr = "Group " + String::IntToString(groupIt++) + "\n";
+							for (const auto& x : verts) {
+								vertListStr +=
+									"[" + String::IntToString(x.ParentBone) + "] " +
+									"[" + String::FloatToString(x.Position.x) + ", " +
+									String::FloatToString(x.Position.y) + ", " +
+									String::FloatToString(x.Position.z) + "] " +
+									"[" + String::FloatToString(x.Normals.x) + ", " +
+									String::FloatToString(x.Normals.y) + ", " +
+									String::FloatToString(x.Normals.z) + "] " +
+									"[" + String::FloatToString(x.u) + ", " +
+									String::FloatToString(x.v) + "] " +
+									"[";
+								for (auto y : x.WeightMapEntries) vertListStr +=
+									"(" + String::IntToString(y.BoneId) + ", " + String::FloatToString(y.Weight) + "), ";
+								vertListStr.Delete(vertListStr.GetLength() - 2, 2);
+								vertListStr += "]\n";
+							}
+							Log(vertListStr);
+							break;
+						}
+					}
+				}
+			}
+
+			String dMsg = "Parent Bone Diffs: " + String::IntToString(parentBoneDiff)
+				+ " Weight Diffs: " + String::IntToString(weightDiff)
+				+ " Normal Diffs: " + String::IntToString(normalsDiff);
+			Log(dMsg);
+		}
+#		endif
 
 		return true;
 	}

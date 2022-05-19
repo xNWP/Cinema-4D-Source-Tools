@@ -50,11 +50,10 @@ namespace st::shared_grammar
 	{};
 
 	struct floatingpoint
-		: pegtl::seq <
+		: pegtl::seq<
 		pegtl::opt<pegtl::one<'+', '-'>>,
-		integer,
-		pegtl::opt<pegtl::seq<
-		pegtl::one<'.'>, integer>>>
+		pegtl::plus<pegtl::digit>,
+		pegtl::opt<pegtl::seq<pegtl::one<'.'>, pegtl::plus<pegtl::digit>>>>
 	{};
 
 	template <typename object>

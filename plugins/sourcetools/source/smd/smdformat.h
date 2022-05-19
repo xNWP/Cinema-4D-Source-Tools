@@ -18,6 +18,13 @@ namespace st::smd
 		struct Point3f
 		{
 			Float32 x, y, z;
+
+			Float32 Distance(const Point3f& p) const {
+				return maxon::Sqrt(
+					maxon::Sqr(this->x - p.x) + 
+					maxon::Sqr(this->y - p.y) + 
+					maxon::Sqr(this->z - p.z));
+			}
 		};
 
 		struct SkeletonAnimationEntry
@@ -37,6 +44,12 @@ namespace st::smd
 		{
 			Int16 BoneId;
 			Float32 Weight;
+
+			bool operator==(const WeightmapEntry& wm) const {
+				return
+					(this->BoneId == wm.BoneId) &&
+					(this->Weight == wm.Weight);
+			}
 		};
 
 		struct Vertex
