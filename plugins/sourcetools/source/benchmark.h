@@ -30,5 +30,6 @@ namespace st
 		Float64 GetElapsedSeconds() const;
 		String GetElapsedTimeFormatted() const;
 		Bool IsRunning() const;
+		void PrintOnDestruct(Bool val);
 	};
 }

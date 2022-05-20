@@ -72,4 +72,8 @@ namespace st
 	{
 		return !_stopped;
 	}
+
+	void Benchmark::PrintOnDestruct(Bool val) {
+		_printOnDestruct = val;
+	}
 }
