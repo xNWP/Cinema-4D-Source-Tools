@@ -127,139 +127,101 @@ namespace st::smd
 		if (SMDObj.Skeleton.empty() && config.IncludeSkeleton)
 		{
 			IF_PROFILING(Benchmark CreateSMDBuildSkeletonBench("CreateSMD-BuildSkeleton"));
-
-			for (auto& bone : smd.Bones)
 			{
-				BoneMapData Entry;
-				Entry.ParentId = bone.ParentId;
-				Entry.Object = BaseObject::Alloc(Ojoint);
-				Entry.Object->SetName(bone.Name);
-				SMDObj.Skeleton[bone.Id] = std::move(Entry);
+				IF_PROFILING(Benchmark CreateSMDBuildSkeletonInsertBonesBench("CreateSMD-BuildSkeleton-InsertBones"));
+				for (auto& bone : smd.Bones)
+				{
+					BoneMapData Entry;
+					Entry.ParentId = bone.ParentId;
+					Entry.Object = BaseObject::Alloc(Ojoint);
+					Entry.Object->SetName(bone.Name);
+					SMDObj.Skeleton[bone.Id] = std::move(Entry);
 
-				if (Entry.ParentId == -1)
-					config.doc->InsertObject(Entry.Object, RootNull, RootNull->GetDownLast());
-				else
-					config.doc->InsertObject(Entry.Object,
-						SMDObj.Skeleton[Entry.ParentId].Object,
-						SMDObj.Skeleton[Entry.ParentId].Object->GetDownLast());
+					if (Entry.ParentId == -1)
+						config.doc->InsertObject(Entry.Object, RootNull, RootNull->GetDownLast());
+					else
+						config.doc->InsertObject(Entry.Object,
+							SMDObj.Skeleton[Entry.ParentId].Object,
+							SMDObj.Skeleton[Entry.ParentId].Object->GetDownLast());
+				}
 			}
 
+			// Animation + Default Pose
 			Int32 DocumentFramesPerSecond = config.doc->GetFps();
-
-			/* Set Initial Positions/Rotations On Skeleton */
 			std::map<std::int16_t, Vector> LastBoneRotationMap;
-			for (auto& frame : smd.SkeletonAnimation)
-			{
-				if (!config.IncludeAnimation && frame.Time != 0) break;
+			IF_PROFILING(Benchmark CreateSMDAnimationBench("CreateSMD-Animation", false));
+			IF_PROFILING(Benchmark CreateSMDAnimationInitTracksCurvesBench("CreateSMD-Animation-InitTracksCurves", false, false));
+			IF_PROFILING(Benchmark CreateSMDAnimationTransformShortRouteBench("CreateSMD-Animation-TransformShortRoute", false, false));
+			IF_PROFILING(Benchmark CreateSMDAnimationAddSetKeysBench("CreateSMD-Animation-AddSetKeys", false, false));
+			IF_PROFILING(if (config.IncludeAnimation) {
+				CreateSMDAnimationBench.PrintOnDestruct(true);
+				CreateSMDAnimationInitTracksCurvesBench.PrintOnDestruct(true);
+				CreateSMDAnimationTransformShortRouteBench.PrintOnDestruct(true);
+				CreateSMDAnimationAddSetKeysBench.PrintOnDestruct(true);
+			})
 
-				for (auto& bone : frame.Entries)
-				{
-					maxon::Matrix BoneLocalMatrix = HPBToMatrix(maxon::Vector(bone.Rotation.x, bone.Rotation.y, bone.Rotation.z), ROTATIONORDER::XYZLOCAL);
+			for (const auto& bone : smd.SkeletonAnimation[0].Entries) {
+				auto DoBoneTransform = [&SMDObj, &TransformMatrix](const Types::SkeletonAnimationEntry& b) -> maxon::Matrix {
+					maxon::Matrix BoneLocalMatrix = HPBToMatrix(maxon::Vector
+					(b.Rotation.x, b.Rotation.y, b.Rotation.z), ROTATIONORDER::XYZLOCAL);
 					BoneLocalMatrix = ~BoneLocalMatrix;
-					BoneLocalMatrix.off = maxon::Vector64(bone.Position.x, bone.Position.y, bone.Position.z);
+					BoneLocalMatrix.off = maxon::Vector(b.Position.x, b.Position.y, b.Position.z);
+					if (SMDObj.Skeleton[b.Id].ParentId == -1) BoneLocalMatrix = TransformMatrix * BoneLocalMatrix;
+					return BoneLocalMatrix;
+				};
 
-					// Do Transform
-					if (SMDObj.Skeleton[bone.Id].ParentId == -1)
-						BoneLocalMatrix = TransformMatrix * BoneLocalMatrix;
+				// Set Default Pose				
+				SMDObj.Skeleton[bone.Id].Object->SetMl(DoBoneTransform(bone));
 
-					if (frame.Time == 0) SMDObj.Skeleton[bone.Id].Object->SetMl(BoneLocalMatrix);
-
-					if (config.IncludeAnimation && smd.SkeletonAnimation.size() > 1)
-					{
-						CTrack* XTrack, * YTrack, * ZTrack,
-							* XRTrack, * YRTrack, * ZRTrack;
-						CCurve* XCurve, * YCurve, * ZCurve,
-							* XRCurve, * YRCurve, * ZRCurve;
-
-						if (frame.Time == 0)
-						{
-							XTrack = CTrack::Alloc(SMDObj.Skeleton[bone.Id].Object,
-								DescID(DescLevel(ID_BASEOBJECT_REL_POSITION, DTYPE_VECTOR, 0),
-									DescLevel(VECTOR_X, DTYPE_REAL, 0)));
-							YTrack = CTrack::Alloc(SMDObj.Skeleton[bone.Id].Object,
-								DescID(DescLevel(ID_BASEOBJECT_REL_POSITION, DTYPE_VECTOR, 0),
-									DescLevel(VECTOR_Y, DTYPE_REAL, 0)));
-							ZTrack = CTrack::Alloc(SMDObj.Skeleton[bone.Id].Object,
-								DescID(DescLevel(ID_BASEOBJECT_REL_POSITION, DTYPE_VECTOR, 0),
-									DescLevel(VECTOR_Z, DTYPE_REAL, 0)));
-							XRTrack = CTrack::Alloc(SMDObj.Skeleton[bone.Id].Object,
-								DescID(DescLevel(ID_BASEOBJECT_REL_ROTATION, DTYPE_VECTOR, 0),
-									DescLevel(VECTOR_X, DTYPE_REAL, 0)));
-							YRTrack = CTrack::Alloc(SMDObj.Skeleton[bone.Id].Object,
-								DescID(DescLevel(ID_BASEOBJECT_REL_ROTATION, DTYPE_VECTOR, 0),
-									DescLevel(VECTOR_Y, DTYPE_REAL, 0)));
-							ZRTrack = CTrack::Alloc(SMDObj.Skeleton[bone.Id].Object,
-								DescID(DescLevel(ID_BASEOBJECT_REL_ROTATION, DTYPE_VECTOR, 0),
-									DescLevel(VECTOR_Z, DTYPE_REAL, 0)));
-
-							SMDObj.Skeleton[bone.Id].Object->InsertTrackSorted(XTrack);
-							SMDObj.Skeleton[bone.Id].Object->InsertTrackSorted(YTrack);
-							SMDObj.Skeleton[bone.Id].Object->InsertTrackSorted(ZTrack);
-							SMDObj.Skeleton[bone.Id].Object->InsertTrackSorted(XRTrack);
-							SMDObj.Skeleton[bone.Id].Object->InsertTrackSorted(YRTrack);
-							SMDObj.Skeleton[bone.Id].Object->InsertTrackSorted(ZRTrack);
+				// Animation
+				if (config.IncludeAnimation) {
+					// Initialize + Insert Tracks + Get Curves
+					IF_PROFILING(CreateSMDAnimationInitTracksCurvesBench.StartBenchmark());
+					CCurve* curves[6];
+					Int32 curveIt = 0;
+					for (const auto& trackProp : { ID_BASEOBJECT_REL_POSITION, ID_BASEOBJECT_REL_ROTATION }) {
+						for (const auto& trackComp : { VECTOR_X, VECTOR_Y, VECTOR_Z }) {
+							CTrack* track = CTrack::Alloc(SMDObj.Skeleton[bone.Id].Object,
+								DescID(DescLevel(trackProp, DTYPE_VECTOR, 0), DescLevel(trackComp, DTYPE_REAL, 0)));
+							SMDObj.Skeleton[bone.Id].Object->InsertTrackSorted(track);
+							curves[curveIt++] = track->GetCurve();
 						}
-						else
-						{
-							SMDObj.Skeleton[bone.Id].Object->GetVectorTracks(DescID(DescLevel(ID_BASEOBJECT_REL_POSITION, DTYPE_VECTOR, 0)), XTrack, YTrack, ZTrack);
-							SMDObj.Skeleton[bone.Id].Object->GetVectorTracks(DescID(DescLevel(ID_BASEOBJECT_REL_ROTATION, DTYPE_VECTOR, 0)), XRTrack, YRTrack, ZRTrack);
-						}
+					}
+					IF_PROFILING(CreateSMDAnimationInitTracksCurvesBench.StopBenchmark());
 
-						XCurve = XTrack->GetCurve();
-						YCurve = YTrack->GetCurve();
-						ZCurve = ZTrack->GetCurve();
-						XRCurve = XRTrack->GetCurve();
-						YRCurve = YRTrack->GetCurve();
-						ZRCurve = ZRTrack->GetCurve();
-
-						CKey* XKey = XCurve->AddKey(BaseTime(frame.Time, DocumentFramesPerSecond));
-						XKey->SetValue(XCurve, BoneLocalMatrix.off.x);
-						CKey* YKey = YCurve->AddKey(BaseTime(frame.Time, DocumentFramesPerSecond));
-						YKey->SetValue(YCurve, BoneLocalMatrix.off.y);
-						CKey* ZKey = ZCurve->AddKey(BaseTime(frame.Time, DocumentFramesPerSecond));
-						ZKey->SetValue(ZCurve, BoneLocalMatrix.off.z);
-
-						maxon::Vector RotationVector = MatrixToHPB(BoneLocalMatrix, ROTATIONORDER::HPB);
+					Int32 frameIt = 0;
+					for (const auto& frame : smd.SkeletonAnimation) {
+						IF_PROFILING(CreateSMDAnimationTransformShortRouteBench.StartBenchmark());
+						// transform
+						auto point = DoBoneTransform(smd.SkeletonAnimation[frameIt++].Entries[bone.Id]);
+						auto rotVec = MatrixToHPB(point, ROTATIONORDER::HPB);
 
 						// Ensure we take the shortest route
 						auto LastRotationIterator = LastBoneRotationMap.find(bone.Id);
 						if (LastRotationIterator != LastBoneRotationMap.end())
 						{
 							Vector LastRotation = LastRotationIterator->second;
-
-							while (Abs(RotationVector.x - LastRotation.x) > PI)
-							{
-								if (RotationVector.x >= LastRotation.x)
-									RotationVector.x -= 2 * PI;
-								else
-									RotationVector.x += 2 * PI;
-							}
-
-							while (Abs(RotationVector.y - LastRotation.y) > PI)
-							{
-								if (RotationVector.y >= LastRotation.y)
-									RotationVector.y -= 2 * PI;
-								else
-									RotationVector.y += 2 * PI;
-							}
-
-							while (Abs(RotationVector.z - LastRotation.z) > PI)
-							{
-								if (RotationVector.z >= LastRotation.z)
-									RotationVector.z -= 2 * PI;
-								else
-									RotationVector.z += 2 * PI;
+							for (const auto& rotComp : { 0, 1, 2 }) {
+								while (Abs(rotVec[rotComp] - LastRotation[rotComp]) > PI) {
+									if (rotVec[rotComp] < LastRotation[rotComp]) rotVec[rotComp] += PI2;
+									else rotVec[rotComp] -= PI2;
+								}
 							}
 						}
+						LastBoneRotationMap[bone.Id] = rotVec;
+						IF_PROFILING(CreateSMDAnimationTransformShortRouteBench.StopBenchmark());
 
-						LastBoneRotationMap[bone.Id] = RotationVector;
-
-						CKey* XRKey = XRCurve->AddKey(BaseTime(frame.Time, DocumentFramesPerSecond));
-						XRKey->SetValue(XRCurve, RotationVector.x);
-						CKey* YRKey = YRCurve->AddKey(BaseTime(frame.Time, DocumentFramesPerSecond));
-						YRKey->SetValue(YRCurve, RotationVector.y);
-						CKey* ZRKey = ZRCurve->AddKey(BaseTime(frame.Time, DocumentFramesPerSecond));
-						ZRKey->SetValue(ZRCurve, RotationVector.z);
+						// add + set, pos & rot
+						IF_PROFILING(CreateSMDAnimationAddSetKeysBench.StartBenchmark());
+						curveIt = 0;
+						for (const auto& curveProp : { point.off, rotVec }) {
+							for (const auto& curveComp : { 0, 1, 2 }) {
+								curves[curveIt]->AddKey(BaseTime(frame.Time, DocumentFramesPerSecond))
+									->SetValue(curves[curveIt], curveProp[curveComp]);
+								curveIt++;
+							}
+						}
+						IF_PROFILING(CreateSMDAnimationAddSetKeysBench.StopBenchmark());
 					}
 				}
 			}
@@ -272,91 +234,118 @@ namespace st::smd
 			Int32 PolyCount = (Int32)smd.Triangles.size();
 			if (PolyCount != 0)
 			{
+				// Construct Mesh
 				PolygonObject* SMDMesh = PolygonObject::Alloc(PolyCount * 3, PolyCount);
 				SMDObj.Mesh = SMDMesh;
 				config.doc->InsertObject(SMDMesh, RootNull, RootNull->GetDownLast());
 
-				std::vector<maxon::Vector> PointVec;
+				// Point + Polygon Locals
 				auto pointHashFunc = [](const maxon::Vector& v) { return v.GetHashCode(); };
 				std::unordered_map<maxon::Vector, Int32, decltype(pointHashFunc)> PointIndexMap(10, pointHashFunc);
 				std::map<String, std::vector<Int32>> SelectionMap;
 				auto PolygonArr = SMDMesh->GetPolygonW();
-
-				{
-					IF_PROFILING(Benchmark CreateSMDBuildMeshPolyonsBench("CreateSMD-BuildMesh-Polygons"));
-					IF_PROFILING(Benchmark CreateSMDBuildMeshPolygonsFindDupsBench("CreateSMD-BuildMesh-Polygons-FindDups", true, false));
-					Int32 PolygonIterator = 0;
-					Int32 PointIterator = 0;
-					for (auto& triangle : smd.Triangles)
-					{
-						maxon::Vector C(
-							triangle.Vertices[0].Position.x,
-							triangle.Vertices[0].Position.y,
-							triangle.Vertices[0].Position.z);
-						maxon::Vector B(
-							triangle.Vertices[1].Position.x,
-							triangle.Vertices[1].Position.y,
-							triangle.Vertices[1].Position.z);
-						maxon::Vector A(
-							triangle.Vertices[2].Position.x,
-							triangle.Vertices[2].Position.y,
-							triangle.Vertices[2].Position.z);
-
-						C = TransformMatrix * C;
-						B = TransformMatrix * B;
-						A = TransformMatrix * A;
-
-						IF_PROFILING(CreateSMDBuildMeshPolygonsFindDupsBench.StartBenchmark());
-						Int32 pointIndices[3];
-						Int32 pointIndicesIterator = 0;
-						for (auto& point : { A, B, C }) {
-							const auto& [pointIt, bPointInserted] = PointIndexMap.emplace(point, PointIterator);
-							if (bPointInserted) {
-								PointVec.push_back(point);
-								pointIndices[pointIndicesIterator++] = PointIterator++;
-							} else {
-								pointIndices[pointIndicesIterator++] = pointIt->second;
-							}
-						}
-						IF_PROFILING(CreateSMDBuildMeshPolygonsFindDupsBench.StopBenchmark());
-
-						PolygonArr[PolygonIterator] = CPolygon(pointIndices[0], pointIndices[1], pointIndices[2]);
-						SelectionMap[triangle.Material].push_back(PolygonIterator++);
-					}
-
-					SMDMesh->ResizeObject(Int32(PointVec.size()), PolyCount);
-					std::move(PointVec.begin(), PointVec.end(), SMDMesh->GetPointW());
+				auto PointArr = SMDMesh->GetPointW();
+				
+				// Normals Locals
+				IF_PROFILING(Benchmark CreateSMDBuildMeshNormalsBench("CreateSMD-BuildMesh-Normals", false, false));
+				NormalTag* TagNormals = nullptr;
+				NormalHandle HandleNormals = nullptr;
+				if (config.IncludeNormals) {
+					IF_PROFILING(CreateSMDBuildMeshNormalsBench.PrintOnDestruct(true));
+					SMDMesh->MakeTag(Tphong);
+					TagNormals = NormalTag::Alloc(PolyCount);
+					SMDMesh->InsertTag(TagNormals);
+					HandleNormals = TagNormals->GetDataAddressW();
 				}
 
-				if (config.IncludeNormals)
-				{
-					IF_PROFILING(Benchmark CreateSMDBuildMeshNormalsBench("CreateSMD-BuildMesh-Normals"));
-					/* Normals */
-					SMDMesh->MakeTag(Tphong);
-					NormalTag* TagNormals = NormalTag::Alloc(PolyCount);
-					SMDMesh->InsertTag(TagNormals);
-					NormalHandle HandleNormals = TagNormals->GetDataAddressW();
+				// UVW Locals
+				IF_PROFILING(Benchmark CreateSMDBuildMeshUVWTagBench("CreateSMD-BuildMesh-UVWTag", false, false));
+				UVWTag* pUVWTag = nullptr;
+				UVWHandle hUVWData = nullptr;
+				if (config.IncludeUVW) {
+					IF_PROFILING(CreateSMDBuildMeshUVWTagBench.PrintOnDestruct(true));
+					pUVWTag = UVWTag::Alloc(PolyCount);
+					SMDMesh->InsertTag(pUVWTag);
+					hUVWData = pUVWTag->GetDataAddressW();
+				}
 
-					for (Int32 i = 0; i < PolyCount; ++i)
-					{
+				IF_PROFILING(Benchmark CreateSMDBuildMeshPolygonsFindDupsBench("CreateSMD-BuildMesh-Polygons-FindDups", true, false));
+				Int32 PolygonIterator = 0;
+				Int32 PointIterator = 0;
+				for (auto& triangle : smd.Triangles)
+				{
+					maxon::Vector C(
+						triangle.Vertices[0].Position.x,
+						triangle.Vertices[0].Position.y,
+						triangle.Vertices[0].Position.z);
+					maxon::Vector B(
+						triangle.Vertices[1].Position.x,
+						triangle.Vertices[1].Position.y,
+						triangle.Vertices[1].Position.z);
+					maxon::Vector A(
+						triangle.Vertices[2].Position.x,
+						triangle.Vertices[2].Position.y,
+						triangle.Vertices[2].Position.z);
+
+					C = TransformMatrix * C;
+					B = TransformMatrix * B;
+					A = TransformMatrix * A;
+
+					IF_PROFILING(CreateSMDBuildMeshPolygonsFindDupsBench.StartBenchmark());
+					Int32 pointIndices[3];
+					Int32 pointIndicesIterator = 0;
+					for (auto& point : { A, B, C }) {
+						const auto& [pointIt, bPointInserted] = PointIndexMap.emplace(point, PointIterator);
+						if (bPointInserted) {
+							PointArr[PointIterator] = point;
+							pointIndices[pointIndicesIterator++] = PointIterator++;
+						}
+						else {
+							pointIndices[pointIndicesIterator++] = pointIt->second;
+						}
+					}
+					IF_PROFILING(CreateSMDBuildMeshPolygonsFindDupsBench.StopBenchmark());
+
+					PolygonArr[PolygonIterator] = CPolygon(pointIndices[0], pointIndices[1], pointIndices[2]);
+					SelectionMap[triangle.Material].push_back(PolygonIterator);
+
+					// Normals
+					if (config.IncludeNormals) {
+						IF_PROFILING(CreateSMDBuildMeshNormalsBench.StartBenchmark());
 						NormalStruct VertexNormals;
 
 						VertexNormals.c = RotationMatrix * maxon::Vector(
-							smd.Triangles[i].Vertices[0].Normals.x,
-							smd.Triangles[i].Vertices[0].Normals.y,
-							smd.Triangles[i].Vertices[0].Normals.z);
+							triangle.Vertices[0].Normals.x,
+							triangle.Vertices[0].Normals.y,
+							triangle.Vertices[0].Normals.z);
 						VertexNormals.b = RotationMatrix * maxon::Vector(
-							smd.Triangles[i].Vertices[1].Normals.x,
-							smd.Triangles[i].Vertices[1].Normals.y,
-							smd.Triangles[i].Vertices[1].Normals.z);
+							triangle.Vertices[1].Normals.x,
+							triangle.Vertices[1].Normals.y,
+							triangle.Vertices[1].Normals.z);
 						VertexNormals.a = RotationMatrix * maxon::Vector(
-							smd.Triangles[i].Vertices[2].Normals.x,
-							smd.Triangles[i].Vertices[2].Normals.y,
-							smd.Triangles[i].Vertices[2].Normals.z);
+							triangle.Vertices[2].Normals.x,
+							triangle.Vertices[2].Normals.y,
+							triangle.Vertices[2].Normals.z);
 
-						NormalTag::Set(HandleNormals, i, VertexNormals);
+						NormalTag::Set(HandleNormals, PolygonIterator, VertexNormals);
+						IF_PROFILING(CreateSMDBuildMeshNormalsBench.StopBenchmark());
 					}
+
+					// UVW
+					if (config.IncludeUVW) {
+						IF_PROFILING(CreateSMDBuildMeshUVWTagBench.StartBenchmark());
+						UVWStruct uvData(
+							Vector(triangle.Vertices[2].u, 1 - triangle.Vertices[2].v, 0),
+							Vector(triangle.Vertices[1].u, 1 - triangle.Vertices[1].v, 0),
+							Vector(triangle.Vertices[0].u, 1 - triangle.Vertices[0].v, 0));
+						UVWTag::Set(hUVWData, PolygonIterator, uvData);
+						IF_PROFILING(CreateSMDBuildMeshUVWTagBench.StopBenchmark());
+					}
+
+					PolygonIterator++;
 				}
+
+				SMDMesh->ResizeObject(PointIterator, PolyCount);
 
 				if (config.IncludePolySelections)
 				{
@@ -376,25 +365,6 @@ namespace st::smd
 
 						BaseSelect* TagSelection = pSelectionTag->GetBaseSelect();
 						Selector->CopyTo(TagSelection);
-					}
-				}
-
-				if (config.IncludeUVW)
-				{
-					IF_PROFILING(Benchmark CreateSMDBuildMeshUVWTagBench("CreateSMD-BuildMesh-UVWTag"));
-					/* UVW Tag */
-					UVWTag* pUVWTag = UVWTag::Alloc(PolyCount);
-					SMDMesh->InsertTag(pUVWTag);
-					UVWHandle hUVWData = pUVWTag->GetDataAddressW();
-
-					Int32 PolyIndex = 0;
-					for (const auto& Poly : smd.Triangles)
-					{
-						UVWStruct uvData(
-							Vector(Poly.Vertices[2].u, 1 - Poly.Vertices[2].v, 0),
-							Vector(Poly.Vertices[1].u, 1 - Poly.Vertices[1].v, 0),
-							Vector(Poly.Vertices[0].u, 1 - Poly.Vertices[0].v, 0));
-						UVWTag::Set(hUVWData, PolyIndex++, uvData);
 					}
 				}
 
