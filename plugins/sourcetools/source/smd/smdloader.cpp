@@ -21,6 +21,7 @@
 #include "benchmark.h"
 
 #include <cmath> // std::floor
+#include <unordered_map>
 
 namespace st::smd
 {
@@ -276,12 +277,16 @@ namespace st::smd
 				config.doc->InsertObject(SMDMesh, RootNull, RootNull->GetDownLast());
 
 				std::vector<maxon::Vector> PointVec;
+				auto pointHashFunc = [](const maxon::Vector& v) { return v.GetHashCode(); };
+				std::unordered_map<maxon::Vector, Int32, decltype(pointHashFunc)> PointIndexMap(10, pointHashFunc);
 				std::map<String, std::vector<Int32>> SelectionMap;
 				auto PolygonArr = SMDMesh->GetPolygonW();
 
 				{
 					IF_PROFILING(Benchmark CreateSMDBuildMeshPolyonsBench("CreateSMD-BuildMesh-Polygons"));
+					IF_PROFILING(Benchmark CreateSMDBuildMeshPolygonsFindDupsBench("CreateSMD-BuildMesh-Polygons-FindDups", true, false));
 					Int32 PolygonIterator = 0;
+					Int32 PointIterator = 0;
 					for (auto& triangle : smd.Triangles)
 					{
 						maxon::Vector C(
@@ -301,37 +306,21 @@ namespace st::smd
 						B = TransformMatrix * B;
 						A = TransformMatrix * A;
 
-						Int32 Aindex = -1, Bindex = -1, Cindex = -1;
-
-						for (Int32 i = Int32(PointVec.size() - 1); i >= 0; i--)
-						{
-							if (Aindex >= 0 && Bindex >= 0 && Cindex >= 0)
-								break;
-
-							if (PointVec[i] == A) Aindex = i;
-							else if (PointVec[i] == B) Bindex = i;
-							else if (PointVec[i] == C) Cindex = i;
+						IF_PROFILING(CreateSMDBuildMeshPolygonsFindDupsBench.StartBenchmark());
+						Int32 pointIndices[3];
+						Int32 pointIndicesIterator = 0;
+						for (auto& point : { A, B, C }) {
+							const auto& [pointIt, bPointInserted] = PointIndexMap.emplace(point, PointIterator);
+							if (bPointInserted) {
+								PointVec.push_back(point);
+								pointIndices[pointIndicesIterator++] = PointIterator++;
+							} else {
+								pointIndices[pointIndicesIterator++] = pointIt->second;
+							}
 						}
+						IF_PROFILING(CreateSMDBuildMeshPolygonsFindDupsBench.StopBenchmark());
 
-						if (Aindex == -1)
-						{
-							PointVec.push_back(A);
-							Aindex = Int32(PointVec.size() - 1);
-						}
-
-						if (Bindex == -1)
-						{
-							PointVec.push_back(B);
-							Bindex = Int32(PointVec.size() - 1);
-						}
-
-						if (Cindex == -1)
-						{
-							PointVec.push_back(C);
-							Cindex = Int32(PointVec.size() - 1);
-						}
-
-						PolygonArr[PolygonIterator] = CPolygon(Aindex, Bindex, Cindex);
+						PolygonArr[PolygonIterator] = CPolygon(pointIndices[0], pointIndices[1], pointIndices[2]);
 						SelectionMap[triangle.Material].push_back(PolygonIterator++);
 					}
 
