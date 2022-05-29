@@ -30,10 +30,7 @@ namespace st::shared_grammar
 	{};
 
 	struct filename
-		: pegtl::seq<pegtl::identifier_first,
-		pegtl::plus<
-		pegtl::sor<pegtl::identifier_other,
-		pegtl::one<'-', '.', ' ', '{', '}'>>>>
+		: identifier_ext
 	{};
 
 	struct filepath
